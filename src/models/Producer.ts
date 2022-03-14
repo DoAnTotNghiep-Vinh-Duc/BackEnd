@@ -7,7 +7,7 @@ const ProducerSchema = new Schema({
     address: String,
     email: String,
     phone: String,
-},{ timestamps: true , collection:"Producer"});
+},{ collection:"Producer"});
 
 const Producer = mongoose.model("Producer", ProducerSchema);
 module.exports = Producer;

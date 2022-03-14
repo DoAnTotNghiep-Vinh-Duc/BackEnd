@@ -22,4 +22,17 @@ export class ProducerService {
             callback({message: "Something went wrong !", error: error});
         }
     }
+    static async updateProducerById(producerId: String, newProducer: any, callback: any){
+        try {
+            const producer = await Producer.findOne({ _id: producerId })
+            if(producer){
+                const result = await Producer.findByIdAndUpdate(producerId, newProducer);
+                callback({message: "update producer success !", data: result})
+            }
+            else
+                callback({message: "Not found producer !"})
+        } catch (error) {
+            callback({message: "Something went wrong !", error: error});
+        }
+    }
 }
