@@ -1,0 +1,37 @@
+import { ProducerService } from "./../services/ProducerService";
+import { Request, Response } from "express";
+
+
+
+const getAllProducer = async (req: Request, res: Response): Promise<any> => {
+    try {
+        ProducerService.getAllProducer((data: any) => {
+        res.status(200).send(data);
+        });
+    
+    } catch (error: any) {
+        return res.status(500).send({
+        msg: error.message,
+        });
+    }
+}
+
+const getProducerById = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const producerId = req.params.producer_id
+        ProducerService.getProducerById(producerId,(data: any) => {
+          res.status(200).send(data);
+        });
+     
+    } catch (error: any) {
+        return res.status(500).send({
+          msg: error.message,
+        });
+    }
+}
+const producerController = {
+    getAllProducer,
+    getProducerById
+};
+
+export { producerController };
