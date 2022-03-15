@@ -43,6 +43,20 @@ export class ProducerController{
             });
         }
     }
+
+    static async createProducer(req: Request, res: Response): Promise<any> {
+        try {
+            const newProducer = req.body
+            ProducerService.createProducer(newProducer, (data: any) => {
+              res.status(200).send(data);
+            });
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
 }
 
 
