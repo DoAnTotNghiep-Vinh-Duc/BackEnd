@@ -1,4 +1,4 @@
-import { ProducerService } from "./../services/ProducerService";
+import { ProducerService } from "../../services/admin/ProducerService";
 import { Request, Response } from "express";
 
 

@@ -1,5 +1,4 @@
-import { ConnectDatabase } from "../config/database/database";
-const Producer = require("../models/Producer")
+const Producer = require("../../models/Producer")
 export class ProducerService {
     static async getAllProducer(callback: any) {
         try {

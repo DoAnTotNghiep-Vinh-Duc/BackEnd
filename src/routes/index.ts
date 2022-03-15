@@ -1,8 +1,8 @@
 import express, { Router } from 'express';
 import { authRouter } from './authRouter';
-import {producerRouter} from './producerRouter'
+import {AdminRoutes} from './admin/index'
 // import { loginFacebookRouter } from './loginFacebookRouter';
 export const Routes = express.Router();
 Routes.use('/', authRouter)
-Routes.use('/', producerRouter);
+Routes.use('/', AdminRoutes);
 // Routes.use('/', loginFacebookRouter)

@@ -1,5 +1,5 @@
 import express from 'express';
-import { producerController } from '../controllers/ProducerController';
+import { producerController } from '../../controllers/admin/ProducerController';
 export const producerRouter = express.Router();
 
 producerRouter.get("/producer", producerController.getAllProducer);
