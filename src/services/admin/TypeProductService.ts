@@ -1,35 +1,47 @@
-const Supplier = require("../../models/Supplier")
-export class SupplierService {
-    static async getAllSupplier(callback: any) {
+const TypeProduct = require("../../models/TypeProduct")
+export class TypeProductService {
+    static async getAllTypeProduct(callback: any) {
         try {
-            const suppliers = await Supplier.find();
-            callback({message: "get all supplier success !", data: suppliers});
+            const typeProducts = await TypeProduct.find();
+            callback({message: "get all Type Product success !", data: typeProducts});
         } catch (error) {
             callback({message: "Something went wrong !", error: error});
         }
     }
 
-    static async getSupplierById(supplierId: String, callback: any){
+    static async getTypeProductById(typeProductId: String, callback: any){
         try {
-            const supplier = await Supplier.findOne({ _id: supplierId })
-            if(supplier){
-                callback({message: "found supplier success !", data: supplier})
+            const typeProduct = await TypeProduct.findOne({ _id: typeProductId })
+            if(typeProduct){
+                callback({message: "found Type Product success !", data: typeProduct})
             }
             else
-                callback({message: "Not found supplier !"})
+                callback({message: "Not found Type Product !"})
         } catch (error) {
             callback({message: "Something went wrong !", error: error});
         }
     }
-    static async updateSupplierById(supplierId: String, newSupplier: any, callback: any){
+
+    static async createTypeProduct(typeProduct: any, callback: any){
         try {
-            const supplier = await Supplier.findOne({ _id: supplierId })
-            if(supplier){
-                const result = await supplier.findByIdAndUpdate(supplierId, newSupplier);
-                callback({message: "update supplier success !", data: result})
+            const newTypeProduct = new TypeProduct(typeProduct);
+            await newTypeProduct.save();
+            callback({message: "create Type Product success !", data: newTypeProduct})
+           
+        } catch (error) {
+            callback({message: "Something went wrong !", error: error});
+        }
+    }
+
+    static async updateTypeProductById(typeProductId: String, newTypeProduct: any, callback: any){
+        try {
+            const typeProduct = await TypeProduct.findOne({ _id: typeProductId })
+            if(typeProduct){
+                const result = await TypeProduct.findByIdAndUpdate(typeProductId, newTypeProduct);
+                callback({message: "update Type Product success !", data: result})
             }
             else
-                callback({message: "Not found supplier !"})
+                callback({message: "Not found Type Product !"})
         } catch (error) {
             callback({message: "Something went wrong !", error: error});
         }
