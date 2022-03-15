@@ -1,7 +1,7 @@
 import express from 'express';
-import { producerController } from '../../controllers/admin/ProducerController';
+import { ProducerController } from '../../controllers/admin/ProducerController';
 export const producerRouter = express.Router();
 
-producerRouter.get("/producer", producerController.getAllProducer);
-producerRouter.get("/producer/:producer_id", producerController.getProducerById);
-producerRouter.put("/producer/:producer_id", producerController.updateProducerById);
+producerRouter.get("/producer", ProducerController.getAllProducer);
+producerRouter.get("/producer/:producer_id", ProducerController.getProducerById);
+producerRouter.put("/producer/:producer_id", ProducerController.updateProducerById);

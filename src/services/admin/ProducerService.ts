@@ -21,6 +21,18 @@ export class ProducerService {
             callback({message: "Something went wrong !", error: error});
         }
     }
+
+    static async createProducer(producer: any, callback: any){
+        try {
+            const newProducer = new Producer(producer);
+            await newProducer.save();
+            callback({message: "create producer success !", data: newProducer})
+           
+        } catch (error) {
+            callback({message: "Something went wrong !", error: error});
+        }
+    }
+
     static async updateProducerById(producerId: String, newProducer: any, callback: any){
         try {
             const producer = await Producer.findOne({ _id: producerId })
