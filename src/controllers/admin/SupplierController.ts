@@ -43,6 +43,20 @@ export class SupplierController {
             });
         }
     }
+
+    static async createSupplier(req: Request, res: Response): Promise<any> {
+        try {
+            const newSupplier = req.body
+            SupplierService.createSupplier(newSupplier, (data: any) => {
+              res.status(200).send(data);
+            });
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
 }
 
 // const supplierController = {

@@ -21,6 +21,18 @@ export class SupplierService {
             callback({message: "Something went wrong !", error: error});
         }
     }
+
+    static async createSupplier(supplier: any, callback: any){
+        try {
+            const newSupplier = new Supplier(supplier);
+            await newSupplier.save();
+            callback({message: "create supplier success !", data: newSupplier})
+           
+        } catch (error) {
+            callback({message: "Something went wrong !", error: error});
+        }
+    }
+
     static async updateSupplierById(supplierId: String, newSupplier: any, callback: any){
         try {
             const supplier = await Supplier.findOne({ _id: supplierId })
