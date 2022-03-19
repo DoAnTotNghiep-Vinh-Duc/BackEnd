@@ -1,0 +1,22 @@
+Product :{
+    id,
+    producer: {
+        id,
+        name,
+        info,
+        address
+        ...
+    },
+    supplier:{
+        id,
+        name,
+        info,
+        address
+        ...
+    },
+    name,
+    description,
+    status,
+    created_at,
+    updated_at
+}
