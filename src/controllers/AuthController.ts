@@ -6,26 +6,23 @@ import { Request, Response } from "express";
 passport.use(googleStrategy);
 passport.use(facebookStrategy);
 
-export class AuthController{
-    static getAccountGoogle (){
-        return passport.authenticate("google", { scope: ["profile", "email"] });
-    }
-    
-    static getAccountGoogleCB(){
-    return passport.authenticate("google", {
-            session: false,
-        });
-    } 
-    
-    static getAccountFacebook(){
-        return passport.authenticate("facebook", { failureRedirect: '/login' })
-    } 
-    
-    static getAccountFacebookCB (){ 
-        return passport.authenticate("facebook", {
-            // successRedirect: "/", // Chỗ này là redirect lại cái trang web
-            // failureRedirect: "/login/failed",
-            session: false,
-        })
-    }
-}
+const getAccountGoogle = passport.authenticate("google", { scope: ["profile", "email"] });
+
+const getAccountGoogleCB = passport.authenticate("google", {
+    session: false,
+});
+
+const getAccountFacebook = passport.authenticate("facebook", { failureRedirect: '/login' })
+
+const getAccountFacebookCB = passport.authenticate("facebook", {
+    // successRedirect: "/", // Chỗ này là redirect lại cái trang web
+    // failureRedirect: "/login/failed",
+    session: false,
+  })
+export const authController = {
+    getAccountGoogle,
+    getAccountGoogleCB,
+    getAccountFacebook,
+    getAccountFacebookCB,
+
+};
