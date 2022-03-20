@@ -9,12 +9,13 @@ const GOOGLE_CLIENT_SECRET = "your id";
 const FACEBOOK_APP_ID = "your id";
 const FACEBOOK_APP_SECRET = "your id";
 
-passport.use(
+passport.use('googleVerification',
   new GoogleStrategy.Strategy(
     {
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
       callbackURL: "/auth/google/callback",
+      proxy: true
     },
     function (accessToken, refreshToken, profile, done) {
       done(null, profile);
