@@ -1,18 +1,16 @@
-import GoogleStrategy from "passport-google-oauth20";
+const GoogleTokenStrategy = require('passport-google-token')
 
-
-export const googleStrategy = new GoogleStrategy.Strategy(
+export const googleStrategy = new GoogleTokenStrategy.Strategy(
   {
-    clientID: '334725893158-2nu8k88u4995j21q2bvooa5aabg9lg7l.apps.googleusercontent.com',
-    clientSecret: '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',
-    callbackURL: "/auth/google/callback",
+    clientID: `${process.env.googleClientID}`,
+    clientSecret: `${process.env.googleClientSecret}`,
   },
   (accessToken: any, refreshToken: any, profile: any, done: any) => {
 
     if (profile.id) {
         console.log("AccessToken:",accessToken);
         console.log(profile)
-        done(profile)
+        return profile;
     }
   }
 );

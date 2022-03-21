@@ -2,7 +2,7 @@ import mongoose, {ConnectOptions} from "mongoose";
 export class ConnectDatabase {
   static async connectDatabase() {
     try {
-      mongoose.connect("mongodb://localhost:27017/KhoaLuanTotNghiep", {
+      mongoose.connect(`${process.env.CONNECT_MONGODB}`, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       }as ConnectOptions);
