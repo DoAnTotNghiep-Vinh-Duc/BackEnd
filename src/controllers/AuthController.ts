@@ -10,17 +10,7 @@ export class authController{
 
     static getAccountGoogle =  passport.authenticate('google-token');
     
-    // static getAccountGoogleCB = passport.authenticate("google", {
-    //     session: false,
-    // });
-    
     static getAccountFacebook = passport.authenticate('facebook-token')
-    
-    // static getAccountFacebookCB = passport.authenticate("facebook", {
-    //     // successRedirect: "/", // Chỗ này là redirect lại cái trang web
-    //     // failureRedirect: "/login/failed",
-    //     session: false,
-    // })
 
     // static async signIn  (req: IGetPayloadAuthInfoRequest, res: Response, next: NextFunction) : Promise<any> {
     //     try {
