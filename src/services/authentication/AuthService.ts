@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import {client} from "../../config/redis";
+const FacebookAccount = require('../../models/FacebookAccount')
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -38,4 +39,24 @@ export class AuthService{
           });
         });
     };
+    
+    static async CreateAccountFacebook(profile: any, callback: any): Promise<any>{
+      try {
+        const user = await FacebookAccount.findOne({ idFacebook: profile.id });
+        if(!user){
+          const newAccount = new FacebookAccount({
+            idFacebook: profile.id,
+            password: profile.id,
+            name: profile.displayName,
+            isVerifyPhone: false,
+            avatar: profile.photos[0].value
+          });
+          await newAccount.save();
+          callback(newAccount) ;
+        }
+          callback(user) ;
+      } catch (error) {
+        callback({message:"Something error when login with facebook ! Please try again !"}) ;
+      }
+    }
 }
