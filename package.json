@@ -25,7 +25,9 @@
     "node": "v16.13.2",
     "passport": "^0.5.2",
     "passport-facebook": "^3.0.0",
+    "passport-facebook-token": "^4.0.0",
     "passport-google-oauth20": "^2.0.0",
+    "passport-google-token": "^0.1.2",
     "redis": "^4.0.4",
     "ts-node": "^10.5.0"
   },

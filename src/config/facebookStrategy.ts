@@ -1,11 +1,9 @@
-import FacebookStrategy from "passport-facebook";
-export const facebookStrategy = new FacebookStrategy.Strategy({
+const FacebookTokenStrategy = require('passport-facebook-token');
+export const facebookStrategy = new FacebookTokenStrategy({
     clientID: `${process.env.facebookID}`,
     clientSecret: `${process.env.facebookSecret}`,
-    callbackURL: "/auth/facebook/callback",
-    enableProof: true,
-    profileFields: ['id', 'displayName', 'picture.type(large)', 'email', 'birthday', 'friends', 'first_name', 'last_name', 'middle_name', 'gender', 'link']
-  },function (accessToken, refreshToken, profile, done) {
+    fbGraphVersion: 'v3.0',
+  },function (accessToken: string, refreshToken: string, profile: any, done: any) {
       console.log(profile)
-    done(null, profile);
+      return profile;
 }) 

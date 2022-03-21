@@ -8,19 +8,19 @@ passport.use(googleStrategy);
 passport.use(facebookStrategy);
 export class authController{
 
-    static getAccountGoogle = passport.authenticate("google", { scope: ["profile", "email"] });
+    static getAccountGoogle =  passport.authenticate('google-token');
     
-    static getAccountGoogleCB = passport.authenticate("google", {
-        session: false,
-    });
+    // static getAccountGoogleCB = passport.authenticate("google", {
+    //     session: false,
+    // });
     
-    static getAccountFacebook = passport.authenticate("facebook", { failureRedirect: '/login' })
+    static getAccountFacebook = passport.authenticate('facebook-token')
     
-    static getAccountFacebookCB = passport.authenticate("facebook", {
-        // successRedirect: "/", // Chỗ này là redirect lại cái trang web
-        // failureRedirect: "/login/failed",
-        session: false,
-    })
+    // static getAccountFacebookCB = passport.authenticate("facebook", {
+    //     // successRedirect: "/", // Chỗ này là redirect lại cái trang web
+    //     // failureRedirect: "/login/failed",
+    //     session: false,
+    // })
 
     // static async signIn  (req: IGetPayloadAuthInfoRequest, res: Response, next: NextFunction) : Promise<any> {
     //     try {
