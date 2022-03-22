@@ -49,7 +49,8 @@ export class AuthService{
             password: profile.id,
             name: profile.displayName,
             isVerifyPhone: false,
-            avatar: profile.photos[0].value
+            avatar: profile.photos[0].value,
+            typeAccount: "facebook"
           });
           await newAccount.save();
           callback(newAccount) ;

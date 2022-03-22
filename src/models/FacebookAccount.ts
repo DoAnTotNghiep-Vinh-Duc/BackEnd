@@ -7,6 +7,7 @@ const FacebookSchema = new Schema({
     name: String,
     isVerifyPhone: Boolean,
     avatar: String,
+    typeAccount: String,
 },{timestamps: true, collection:"FacebookAccount"});
 
 const account = mongoose.model("FacebookAccount", FacebookSchema);
