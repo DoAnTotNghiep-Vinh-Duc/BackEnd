@@ -1,17 +1,17 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-const FacebookSchema = new Schema({
-    idFacebook: String,
+const GoogleSchema = new Schema({
+    idGoogle: String,
     password: String,
     name: String,
     isVerifyPhone: Boolean,
     avatar: String,
     typeAccount: {
         type: String,
-        default: "facebook"
+        default: "google"
     },
-},{timestamps: true, collection:"FacebookAccount"});
+},{timestamps: true, collection:"GoogleAccount"});
 
-const account = mongoose.model("FacebookAccount", FacebookSchema);
+const account = mongoose.model("GoogleAccount", GoogleSchema);
 module.exports = account;

@@ -11,7 +11,7 @@ export const facebookStrategy = new FacebookTokenStrategy({
         return data
       });
     } catch (error) {
-      
+      return {message:"Error when login with facebook"};
     }
   }
 ) 
