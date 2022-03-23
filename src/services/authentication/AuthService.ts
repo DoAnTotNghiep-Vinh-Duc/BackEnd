@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken'
 import {client} from "../../config/redis";
 const FacebookAccount = require('../../models/FacebookAccount');
 const GoogleAccount = require('../../models/GoogleAccount');
+const Information = require('../../models/Information');
+import { InformationService } from '../InformationService';
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -45,18 +47,27 @@ export class AuthService{
       try {
         const user = await FacebookAccount.findOne({ idFacebook: profile.id });
         if(!user){
-          const newAccount = new FacebookAccount({
-            idFacebook: profile.id,
-            password: profile.id,
-            name: profile.displayName,
-            isVerifyPhone: false,
-            avatar: profile.photos[0].value,
-            typeAccount: "facebook"
-          });
-          await newAccount.save();
-          callback(newAccount) ;
+          const newInformation = {
+            name: "",
+            address: "",
+            email: "",
+            phone: ""
+          }
+          await InformationService.createInformation(newInformation,async(data: any)=>{
+            const newAccount = new FacebookAccount({
+              idFacebook: profile.id,
+              password: profile.id,
+              name: profile.displayName,
+              isVerifyPhone: false,
+              avatar: profile.photos[0].value,
+              typeAccount: "facebook",
+              information: data.data._id,
+            });
+            await newAccount.save();
+            callback(newAccount) ;
+          })
         }
-          callback(user) ;
+        callback(user) ;
       } catch (error) {
         callback({message:"Something error when login with facebook ! Please try again !"}) ;
       }
@@ -66,12 +77,20 @@ export class AuthService{
       try {
         const user = await GoogleAccount.findOne({ idGoogle: profile.id });
         if(!user){
+          const newInformation = new Information({
+            name: "",
+            address: "",
+            email: "",
+            phone: ""
+          })
+          await newInformation.save();
           const newAccount = new GoogleAccount({
             idGoogle: profile.id,
             password: profile.id,
             name: profile.displayName,
             isVerifyPhone: false,
-            avatar: profile._json.picture
+            avatar: profile._json.picture,
+            information: newInformation._id,
           });
           await newAccount.save();
           callback(newAccount) ;

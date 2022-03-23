@@ -4,14 +4,18 @@ const Schema = mongoose.Schema;
 const GoogleSchema = new Schema({
     idGoogle: String,
     password: String,
-    name: String,
+    nameDisplay: String,
     isVerifyPhone: Boolean,
     avatar: String,
     typeAccount: {
         type: String,
         default: "google"
     },
+    information:{
+        type: Schema.Types.ObjectId,
+        ref: "Information",
+    }
 },{timestamps: true, collection:"GoogleAccount"});
 
-const account = mongoose.model("GoogleAccount", GoogleSchema);
-module.exports = account;
+const googleAccount = mongoose.model("GoogleAccount", GoogleSchema);
+module.exports = googleAccount;
