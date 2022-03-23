@@ -3,6 +3,7 @@ import {client} from "../../config/redis";
 const FacebookAccount = require('../../models/FacebookAccount');
 const GoogleAccount = require('../../models/GoogleAccount');
 const Information = require('../../models/Information');
+const  WebAccount  = require('../../models/WebAccount') ;
 import { InformationService } from '../InformationService';
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
@@ -45,8 +46,8 @@ export class AuthService{
     
     static async CreateAccountFacebook(profile: any, callback: any): Promise<any>{
       try {
-        const user = await FacebookAccount.findOne({ idFacebook: profile.id });
-        if(!user){
+        const account = await FacebookAccount.findOne({ idFacebook: profile.id });
+        if(!account){
           const newInformation = {
             name: "",
             address: "",
@@ -67,7 +68,7 @@ export class AuthService{
             callback(newAccount) ;
           })
         }
-        callback(user) ;
+        callback(account) ;
       } catch (error) {
         callback({message:"Something error when login with facebook ! Please try again !"}) ;
       }
@@ -75,8 +76,8 @@ export class AuthService{
 
     static async CreateAccountGoogle(profile: any, callback: any): Promise<any>{
       try {
-        const user = await GoogleAccount.findOne({ idGoogle: profile.id });
-        if(!user){
+        const account = await GoogleAccount.findOne({ idGoogle: profile.id });
+        if(!account){
           const newInformation = new Information({
             name: "",
             address: "",
@@ -95,9 +96,40 @@ export class AuthService{
           await newAccount.save();
           callback(newAccount) ;
         }
-          callback(user) ;
+          callback(account) ;
       } catch (error) {
         callback({message:"Something error when login with google ! Please try again !"}) ;
+      }
+    }
+
+    static async RegisterWebAccount(account: any, callback: any): Promise<any>{
+      // account: name, email, password
+      try {
+        const user = await WebAccount.findOne({ email: account.email });
+        if(!user){
+          const newInformation = new Information({
+            name: "",
+            address: "",
+            email: account.email,
+            phone: ""
+          })
+          await newInformation.save();
+          const newAccount = new WebAccount({
+            email: account.email,
+            password: account.password,
+            name: account.name,
+            isVerifyPhone: false,
+            avatar: "",
+            information: newInformation._id,
+          })
+          await newAccount.save();
+          callback(newAccount) ;
+        }
+        else{
+          callback({message:"Account already exists ! "}) ;
+        }
+      } catch (error) {
+        callback({message:"Something error when register account ! Please try again !", error: error}) ;
       }
     }
 }

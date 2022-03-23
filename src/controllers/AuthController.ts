@@ -1,8 +1,8 @@
 import passport from "passport";
 import { googleStrategy } from "../config/googleStrategy";
 import { facebookStrategy } from "../config/facebookStrategy";
-import {IGetPayloadAuthInfoRequest} from "../interface/RequestInterface"
 import { NextFunction, Request, Response } from "express";
+import {AuthService} from "../services/authentication/AuthService";
 
 passport.use(googleStrategy);
 passport.use(facebookStrategy);
@@ -11,6 +11,20 @@ export class authController{
     static getAccountGoogle =  passport.authenticate('google-token');
     
     static getAccountFacebook = passport.authenticate('facebook-token')
+
+    static async registerWebAccount (req: Request, res: Response, next: NextFunction) : Promise<any>{
+        try {
+            const newAccount = req.body
+            AuthService.RegisterWebAccount(newAccount, (data: any) => {
+              res.status(200).send(data);
+            });
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
 
     // static async signIn  (req: IGetPayloadAuthInfoRequest, res: Response, next: NextFunction) : Promise<any> {
     //     try {
