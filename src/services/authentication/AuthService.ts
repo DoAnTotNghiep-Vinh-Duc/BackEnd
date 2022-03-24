@@ -5,6 +5,7 @@ const GoogleAccount = require('../../models/GoogleAccount');
 const Information = require('../../models/Information');
 const  WebAccount  = require('../../models/WebAccount') ;
 import { InformationService } from '../InformationService';
+import { SendMailService } from '../sendMailService';
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -123,7 +124,9 @@ export class AuthService{
             information: newInformation._id,
           })
           await newAccount.save();
-          callback(newAccount) ;
+          await SendMailService.sendMail(account.name,account.email, "I create account", (data: any)=>{
+            callback(newAccount) ;
+          });
         }
         else{
           callback({message:"Account already exists ! "}) ;
