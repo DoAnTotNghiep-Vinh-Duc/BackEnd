@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import {client} from "../../config/redis";
+import { redisCache } from '../../config/redisCache';
 const FacebookAccount = require('../../models/FacebookAccount');
 const GoogleAccount = require('../../models/GoogleAccount');
 const Information = require('../../models/Information');
@@ -35,8 +35,7 @@ export class AuthService{
           jwt.sign(payload, `${secret}`, options, async (err: any, token: any) => {
             if (err) reject(err);
             try {
-                await client.set(userId.toString(), token);
-                await client.expire("abc", 365 * 24 * 60 * 60);
+                await redisCache.setCache(userId.toString(), token, 365 * 24 * 60 * 60);
                 resolve(token);
             } catch (error: any) {
                 return reject(error);

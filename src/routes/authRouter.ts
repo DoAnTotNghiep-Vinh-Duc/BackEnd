@@ -4,3 +4,4 @@ export const authRouter = express.Router();
 authRouter.get("/auth/google", authController.getAccountGoogle);
 authRouter.get("/auth/facebook", authController.getAccountFacebook);
 authRouter.post("/signup", authController.registerWebAccount);
+authRouter.post("/signin", authController.signInWithWebAccount);
