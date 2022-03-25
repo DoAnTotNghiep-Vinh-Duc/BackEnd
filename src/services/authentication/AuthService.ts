@@ -5,7 +5,8 @@ const GoogleAccount = require('../../models/GoogleAccount');
 const Information = require('../../models/Information');
 const  WebAccount  = require('../../models/WebAccount') ;
 import { InformationService } from '../InformationService';
-import { SendMailService } from '../sendMailService';
+import { SendMailService } from '../SendMailService';
+import { Response } from 'express';
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -74,7 +75,7 @@ export class AuthService{
       }
     }
 
-    static async CreateAccountGoogle(profile: any, callback: any): Promise<any>{
+    static async CreateAccountGoogle(profile: any): Promise<any>{
       try {
         const account = await GoogleAccount.findOne({ idGoogle: profile.id });
         if(!account){
@@ -90,15 +91,18 @@ export class AuthService{
             password: profile.id,
             name: profile.displayName,
             isVerifyPhone: false,
-            avatar: profile._json.picture,
+            avatar: "profile._json.picture",
             information: newInformation._id,
           });
           await newAccount.save();
-          callback(newAccount) ;
+
+          return newAccount ;
         }
-          callback(account) ;
+        else{
+          return account ;
+        }
       } catch (error) {
-        callback({message:"Something error when login with google ! Please try again !"}) ;
+        return {message:"Something error when login with google ! Please try again !", error:error} ;
       }
     }
 

@@ -9,7 +9,7 @@ passport.use(googleStrategy);
 passport.use(facebookStrategy);
 export class authController{
 
-    static getAccountGoogle =  passport.authenticate('google-token');
+    static getAccountGoogle = passport.authenticate('google-token');
     
     static getAccountFacebook = passport.authenticate('facebook-token')
 
