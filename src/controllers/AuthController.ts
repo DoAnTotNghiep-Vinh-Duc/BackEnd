@@ -1,7 +1,30 @@
+import { NextFunction, Request, Response } from "express";
 import passport from "passport";
-
+const CLIENT_URL = "http://localhost:3000/";
 export class authController{
+    static async loginSuccess (req: Request, res: Response, next: NextFunction): Promise<any>{
+        if (req.user) {
+            console.log(req.user)
+          res.status(200).json({
+            success: true,
+            message: "successfull",
+            user: req.user,
+            //   cookies: req.cookies
+          });
+        }
+    }
 
+    static async loginFail (req: Request, res: Response, next: NextFunction): Promise<any>{
+        res.status(401).json({
+            success: false,
+            message: "failure",
+        });
+    }
+
+    static async logout (req: Request, res: Response, next: NextFunction): Promise<any>{
+        req.logout();
+        res.redirect(CLIENT_URL);
+    }
     // static async signIn  (req: IGetPayloadAuthInfoRequest, res: Response, next: NextFunction) : Promise<any> {
     //     try {
     //       const { phone, password } = req.body;

@@ -14,33 +14,13 @@ passport.serializeUser((user: any, done: any) => {
 passport.deserializeUser((user: any, done: any) => {
   done(null, user);
 });
-// authRouter.get("/auth/google", authController.getAccountGoogle);
-// authRouter.get("/auth/facebook", authController.getAccountFacebook);
 const CLIENT_URL = "http://localhost:3000/";
 
-authRouter.get("/login/success", (req, res) => {
-  if (req.user) {
-      console.log(req.user)
-    res.status(200).json({
-      success: true,
-      message: "successfull",
-      user: req.user,
-      //   cookies: req.cookies
-    });
-  }
-});
+authRouter.get("/login/success", authController.loginSuccess);
 
-authRouter.get("/login/failed", (req, res) => {
-  res.status(401).json({
-    success: false,
-    message: "failure",
-  });
-});
+authRouter.get("/login/failed", authController.loginFail);
 
-authRouter.get("/logout", (req, res) => {
-  req.logout();
-  res.redirect(CLIENT_URL);
-});
+authRouter.get("/logout", authController.logout);
 
 authRouter.get("/google", passport.authenticate("google", { scope: ["profile"] }));
 
