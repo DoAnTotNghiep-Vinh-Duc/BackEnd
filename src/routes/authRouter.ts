@@ -1,8 +1,9 @@
-import express from 'express';
+import express, { NextFunction } from 'express';
 import { authController } from '../controllers/AuthController';
 import { googleStrategy } from "../config/googleStrategy";
 import { facebookStrategy } from "../config/facebookStrategy";
 export const authRouter = express.Router();
+
 import passport from "passport";
 
 passport.use(googleStrategy)

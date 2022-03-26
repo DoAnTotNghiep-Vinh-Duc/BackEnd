@@ -1,3 +1,4 @@
+
 const FacebookTokenStrategy = require('passport-facebook');
 export const facebookStrategy = new FacebookTokenStrategy({
     clientID: `${process.env.facebookID}`,
@@ -6,3 +7,4 @@ export const facebookStrategy = new FacebookTokenStrategy({
   },function (accessToken: string, refreshToken: string, profile: any, done: any) {
     done(null, profile);
 }) 
+

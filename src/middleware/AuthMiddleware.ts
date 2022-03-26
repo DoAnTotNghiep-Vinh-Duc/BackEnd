@@ -1,12 +1,11 @@
 import jwt from 'jsonwebtoken'
 import { Request, Response, NextFunction } from 'express'
 import {client} from "../config/redis";
-import {IGetPayloadAuthInfoRequest} from "../interface/RequestInterface"
 
 export class AuthMiddleware {
 
       
-      static async verifyAccessToken (req: IGetPayloadAuthInfoRequest, res: Response, next: any): Promise<any>  {
+      static async verifyAccessToken (req: Request, res: Response, next: any): Promise<any>  {
         const authHeader: any = req.headers["Authorization"];
         const bearerToken = authHeader.split(' ');
         const token = bearerToken[1];
