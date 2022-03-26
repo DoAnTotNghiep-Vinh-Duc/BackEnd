@@ -91,7 +91,7 @@ export class AuthService{
             password: profile.id,
             name: profile.displayName,
             isVerifyPhone: false,
-            avatar: "profile._json.picture",
+            avatar: profile.photos[0].value,
             information: newInformation._id,
           });
           await newAccount.save();
@@ -137,5 +137,29 @@ export class AuthService{
       } catch (error) {
         callback({message:"Something error when register account ! Please try again !", error: error}) ;
       }
+    }
+
+    static async SignInWithWebAccount(account: any, callback: any): Promise<any>{
+      // account : email, password
+      const email = account.email;
+      const foundAccount = await WebAccount.findOne({ email });
+      if (!foundAccount) {
+        callback({status: 403, error: { message: "Tài khoản chưa được đăng ký." } })
+        // return res
+        //   .status(403)
+        //   .send({ error: { message: "Tài khoản chưa được đăng ký." } });
+      }
+      // Note
+      // const isValid = await account.isValidPassword(password);
+      // if (!isValid) {
+      //   return res
+      //     .status(403)
+      //     .json({ error: { message: "Tài khoản hoặc mật khẩu không khớp !!!" } });
+      // }
+      const accessToken = await AuthService.signAccessToken(foundAccount._id);
+      const refreshToken = await AuthService.signRefreshToken(foundAccount._id);
+      
+      callback({status: 200, message:{account: foundAccount, accessToken, refreshToken}})
+        
     }
 }

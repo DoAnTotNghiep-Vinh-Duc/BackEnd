@@ -1,6 +1,6 @@
 
-const FacebookTokenStrategy = require('passport-facebook');
-export const facebookStrategy = new FacebookTokenStrategy({
+import FacebookTokenStrategy from 'passport-facebook';
+export const facebookStrategy = new FacebookTokenStrategy.Strategy({
     clientID: `${process.env.facebookID}`,
     clientSecret: `${process.env.facebookSecret}`,
     callbackURL: "/auth/facebook/callback",

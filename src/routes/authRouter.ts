@@ -33,7 +33,6 @@ authRouter.get(
   })
 );
 
-
 authRouter.get("/facebook", passport.authenticate("facebook",));
 
 authRouter.get(
@@ -43,3 +42,6 @@ authRouter.get(
     failureRedirect: "/login/failed",
   })
 );
+
+authRouter.post("/signup",authController.registerWebAccount)
+authRouter.post("/signin",authController.signInWithWebAccount)
