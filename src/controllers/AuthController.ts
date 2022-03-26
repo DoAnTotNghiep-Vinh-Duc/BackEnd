@@ -13,17 +13,20 @@ passport.use(googleStrategy);
 passport.use(facebookStrategy);
 export class authController{
     static async loginSuccess (req: Request, res: Response, next: NextFunction): Promise<any>{
-      const user: any = req.user;
-      const id = user._id;
-      // const accountGoogle = await GoogleAccount.findOne({googleId});
-      const accessToken = await AuthService.signAccessToken(id);
-      const refreshToken = await AuthService.signRefreshToken(id);
-      res.setHeader("authorization", accessToken);
-      res.setHeader("refreshToken", refreshToken);
-      res.status(200).json({
-        success: true, accessToken, refreshToken, account: user
-        //   cookies: req.cookies
-      });
+      if(req.user){
+        const user: any = req.user;
+        const id = user._id;
+        console.log(req.user)
+        // const accountGoogle = await GoogleAccount.findOne({googleId});
+        const accessToken = await AuthService.signAccessToken(id);
+        const refreshToken = await AuthService.signRefreshToken(id);
+        res.setHeader("authorization", accessToken);
+        res.setHeader("refreshToken", refreshToken);
+        res.status(200).json({
+          success: true, accessToken, refreshToken, account: user
+          //   cookies: req.cookies
+        });
+      }
         
     }
 
