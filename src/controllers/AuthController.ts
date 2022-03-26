@@ -1,16 +1,6 @@
 import passport from "passport";
-import { googleStrategy } from "../config/googleStrategy";
-import { facebookStrategy } from "../config/facebookStrategy";
-import {IGetPayloadAuthInfoRequest} from "../interface/RequestInterface"
-import { NextFunction, Request, Response } from "express";
 
-passport.use(googleStrategy);
-passport.use(facebookStrategy);
 export class authController{
-
-    static getAccountGoogle =  passport.authenticate('google-token');
-    
-    static getAccountFacebook = passport.authenticate('facebook-token')
 
     // static async signIn  (req: IGetPayloadAuthInfoRequest, res: Response, next: NextFunction) : Promise<any> {
     //     try {

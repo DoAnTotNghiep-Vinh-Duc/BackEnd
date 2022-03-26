@@ -1,9 +1,8 @@
-const FacebookTokenStrategy = require('passport-facebook-token');
+const FacebookTokenStrategy = require('passport-facebook');
 export const facebookStrategy = new FacebookTokenStrategy({
     clientID: `${process.env.facebookID}`,
     clientSecret: `${process.env.facebookSecret}`,
-    fbGraphVersion: 'v3.0',
+    callbackURL: "/auth/facebook/callback",
   },function (accessToken: string, refreshToken: string, profile: any, done: any) {
-      console.log(profile)
-      return profile;
+    done(null, profile);
 }) 
