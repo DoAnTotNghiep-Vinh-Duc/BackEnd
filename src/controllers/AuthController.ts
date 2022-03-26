@@ -1,3 +1,6 @@
+
+const CLIENT_URL = "http://localhost:3000/";
+
 import passport from "passport";
 import { googleStrategy } from "../config/googleStrategy";
 import { facebookStrategy } from "../config/facebookStrategy";
@@ -8,11 +11,52 @@ const  WebAccount  = require('../models/WebAccount') ;
 passport.use(googleStrategy);
 passport.use(facebookStrategy);
 export class authController{
+    static async loginSuccess (req: Request, res: Response, next: NextFunction): Promise<any>{
+        if (req.user) {
+            console.log(req.user)
+          res.status(200).json({
+            success: true,
+            message: "successfull",
+            user: req.user,
+            //   cookies: req.cookies
+          });
+        }
+    }
 
-    static getAccountGoogle =  passport.authenticate('google-token');
-    
-    static getAccountFacebook = passport.authenticate('facebook-token')
+    static async loginFail (req: Request, res: Response, next: NextFunction): Promise<any>{
+        res.status(401).json({
+            success: false,
+            message: "failure",
+        });
+    }
 
+
+    static async logout (req: Request, res: Response, next: NextFunction): Promise<any>{
+        req.logout();
+        res.redirect(CLIENT_URL);
+    }
+    // static async signIn  (req: IGetPayloadAuthInfoRequest, res: Response, next: NextFunction) : Promise<any> {
+    //     try {
+    //       const { phone, password } = req.body;
+    //       const user = await User.findOne({ phone });
+    //       if (!user) {
+    //         return res
+    //           .status(403)
+    //           .json({ error: { message: "Tài khoản chưa được đăng ký." } });
+    //       }
+    //       const isValid = await user.isValidPassword(password);
+    //       if (!isValid) {
+    //         return res
+    //           .status(403)
+    //           .json({ error: { message: "Tài khoản hoặc mật khẩu không khớp !!!" } });
+    //       }
+    //       user.active = true;
+    //       await user.save();
+    //       const accessToken = await signAccessToken(user._id);
+    //       const refreshToken = await signRefreshToken(user._id);
+    //       res.setHeader("authorization", accessToken);
+    //       res.setHeader("refreshToken", refreshToken);
+  
     static async registerWebAccount (req: Request, res: Response, next: NextFunction) : Promise<any>{
         try {
             const newAccount = req.body

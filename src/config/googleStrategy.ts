@@ -1,19 +1,14 @@
-import { AuthService } from "../services/authentication/AuthService";
 
-const GoogleTokenStrategy = require('passport-google-token')
+const GoogleTokenStrategy = require('passport-google-oauth20')
 
 export const googleStrategy = new GoogleTokenStrategy.Strategy(
   {
     clientID: `${process.env.googleClientID}`,
     clientSecret: `${process.env.googleClientSecret}`,
+    callbackURL: "/auth/google/callback",
   },
-  async (accessToken: any, refreshToken: any, profile: any, done: any) => {
-    try {
-      await AuthService.CreateAccountGoogle(profile,(data: any)=>{
-        return data
-      });
-    } catch (error) {
-      return {message:"Error when login with facebook"};
-    }
+  (accessToken: any, refreshToken: any, profile: any, done: any) => {
+
+    done(null, profile);
   }
 );
