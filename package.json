@@ -16,11 +16,13 @@
     "@types/mongoose": "^5.11.97",
     "@types/passport-facebook": "^2.1.11",
     "@types/passport-google-oauth20": "^2.0.11",
+    "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "cross-fetch": "^3.1.5",
     "dotenv": "^10.0.0",
     "emailjs": "^3.8.0",
     "express": "^4.17.2",
+    "express-session": "^1.17.2",
     "firebase": "^9.6.8",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.6",
@@ -34,6 +36,7 @@
     "ts-node": "^10.5.0"
   },
   "devDependencies": {
+    "@types/cookie-session": "^2.0.44",
     "@types/cors": "^2.8.12",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.13",
