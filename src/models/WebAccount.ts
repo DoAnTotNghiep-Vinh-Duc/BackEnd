@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 const Schema = mongoose.Schema;
-
+// Note
+// Chưa làm phân quyền admin
+// Chưa chuyển sang dạng enum
 const WebAccountSchema = new Schema({
     email: String,
     password: String,
