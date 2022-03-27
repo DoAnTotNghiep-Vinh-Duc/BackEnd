@@ -1,5 +1,6 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 import { redisCache } from '../../config/redisCache';
+import bcrypt from "bcryptjs";
 const FacebookAccount = require('../../models/FacebookAccount');
 const GoogleAccount = require('../../models/GoogleAccount');
 const Information = require('../../models/Information');
@@ -118,9 +119,15 @@ export class AuthService{
             phone: ""
           })
           await newInformation.save();
+          // Generate a salt
+          const salt = await bcrypt.genSalt(10);
+          // Generate a password hash (salt + hash)
+          const passwordHashed = await bcrypt.hash(account.password, salt);
+          // Re-assign password hashed
+          const newPassword = passwordHashed;
           const newAccount = new WebAccount({
             email: account.email,
-            password: account.password,
+            password: passwordHashed,
             name: account.name,
             isVerifyPhone: false,
             avatar: "",
@@ -145,21 +152,18 @@ export class AuthService{
       const foundAccount = await WebAccount.findOne({ email });
       if (!foundAccount) {
         callback({status: 403, error: { message: "Tài khoản chưa được đăng ký." } })
-        // return res
-        //   .status(403)
-        //   .send({ error: { message: "Tài khoản chưa được đăng ký." } });
+        
       }
-      // Note
-      // const isValid = await account.isValidPassword(password);
-      // if (!isValid) {
-      //   return res
-      //     .status(403)
-      //     .json({ error: { message: "Tài khoản hoặc mật khẩu không khớp !!!" } });
-      // }
-      const accessToken = await AuthService.signAccessToken(foundAccount._id);
-      const refreshToken = await AuthService.signRefreshToken(foundAccount._id);
-      
-      callback({status: 200, message:{account: foundAccount, accessToken, refreshToken}})
+      const isValid = await foundAccount.isValidPassword(account.password);
+      if (!isValid) {
+        callback({status:403,error:{message:"Sai mật khẩu !"}} )
+      }
+      else{
+        const accessToken = await AuthService.signAccessToken(foundAccount._id);
+        const refreshToken = await AuthService.signRefreshToken(foundAccount._id);
+        
+        callback({status: 200, message:{account: foundAccount, accessToken, refreshToken}})
+      }
         
     }
 }
