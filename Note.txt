@@ -1,1 +1,3 @@
 comment : "Note" là chỗ cần sửa, update thêm
+chưa có màu pink
+Note: Chưa có transaction
