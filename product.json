@@ -1,0 +1,80 @@
+[
+  {
+    "product_id": 1,
+    "name": "áo thun con mèo",
+    "images": ["a", "b"],
+    "status": "ACTIVE",
+    "voted": 20,
+    "point": 4.5,
+    "price": 300000,
+    "list_product_detail": [
+      {
+        "id": 1,
+        "color": {
+          "color": "#A1BBCC",
+          "name": "Đen"
+        },
+        "image": "dbc.png",
+        "size": "M",
+        "quantity": 20
+      },
+      {
+        "id": 2,
+        "color": {
+          "color": "#A1B3C4",
+          "name": "Đỏ"
+        },
+        "image": "dbc.png",
+        "size": "S",
+        "quantity": 22
+      },
+      {
+        "id": 3,
+        "color": {
+          "color": "#A1D3C4",
+          "name": "Hồng"
+        },
+        "image": "dbc.png",
+        "size": "M",
+        "quantity": 25
+      },
+      {
+        "id": 4,
+        "color": {
+          "color": "#A1D3C4",
+          "name": "Hồng"
+        },
+        "image": "dbc.png",
+        "size": "XL",
+        "quantity": 21
+      }
+    ]
+  }
+]
+
+
+
+"Product":{
+  "product_id": 1,
+  "supplier":"ObjectId<àgffsdffd>",
+  "name": "áo thun con mèo",
+  "description":"abc",
+  "typeProducts":["a","b"],
+  "images": ["a", "b"],
+  "status": "ACTIVE",
+  "voted": 20,
+  "point": 4.5,
+  "list_product_detail": [
+    "1","2","3","4"
+  ],
+  "price": 300000,
+}
+
+"ProductDetail":{
+  "product":"ObjectId<abc>",
+  "color":"ObjectId<abc>",
+  "size":"L",
+  "imageUrl":"andvvsd.com",
+  "status":"ACTIVE",
+  "quantity":10
+}
