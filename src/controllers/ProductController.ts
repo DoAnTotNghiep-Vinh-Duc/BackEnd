@@ -1,4 +1,4 @@
-import { ProductService } from "../services/ProductService";
+import { ProductService } from "../services/Product.service";
 import { Request, Response } from "express";
 
 export class ProductController{

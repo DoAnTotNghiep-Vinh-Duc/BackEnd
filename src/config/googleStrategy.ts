@@ -1,4 +1,4 @@
-import { AuthService } from '../services/authentication/AuthService';
+import { AuthService } from '../services/authentication/Auth.service';
 import GoogleTokenStrategy from 'passport-google-oauth20';
 
 export const googleStrategy = new GoogleTokenStrategy.Strategy(

@@ -5,7 +5,7 @@ import passport from "passport";
 import { googleStrategy } from "../config/googleStrategy";
 import { facebookStrategy } from "../config/facebookStrategy";
 import { NextFunction, Request, Response } from "express";
-import {AuthService} from "../services/authentication/AuthService";
+import {AuthService} from "../services/authentication/Auth.service";
 const  WebAccount  = require('../models/WebAccount') ;
 const GoogleAccount = require('../models/GoogleAccount');
 

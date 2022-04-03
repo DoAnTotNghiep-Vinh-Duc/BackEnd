@@ -5,8 +5,8 @@ const FacebookAccount = require('../../models/FacebookAccount');
 const GoogleAccount = require('../../models/GoogleAccount');
 const Information = require('../../models/Information');
 const  WebAccount  = require('../../models/WebAccount') ;
-import { InformationService } from '../InformationService';
-import { SendMailService } from '../SendMailService';
+import { InformationService } from '../Information.service';
+import { SendMailService } from '../SendMail.service';
 import { Response } from 'express';
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {

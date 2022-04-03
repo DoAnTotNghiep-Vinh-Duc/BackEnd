@@ -1,5 +1,5 @@
 import express from 'express';
-import { ColorController } from '../../controllers/admin/ColorController';
+import { ColorController } from '../../controllers/ColorController';
 export const colorRouter = express.Router();
 
 colorRouter.get("/color", ColorController.getAllColor);

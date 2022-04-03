@@ -73,7 +73,6 @@
 "ProductDetail":{
   "product":"ObjectId<abc>",
   "color":"ObjectId<abc>",
-  "size":"L",
   "imageUrl":"andvvsd.com",
   "status":"ACTIVE",
   "quantity":10
