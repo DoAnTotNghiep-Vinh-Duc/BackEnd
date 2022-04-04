@@ -77,3 +77,37 @@
   "status":"ACTIVE",
   "quantity":10
 }
+
+// List Product detail đẩy dữ liệu cho backend
+[
+  {
+    "color":"ObjectId<đỏ>",
+    "listSize":[
+      {
+        "size":"M",
+        "status":"ACTIVE",
+        "quantity":10
+      },
+      {
+        "size":"S",
+        "status":"ACTIVE",
+        "quantity":10
+      }
+    ],
+  },
+  {
+    "color":"ObjectId<xanh>",
+    "listSize":[
+      {
+        "size":"M",
+        "status":"ACTIVE",
+        "quantity":10
+      },
+      {
+        "size":"S",
+        "status":"ACTIVE",
+        "quantity":10
+      }
+    ],
+  }
+]

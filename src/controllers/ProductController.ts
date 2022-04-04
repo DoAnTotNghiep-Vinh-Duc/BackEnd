@@ -5,7 +5,7 @@ export class ProductController{
     static async getAllProduct (req: Request, res: Response): Promise<any> {
         try {
             ProductService.getAllProduct((data: any) => {
-                res.status(200).send(data);
+                return res.status(200).json(data);
             });
         
         } catch (error: any) {
@@ -18,12 +18,11 @@ export class ProductController{
     static async getProductById (req: Request, res: Response): Promise<any> {
         try {
             const productId = req.params.product_id
-            ProductService.getProductById(productId,(data: any) => {
-              res.status(200).send(data);
-            });
+            const product = await ProductService.getProductById(productId)
+            return res.status(200).json(product);
          
         } catch (error: any) {
-            return res.status(500).send({
+            return res.status(500).json({
               msg: error.message,
             });
         }
@@ -46,8 +45,8 @@ export class ProductController{
 
     static async createProduct(req: Request, res: Response): Promise<any> {
         try {
-            const newProduct = req.body
-            ProductService.createProduct(newProduct, (data: any) => {
+            const {product,productDetails } = req.body
+            ProductService.createProduct(product, productDetails,(data: any) => {
               res.status(200).send(data);
             });
          

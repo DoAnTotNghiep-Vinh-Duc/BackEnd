@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import {Request, Response, NextFunction} from "express";
 import bodyParser from "body-parser";
+import morgan from "morgan";
 import { Routes } from "./routes/index";
 import * as http from "http";
 import passport from "passport";
@@ -19,6 +20,7 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(morgan("dev"));
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -26,15 +28,16 @@ app.use(
     credentials: true,
   })
 );
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.all('/', function (req: Request, res: Response, next:NextFunction) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "*");
   next()
 });
 
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 
 app.use("/", Routes);
 

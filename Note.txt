@@ -1,3 +1,2 @@
 comment : "Note" là chỗ cần sửa, update thêm
 Note: Chưa có transaction
-Note: xóa created_at, updated_at của thuộc tính supplier trong product  
