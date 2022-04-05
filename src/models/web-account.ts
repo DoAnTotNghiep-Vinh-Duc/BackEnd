@@ -26,6 +26,5 @@ WebAccountSchema.methods.isValidPassword = async function (newPassword: string) 
       throw new Error(error);
     }
   };
-const WebAccount = mongoose.model("WebAccount", WebAccountSchema);
+export const WebAccount = mongoose.model("WebAccount", WebAccountSchema);
 
-module.exports = WebAccount;

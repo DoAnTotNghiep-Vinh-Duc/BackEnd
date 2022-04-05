@@ -17,5 +17,4 @@ const FacebookSchema = new Schema({
     }
 },{timestamps: true, collection:"FacebookAccount"});
 
-const facebookAccount = mongoose.model("FacebookAccount", FacebookSchema);
-module.exports = facebookAccount;
+export const FacebookAccount = mongoose.model("FacebookAccount", FacebookSchema);

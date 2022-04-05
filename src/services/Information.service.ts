@@ -1,4 +1,4 @@
-const Information = require("../models/Information")
+import {Information} from "../models/information";
 export class InformationService {
     // static async getAllInformation(callback: any) {
     //     try {

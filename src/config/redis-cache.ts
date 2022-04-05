@@ -1,4 +1,4 @@
-import { client } from './../config/redis';
+import { client } from './redis';
 
 async function set(key: any, data: any, ttl?: any) {
     await client.set(key, data);
@@ -19,7 +19,7 @@ async function clearCache(){
 
 
 export class redisCache {
-    static async Connect() {
+    static async connect() {
         client.on("error", (err: any) => console.log("Redis Client Error", err));
         await client.connect();
     }

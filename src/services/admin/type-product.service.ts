@@ -1,4 +1,4 @@
-const TypeProduct = require("../../models/TypeProduct")
+import {TypeProduct} from "../../models/type-product";
 export class TypeProductService {
     static async getAllTypeProduct(callback: any) {
         try {

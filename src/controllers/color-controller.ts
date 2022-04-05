@@ -1,4 +1,4 @@
-import { ColorService } from "../services/admin/Color.service";
+import { ColorService } from "../services/admin/color.service";
 import { Request, Response } from "express";
 
 export class ColorController {

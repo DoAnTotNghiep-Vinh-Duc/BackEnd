@@ -2,16 +2,16 @@
 const CLIENT_URL = "http://localhost:3000/";
 
 import passport from "passport";
-import { googleStrategy } from "../config/googleStrategy";
-import { facebookStrategy } from "../config/facebookStrategy";
+import { googleStrategy } from "../config/google-strategy";
+import { facebookStrategy } from "../config/facebook-strategy";
 import { NextFunction, Request, Response } from "express";
-import {AuthService} from "../services/authentication/Auth.service";
-const  WebAccount  = require('../models/WebAccount') ;
-const GoogleAccount = require('../models/GoogleAccount');
+import {AuthService} from "../services/authentication/auth.service";
+import {WebAccount} from '../models/web-account';
+import {GoogleAccount} from '../models/google-account';
 
 passport.use(googleStrategy);
 passport.use(facebookStrategy);
-export class authController{
+export class AuthController{
     static async loginSuccess (req: Request, res: Response, next: NextFunction): Promise<any>{
       if(req.user){
         const user: any = req.user;
@@ -45,7 +45,7 @@ export class authController{
     static async registerWebAccount (req: Request, res: Response, next: NextFunction) : Promise<any>{
       try {
         const newAccount = req.body
-        AuthService.RegisterWebAccount(newAccount, (data: any) => {
+        AuthService.registerWebAccount(newAccount, (data: any) => {
           res.status(200).send(data);
         });
        
@@ -59,7 +59,7 @@ export class authController{
     static async signInWithWebAccount  (req: Request, res: Response, next: NextFunction) : Promise<any> {
       try {
         const { email, password } = req.body;
-        await AuthService.SignInWithWebAccount({ email, password }, (data: any)=>{
+        await AuthService.signInWithWebAccount({ email, password }, (data: any)=>{
           const status = data.status
           if(status === 200){
             const account = data.message.account

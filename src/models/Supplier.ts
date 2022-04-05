@@ -9,5 +9,4 @@ const SupplierSchema = new Schema({
     phone: String,
 },{timestamps: true, collection:"Supplier"});
 
-const Supplier = mongoose.model("Supplier", SupplierSchema);
-module.exports = Supplier;
+export const Supplier = mongoose.model("Supplier", SupplierSchema);

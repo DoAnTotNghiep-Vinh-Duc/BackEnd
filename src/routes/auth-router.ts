@@ -1,7 +1,7 @@
 import express, { NextFunction } from 'express';
-import { authController } from '../controllers/AuthController';
-import { googleStrategy } from "../config/googleStrategy";
-import { facebookStrategy } from "../config/facebookStrategy";
+import { AuthController } from '../controllers/auth-controller';
+import { googleStrategy } from "../config/google-strategy";
+import { facebookStrategy } from "../config/facebook-strategy";
 export const authRouter = express.Router();
 
 import passport from "passport";
@@ -17,11 +17,11 @@ passport.deserializeUser((user: any, done: any) => {
 });
 const CLIENT_URL = "http://localhost:3000/";
 
-authRouter.get("/login/success", authController.loginSuccess);
+authRouter.get("/login/success", AuthController.loginSuccess);
 
-authRouter.get("/login/failed", authController.loginFail);
+authRouter.get("/login/failed", AuthController.loginFail);
 
-authRouter.get("/logout", authController.logout);
+authRouter.get("/logout", AuthController.logout);
 
 authRouter.get("/google", passport.authenticate("google", { scope: ["profile"] }));
 
@@ -43,5 +43,5 @@ authRouter.get(
   })
 );
 
-authRouter.post("/signup",authController.registerWebAccount)
-authRouter.post("/signin",authController.signInWithWebAccount)
+authRouter.post("/signup",AuthController.registerWebAccount)
+authRouter.post("/signin",AuthController.signInWithWebAccount)

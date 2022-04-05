@@ -1,12 +1,12 @@
 import jwt from 'jsonwebtoken';
-import { redisCache } from '../../config/redisCache';
+import { redisCache } from '../../config/redis-cache';
 import bcrypt from "bcryptjs";
-const FacebookAccount = require('../../models/FacebookAccount');
-const GoogleAccount = require('../../models/GoogleAccount');
-const Information = require('../../models/Information');
-const  WebAccount  = require('../../models/WebAccount') ;
-import { InformationService } from '../Information.service';
-import { SendMailService } from '../SendMail.service';
+import {FacebookAccount} from '../../models/facebook-account';
+import {GoogleAccount} from '../../models/google-account';
+import {Information} from '../../models/information';
+import {WebAccount} from '../../models/web-account';
+import { InformationService } from '../information.service';
+import { SendMailService } from '../send-mail.service';
 import { Response } from 'express';
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
@@ -46,7 +46,7 @@ export class AuthService{
         });
     };
     
-    static async CreateAccountFacebook(profile: any, callback: any): Promise<any>{
+    static async createAccountFacebook(profile: any, callback: any): Promise<any>{
       try {
         const account = await FacebookAccount.findOne({ idFacebook: profile.id });
         if(!account){
@@ -76,7 +76,7 @@ export class AuthService{
       }
     }
 
-    static async CreateAccountGoogle(profile: any): Promise<any>{
+    static async createAccountGoogle(profile: any): Promise<any>{
       try {
         const account = await GoogleAccount.findOne({ idGoogle: profile.id });
         if(!account){
@@ -107,7 +107,7 @@ export class AuthService{
       }
     }
 
-    static async RegisterWebAccount(account: any, callback: any): Promise<any>{
+    static async registerWebAccount(account: any, callback: any): Promise<any>{
       // account: name, email, password
       try {
         const user = await WebAccount.findOne({ email: account.email });
@@ -146,7 +146,7 @@ export class AuthService{
       }
     }
 
-    static async SignInWithWebAccount(account: any, callback: any): Promise<any>{
+    static async signInWithWebAccount(account: any, callback: any): Promise<any>{
       // account : email, password
       const email = account.email;
       const foundAccount = await WebAccount.findOne({ email });

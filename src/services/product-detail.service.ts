@@ -1,11 +1,10 @@
-import { ProductDetail } from "../models/ProductDetail";
-import { ProductService } from "./Product.service";
+import { ProductDetail } from "../models/product-detail";
+import { ProductService } from "./product.service";
 export class ProductDetailService {
     //Note Chỗ này phải tìm bên product, trả về list object id product detail sau đó mới tìm trong product detail
     static async getProductDetailByProductId(productId: String, callback: any) {
         try {
             const product = await ProductService.getProductById(productId)
-            console.log(product);
             const productDetails = await ProductDetail.find({ product: productId })
             if (productDetails.length > 0) {
                 callback({ message: "found Product Size success !", data: productDetails })

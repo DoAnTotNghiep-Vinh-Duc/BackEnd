@@ -1,6 +1,6 @@
-import { ProductDetail } from "../models/ProductDetail";
-import {Product} from "../models/Product"
-import { ProductDetailService } from "./ProductDetail.service";
+import { ProductDetail } from "../models/product-detail";
+import {Product} from "../models/product"
+import { ProductDetailService } from "./product-detail.service";
 export class ProductService {
     static async getAllProduct(callback: any) {
         try {
@@ -16,7 +16,6 @@ export class ProductService {
             const product = await Product.findOne({ _id: productId })
             let listProductDetail: Array<any> = []
             if(product){
-                console.log("product list detail: ", product.listProductDetail)
                 let productDetail: any = null;
                 for(let i=0;i<product.listProductDetail.length;i++){
                     productDetail = await ProductDetail.findOne({_id:product.listProductDetail[i]});
@@ -33,19 +32,71 @@ export class ProductService {
         }
     }
     // Chỗ này phải tạo cả product detail
+    // product:{
+    //     supplier: ObjectId<abc>,
+    //     name: "abc",
+    //     description:"abcc",
+    //     typeProducts:[ObjectId<abc1>,ObjectId<abc2>],
+    //     images:[abc.png, gfv.png],
+    //     price:50000
+    // }
+    // productDetails:[
+    //     {
+    //         color: ObjectId<abc>,
+    //         sizeQuantity:[
+    //             {
+    //                 size:"M",
+    //                 quantity:20
+    //             },
+    //             {
+    //                 size:"S",
+    //                 quantity:20
+    //             },
+    //             {
+    //                 size:"L",
+    //                 quantity:20
+    //             },
+    //         ]
+    //     },
+    //     {
+    //         color: ObjectId<abc>,
+    //         sizeQuantity:[
+    //             {
+    //                 size:"M",
+    //                 quantity:20
+    //             },
+    //             {
+    //                 size:"S",
+    //                 quantity:20
+    //             },
+    //             {
+    //                 size:"L",
+    //                 quantity:20
+    //             },
+    //         ]
+    //     }
+    // ]
+   
     static async createProduct(product: any,productDetails: Array<any>,callback: any){
         try {
             const listObjectIdProductDetail: Array<any> = [];
             const newProduct = new Product(product);
             await newProduct.save();
 
-            productDetails.forEach(async (productDetail) => {
-                const newProductDetail = new ProductDetail(productDetail)
-                newProductDetail.product = newProduct._id;
-                await newProductDetail.save();
-                listObjectIdProductDetail.push(newProductDetail._id)
-
-            });
+            for(let i =0;i< productDetails.length;i++){
+                let sizeQuantity:Array<any> = productDetails[i].sizeQuantity;
+                for(let j=0;j < sizeQuantity.length;i++){
+                    const productDetail = {
+                        product: newProduct._id,
+                        color: productDetails[i].color,
+                        size: sizeQuantity[j].size,
+                        quantity: sizeQuantity[j].quantity
+                    }
+                    const newProductDetail = new ProductDetail(productDetail)
+                    await newProductDetail.save();
+                    listObjectIdProductDetail.push(newProductDetail._id)
+                }
+            }
             await Product.findOneAndUpdate({_id: newProduct._id},{listProductDetail: listObjectIdProductDetail},{new: true});
             callback({message: "create Product success !", data: newProduct})
            

@@ -1,9 +1,9 @@
 import express, { Router } from 'express';
-import { authRouter } from './authRouter';
-import {AdminRoutes} from './admin/index'
-import { productRouter } from './productRouter';
+import { authRouter } from './auth-router';
+import {adminRoutes} from './admin/index'
+import { productRouter } from './product-router';
 // import { loginFacebookRouter } from './loginFacebookRouter';
 export const Routes = express.Router();
 Routes.use('/auth', authRouter)
-Routes.use('/admin', AdminRoutes);
+Routes.use('/admin', adminRoutes);
 Routes.use('/',productRouter )

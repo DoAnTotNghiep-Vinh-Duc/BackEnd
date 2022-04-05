@@ -1,4 +1,4 @@
-const Supplier = require("../../models/Supplier")
+import {Supplier} from "../../models/supplier";
 export class SupplierService {
     static async getAllSupplier(callback: any) {
         try {

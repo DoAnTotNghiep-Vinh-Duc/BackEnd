@@ -5,5 +5,4 @@ const TypeProductSchema = new Schema({
     name: String,
 },{timestamps: true, collection:"TypeProduct"});
 
-const TypeProduct = mongoose.model("TypeProduct", TypeProductSchema);
-module.exports = TypeProduct;
+export const TypeProduct = mongoose.model("TypeProduct", TypeProductSchema);

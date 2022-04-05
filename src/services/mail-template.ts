@@ -1,5 +1,5 @@
 // Note: chưa có gắn token verify nhé
-export class maiTemplateService {
+export class MaiTemplateService {
     static async getMailTemplate(data: any, lang: string, callback: any) {
         const mailTemplate = [
         {

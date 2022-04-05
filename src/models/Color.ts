@@ -6,5 +6,4 @@ const ColorSchema = new Schema({
     name: String
 },{timestamps: true, collection:"Color"});
 
-const color = mongoose.model("Color", ColorSchema);
-module.exports = color;
+export const Color = mongoose.model("Color", ColorSchema);

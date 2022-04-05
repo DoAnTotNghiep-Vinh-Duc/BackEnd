@@ -8,5 +8,4 @@ const InformationSchema = new Schema({
     phone: String,
 },{timestamps: true, collection:"Information"});
 
-const information = mongoose.model("Information", InformationSchema);
-module.exports = information;
+export const Information = mongoose.model("Information", InformationSchema);

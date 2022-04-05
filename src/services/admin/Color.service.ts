@@ -1,4 +1,4 @@
-const Color = require("../../models/Color")
+import {Color} from "../../models/color";
 export class ColorService {
     static async getAllColor(callback: any) {
         try {

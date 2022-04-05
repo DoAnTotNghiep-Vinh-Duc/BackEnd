@@ -1,5 +1,5 @@
 import { SMTPClient } from 'emailjs';
-import { maiTemplateService } from './mailTemplate';
+import { MaiTemplateService } from './mail-template';
 
 export class SendMailService {
     static async sendMail(name: any, email: any, content: any, callback: any){
@@ -10,7 +10,7 @@ export class SendMailService {
             ssl: true,
         });
         try {
-            await maiTemplateService.getMailTemplate({name, email, content},'en',async (data: any)=>{
+            await MaiTemplateService.getMailTemplate({name, email, content},'en',async (data: any)=>{
                 const nameCompany = `Lemon <${process.env.COMPANYMAIL}>`
                 await client.sendAsync({
                     text: data.thankyou_customer.content,

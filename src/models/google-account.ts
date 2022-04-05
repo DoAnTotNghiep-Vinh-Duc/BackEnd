@@ -17,5 +17,4 @@ const GoogleSchema = new Schema({
     }
 },{timestamps: true, collection:"GoogleAccount"});
 
-const googleAccount = mongoose.model("GoogleAccount", GoogleSchema);
-module.exports = googleAccount;
+export const GoogleAccount = mongoose.model("GoogleAccount", GoogleSchema);
