@@ -11,7 +11,8 @@ export class ColorService {
 
     static async getColorById(colorId: String){
         try {
-            const color = await Color.findOne({ _id: colorId })
+
+            const color = await Color.findById(colorId).select(['color', 'name'])
             if(color){
                 return {status: 200,message: "found Color success !", data: color}
             }

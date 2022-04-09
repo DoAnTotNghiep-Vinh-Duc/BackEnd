@@ -3,6 +3,7 @@ import {Product} from "../models/product"
 import { ProductDetailService } from "./product-detail.service";
 import { ColorService } from "./admin/color.service";
 import { Color } from "../models/color";
+import { ColorImageService } from "./color-image.service";
 export class ProductService {
     static async getAllProduct() {
         try {
@@ -21,13 +22,12 @@ export class ProductService {
                 let productDetail: any = null;
                 for(let i=0;i<product.listProductDetail.length;i++){
                     productDetail = await ProductDetail.findOne({_id:product.listProductDetail[i]});
-                    let color = await Color.findById(productDetail.color).select(['color', 'name'])
-                    console.log(color)
-                    productDetail.color = color
+                    let data = await ColorService.getColorById(productDetail.color)
+                    productDetail.color = data.data
                     listProductDetail.push(productDetail);
                 }
-
-                return {status: 200,message: "found Product success !", data:{product,listProductDetail }}
+                const colorImages = await ColorImageService.getColorImageByProductId(productId)
+                return {status: 200,message: "found Product success !", data:{product,listProductDetail, colorImages }}
             }
             else
                 return {status: 404,message: "Not found Product !"}
