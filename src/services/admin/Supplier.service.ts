@@ -1,49 +1,49 @@
 import {Supplier} from "../../models/supplier";
 export class SupplierService {
-    static async getAllSupplier(callback: any) {
+    static async getAllSupplier() {
         try {
             const suppliers = await Supplier.find();
-            callback({message: "get all supplier success !", data: suppliers});
+            return{status: 200,message: "get all supplier success !", data: suppliers};
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return{status: 500,message: "Something went wrong !", error: error};
         }
     }
 
-    static async getSupplierById(supplierId: String, callback: any){
+    static async getSupplierById(supplierId: String, ){
         try {
             const supplier = await Supplier.findOne({ _id: supplierId })
             if(supplier){
-                callback({message: "found supplier success !", data: supplier})
+                return{status: 200,message: "found supplier success !", data: supplier}
             }
             else
-                callback({message: "Not found supplier !"})
+                return {status: 404,message: "Not found supplier !"}
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return{status: 500,message: "Something went wrong !", error: error};
         }
     }
 
-    static async createSupplier(supplier: any, callback: any){
+    static async createSupplier(supplier: any, ){
         try {
             const newSupplier = new Supplier(supplier);
             await newSupplier.save();
-            callback({message: "create supplier success !", data: newSupplier})
+            return {status: 201,message: "create supplier success !", data: newSupplier}
            
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 
-    static async updateSupplierById(supplierId: String, newSupplier: any, callback: any){
+    static async updateSupplierById(supplierId: String, newSupplier: any, ){
         try {
             const supplier = await Supplier.findOne({ _id: supplierId })
             if(supplier){
                 const result = await supplier.findByIdAndUpdate(supplierId, newSupplier);
-                callback({message: "update supplier success !", data: result})
+                return {status: 204,message: "update supplier success !", data: result}
             }
             else
-                callback({message: "Not found supplier !"})
+                return {status: 404,message: "Not found supplier !"}
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 }

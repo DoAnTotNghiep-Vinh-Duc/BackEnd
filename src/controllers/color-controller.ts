@@ -4,13 +4,12 @@ import { Request, Response } from "express";
 export class ColorController {
     static async getAllColor (req: Request, res: Response): Promise<any> {
         try {
-            ColorService.getAllColor((data: any) => {
-            res.status(200).send(data);
-            });
+            const data = await ColorService.getAllColor();
+            return res.status(data.status).json(data);
         
         } catch (error: any) {
             return res.status(500).send({
-            msg: error.message,
+            message: error.message,
             });
         }
     }
@@ -18,13 +17,12 @@ export class ColorController {
     static async getColorById(req: Request, res: Response): Promise<any> {
         try {
             const colorId = req.params.colorId
-            ColorService.getColorById(colorId,(data: any) => {
-              res.status(200).send(data);
-            });
+            const data = await ColorService.getColorById(colorId);
+            return res.status(data.status).json(data)
          
         } catch (error: any) {
             return res.status(500).send({
-              msg: error.message,
+              message: error.message,
             });
         }
     }
@@ -33,13 +31,12 @@ export class ColorController {
         try {
             const colorId = req.params.colorId
             const newColor = req.body
-            ColorService.updateColorById(colorId,newColor, (data: any) => {
-              res.status(200).send(data);
-            });
+            const data = await ColorService.updateColorById(colorId,newColor);
+            return res.status(data.status).json(data);
          
         } catch (error: any) {
             return res.status(500).send({
-              msg: error.message,
+              message: error.message,
             });
         }
     }
@@ -47,13 +44,12 @@ export class ColorController {
     static async createColor(req: Request, res: Response): Promise<any> {
         try {
             const newColor = req.body
-            ColorService.createColor(newColor, (data: any) => {
-              res.status(200).send(data);
-            });
+            const data = await ColorService.createColor(newColor);
+            return res.status(data.status).json(data)
          
         } catch (error: any) {
             return res.status(500).send({
-              msg: error.message,
+              message: error.message,
             });
         }
     }

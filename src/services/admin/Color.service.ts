@@ -1,49 +1,49 @@
 import {Color} from "../../models/color";
 export class ColorService {
-    static async getAllColor(callback: any) {
+    static async getAllColor() {
         try {
             const colors = await Color.find();
-            callback({message: "get all Color success !", data: colors});
+            return {status: 200, message: "get all Color success !", data: colors};
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return{status: 500, message: "Something went wrong !", error: error};
         }
     }
 
-    static async getColorById(colorId: String, callback: any){
+    static async getColorById(colorId: String){
         try {
             const color = await Color.findOne({ _id: colorId })
             if(color){
-                callback({message: "found Color success !", data: color})
+                return {status: 200,message: "found Color success !", data: color}
             }
             else
-                callback({message: "Not found Color !"})
+                return {status: 404, message: "Not found Color !"}
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return {status: 500, message: "Something went wrong !", error: error};
         }
     }
 
-    static async createColor(color: any, callback: any){
+    static async createColor(color: any){
         try {
             const newColor = new Color(color);
             await newColor.save();
-            callback({message: "create Color success !", data: newColor})
+            return {status: 201, message: "create Color success !", data: newColor}
            
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return{status:500,message: "Something went wrong !", error: error};
         }
     }
 
-    static async updateColorById(colorId: String, newColor: any, callback: any){
+    static async updateColorById(colorId: String, newColor: any){
         try {
             const color = await Color.findOne({ _id: colorId })
             if(color){
                 const result = await Color.findByIdAndUpdate(colorId, newColor);
-                callback({message: "update Color success !", data: result})
+                return {status: 204, message: "update Color success !", data: result}
             }
             else
-                callback({message: "Not found Color !"})
+                return {status: 404, message: "Not found Color !"}
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 }

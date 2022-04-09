@@ -1,2 +1,4 @@
 comment : "Note" là chỗ cần sửa, update thêm
 Note: Chưa có transaction
+Note: chưa có cache
+Note: chuyển callback sang return

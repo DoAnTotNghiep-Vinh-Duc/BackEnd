@@ -22,28 +22,28 @@ export class InformationService {
     //     }
     // }
 
-    static async createInformation(information: any, callback: any){
+    static async createInformation(information: any){
         try {
             const newInformation = new Information(information);
             await newInformation.save();
-            callback({message: "create Information success !", data: newInformation})
+            return {status:201, message: "create Information success !", data: newInformation}
            
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 
-    static async updateInformationById(informationId: String, newInformation: any, callback: any){
+    static async updateInformationById(informationId: String, newInformation: any){
         try {
             const information = await Information.findOne({ _id: informationId })
             if(information){
                 const result = await Information.findByIdAndUpdate(informationId, newInformation);
-                callback({message: "update Information success !", data: result})
+                return {status: 204,message: "update Information success !", data: result}
             }
             else
-                callback({message: "Not found Information !"})
+                return {status: 404,message: "Not found Information !"}
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 }

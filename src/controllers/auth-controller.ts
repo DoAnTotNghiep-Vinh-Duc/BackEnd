@@ -42,12 +42,12 @@ export class AuthController{
         res.redirect(CLIENT_URL);
     }
 
-    static async registerWebAccount (req: Request, res: Response, next: NextFunction) : Promise<any>{
+    static async registerWebAccount (req: Request, res: Response) : Promise<any>{
       try {
         const newAccount = req.body
-        AuthService.registerWebAccount(newAccount, (data: any) => {
-          res.status(200).send(data);
-        });
+        const data = await AuthService.registerWebAccount(newAccount);
+        console.log(data)
+        return res.status(data.status).json(data)
        
       } catch (error: any) {
           return res.status(500).send({
@@ -59,8 +59,8 @@ export class AuthController{
     static async signInWithWebAccount  (req: Request, res: Response, next: NextFunction) : Promise<any> {
       try {
         const { email, password } = req.body;
-        await AuthService.signInWithWebAccount({ email, password }, (data: any)=>{
-          const status = data.status
+        const data = await AuthService.signInWithWebAccount({ email, password })
+        const status = data.status
           if(status === 200){
             const account = data.message.account
             const accessToken = data.message.accessToken
@@ -75,9 +75,8 @@ export class AuthController{
           else{
             return res
               .status(status)
-              .send({ error: data.error.message }); 
+              .send({ error: data.message }); 
           }
-        })
       } catch (error) {
         next(error);
       }    

@@ -4,9 +4,8 @@ import { Request, Response } from "express";
 export class TypeProductController {
     static async getAllTypeProduct (req: Request, res: Response): Promise<any> {
         try {
-            TypeProductService.getAllTypeProduct((data: any) => {
-            res.status(200).send(data);
-            });
+            const data = await TypeProductService.getAllTypeProduct();
+            return res.status(data.status).json(data)
         
         } catch (error: any) {
             return res.status(500).send({
@@ -18,9 +17,8 @@ export class TypeProductController {
     static async getTypeProductById(req: Request, res: Response): Promise<any> {
         try {
             const typeProductId = req.params.typeProductId
-            TypeProductService.getTypeProductById(typeProductId,(data: any) => {
-              res.status(200).send(data);
-            });
+            const data = await TypeProductService.getTypeProductById(typeProductId);
+            return res.status(data.status).json(data)
          
         } catch (error: any) {
             return res.status(500).send({
@@ -33,9 +31,8 @@ export class TypeProductController {
         try {
             const typeProductId = req.params.typeProductId
             const newTypeProduct = req.body
-            TypeProductService.updateTypeProductById(typeProductId,newTypeProduct, (data: any) => {
-              res.status(200).send(data);
-            });
+            const data = await TypeProductService.updateTypeProductById(typeProductId,newTypeProduct);
+            return res.status(data.status).json(data)
          
         } catch (error: any) {
             return res.status(500).send({
@@ -47,9 +44,8 @@ export class TypeProductController {
     static async createTypeProduct(req: Request, res: Response): Promise<any> {
         try {
             const newTypeProduct = req.body
-            TypeProductService.createTypeProduct(newTypeProduct, (data: any) => {
-              res.status(200).send(data);
-            });
+            const data = await TypeProductService.createTypeProduct(newTypeProduct);
+            return res.status(data.status).json(data);
          
         } catch (error: any) {
             return res.status(500).send({
