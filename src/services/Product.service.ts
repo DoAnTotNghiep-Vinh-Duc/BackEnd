@@ -1,13 +1,15 @@
 import { ProductDetail } from "../models/product-detail";
 import {Product} from "../models/product"
 import { ProductDetailService } from "./product-detail.service";
+import { ColorService } from "./admin/color.service";
+import { Color } from "../models/color";
 export class ProductService {
-    static async getAllProduct(callback: any) {
+    static async getAllProduct() {
         try {
             const products = await Product.find();
-            callback({message: "get all Product success !", data: products});
+            return {status: 200,message: "get all Product success !", data: products};
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 
@@ -19,16 +21,18 @@ export class ProductService {
                 let productDetail: any = null;
                 for(let i=0;i<product.listProductDetail.length;i++){
                     productDetail = await ProductDetail.findOne({_id:product.listProductDetail[i]});
+                    let color = await Color.findById(productDetail.color).select(['color', 'name'])
+                    console.log(color)
+                    productDetail.color = color
                     listProductDetail.push(productDetail);
                 }
 
-                console.log(listProductDetail)
-                return {message: "found Product success !", data:{product,listProductDetail }}
+                return {status: 200,message: "found Product success !", data:{product,listProductDetail }}
             }
             else
-                return {message: "Not found Product !"}
+                return {status: 404,message: "Not found Product !"}
         } catch (error) {
-            return {message: "Something went wrong !", error: error};
+            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
     // Chỗ này phải tạo cả product detail
@@ -77,7 +81,7 @@ export class ProductService {
     //     }
     // ]
    
-    static async createProduct(product: any,productDetails: Array<any>,callback: any){
+    static async createProduct(product: any,productDetails: Array<any>){
         try {
             const listObjectIdProductDetail: Array<any> = [];
             const newProduct = new Product(product);
@@ -98,24 +102,24 @@ export class ProductService {
                 }
             }
             await Product.findOneAndUpdate({_id: newProduct._id},{listProductDetail: listObjectIdProductDetail},{new: true});
-            callback({message: "create Product success !", data: newProduct})
+            return {status:201,message: "create Product success !", data: newProduct};
            
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 
-    static async updateProductById(productId: String, newProduct: any, callback: any){
+    static async updateProductById(productId: String, newProduct: any){
         try {
             const product = await Product.findOne({ _id: productId })
             if(product){
                 const result = await Product.findByIdAndUpdate(productId, newProduct);
-                callback({message: "update Product success !", data: result})
+                return {status: 204,message: "update Product success !", data: result};
             }
             else
-                callback({message: "Not found Product !"})
+                return {status: 404,message: "Not found Product !"};
         } catch (error) {
-            callback({message: "Something went wrong !", error: error});
+            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 }
