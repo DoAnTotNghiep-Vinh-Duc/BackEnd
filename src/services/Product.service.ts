@@ -1,8 +1,6 @@
+import { Product } from "../models/product";
 import { ProductDetail } from "../models/product-detail";
-import {Product} from "../models/product"
-import { ProductDetailService } from "./product-detail.service";
 import { ColorService } from "./admin/color.service";
-import { Color } from "../models/color";
 import { ColorImageService } from "./color-image.service";
 export class ProductService {
     static async getAllProduct() {

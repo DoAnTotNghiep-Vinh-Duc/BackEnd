@@ -1,14 +1,9 @@
+import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { redisCache } from '../../config/redis-cache';
-import bcrypt from "bcryptjs";
-import {FacebookAccount} from '../../models/facebook-account';
-import {GoogleAccount} from '../../models/google-account';
-import {WebAccount} from '../../models/web-account';
-import {Account} from '../../models/account'
-import {Information} from '../../models/information';
+import { Account } from '../../models/account';
+import { Information } from '../../models/information';
 import { InformationService } from '../information.service';
-import { SendMailService } from '../send-mail.service';
-import { Response } from 'express';
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
