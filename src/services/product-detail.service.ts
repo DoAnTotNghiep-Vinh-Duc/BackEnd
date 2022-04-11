@@ -2,17 +2,17 @@ import { ProductDetail } from "../models/product-detail";
 import { ProductService } from "./product.service";
 export class ProductDetailService {
     //Note Chỗ này phải tìm bên product, trả về list object id product detail sau đó mới tìm trong product detail
-    static async getProductDetailByProductId(productId: String, callback: any) {
+    static async getProductDetailByProductId(productId: String) {
         try {
             const product = await ProductService.getProductById(productId)
             const productDetails = await ProductDetail.find({ product: productId })
             if (productDetails.length > 0) {
-                callback({ message: "found Product Size success !", data: productDetails })
+                return {status:200, message: "found Product Size success !", data: productDetails }
             }
             else
-                callback({ message: "Not found Product Detail with product id: !" + productId })
+                return{status:404, message: "Not found Product Detail with product id: !" + productId }
         } catch (error) {
-            callback({ message: "Something went wrong !", error: error });
+            return {status: 500, message: "Something went wrong !", error: error };
         }
     }
 
@@ -29,28 +29,28 @@ export class ProductDetailService {
         }
     }
 
-    static async createProductDetail(productDetail: any, callback: any) {
+    static async createProductDetail(productDetail: any) {
         try {
             const newProductDetail = new ProductDetail(productDetail);
             await newProductDetail.save();
-            callback({ message: "create Product Detail success !", data: newProductDetail })
+            return{status: 201, message: "create Product Detail success !", data: newProductDetail }
 
         } catch (error) {
-            callback({ message: "Something went wrong !", error: error });
+            return{status: 500, message: "Something went wrong !", error: error };
         }
     }
 
-    static async updateProductDetailById(productDetailId: String, newProductDetail: any, callback: any) {
+    static async updateProductDetailById(productDetailId: String, newProductDetail: any) {
         try {
             const productDetail = await ProductDetail.findOne({ _id: productDetailId })
             if (productDetail) {
                 const result = await ProductDetail.findByIdAndUpdate(productDetailId, newProductDetail);
-                callback({ message: "update Product Detail success !", data: result })
+                return {status: 204, message: "update Product Detail success !", data: result };
             }
             else
-                callback({ message: "Not found Product !" })
+                return {status: 404, message: "Not found Product !" };
         } catch (error) {
-            callback({ message: "Something went wrong !", error: error });
+            return {status: 500, message: "Something went wrong !", error: error };
         }
     }
 }
