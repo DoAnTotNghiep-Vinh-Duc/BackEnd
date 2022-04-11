@@ -1,5 +1,5 @@
 comment : "Note" là chỗ cần sửa, update thêm
 Note: Chưa có transaction
-Note: chưa có cache
+Note: chưa có cache (mới cache getProductbyId)
 Note: chuyển callback sang return - Xong
 Note: chuyển dữ liệu size quantity thành array

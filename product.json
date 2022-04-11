@@ -113,3 +113,40 @@
     "$date": "2022-02-01T00:33:36Z"
   }
 }
+
+[
+  {
+    "color":"abc",
+    "products":[
+      {
+        "_id": "6249cb491e4a0570f0182338",
+        "size": "S",
+        "quantity": 25,
+        "status": "ACTIVE",
+      },
+      {
+        "_id": "6249cb491e4a0570f0182339",
+        "size": "XL",
+        "quantity": 25,
+        "status": "ACTIVE",
+      },
+    ]
+  },
+  {
+    "color":"def",
+    "products":[
+      {
+        "_id": "6249cb491e4a0570f0182338",
+        "size": "S",
+        "quantity": 25,
+        "status": "ACTIVE",
+      },
+      {
+        "_id": "6249cb491e4a0570f0182339",
+        "size": "XL",
+        "quantity": 25,
+        "status": "ACTIVE",
+      },
+    ]
+  }
+]
