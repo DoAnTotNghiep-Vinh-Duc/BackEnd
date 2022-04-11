@@ -4,6 +4,7 @@ import { redisCache } from '../../config/redis-cache';
 import { Account } from '../../models/account';
 import { Information } from '../../models/information';
 import { InformationService } from '../information.service';
+import { CartService } from "../cart.service";
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -62,6 +63,10 @@ export class AuthService{
             information: data.data._id,
           });
           await newAccount.save();
+          const cart = {
+            account: newAccount._id,
+          }
+          const newCart = await CartService.createCart(cart)
           return {status: 201, 
                   message:"create account facebook success !", 
                   data:{nameDisplay: newAccount.nameDisplay, avatar: newAccount.avatar}} ;
@@ -91,6 +96,10 @@ export class AuthService{
             information: newInformation._id,
           });
           await newAccount.save();
+          const cart = {
+            account: newAccount._id,
+          }
+          const newCart = await CartService.createCart(cart)
 
           return {status: 201, message:"create account google success !", data:{nameDisplay: newAccount.nameDisplay, avatar: newAccount.avatar}} ;
         }
@@ -129,6 +138,11 @@ export class AuthService{
             information: newInformation._id,
           })
           await newAccount.save();
+
+          const cart = {
+            account: newAccount._id,
+          }
+          const newCart = await CartService.createCart(cart);
           return {status: 201, message: newAccount} ;
           // await SendMailService.sendMail(account.name,account.email, "I create account", (data: any)=>{
           // });
