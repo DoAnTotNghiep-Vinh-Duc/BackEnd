@@ -21,7 +21,7 @@ export class ProductService {
                 return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             }
             const product = await Product.findOne({ _id: productId })
-            let listProductDetail: Array<any> = []
+            let listProductDetail: Array<any> = [] //await ProductDetail.find({product: productId})
             if(product){
                 let productDetail: any = null;
                 for(let i=0;i<product.listProductDetail.length;i++){
@@ -31,8 +31,19 @@ export class ProductService {
                     listProductDetail.push(productDetail);
                 }
                 const colorImages = await ColorImageService.getColorImageByProductId(productId)
-                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail, colorImages }),60*5)
-                return {status: 200,message: "found Product success !", data:{product,listProductDetail, colorImages }}
+                const groupByCategory = listProductDetail.reduce((group: any, product: any) => {
+                    const color = product.color;
+                    group[color.color] = group[color.color] ?? [];
+                    group[color.color].push(product);
+                    return group;
+                  }, []);
+                  console.log(groupByCategory);
+                
+                  const arrayOfObj = Object.entries(groupByCategory).map((e) => ({
+                    [e[0]]: e[1],
+                  }));
+                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail:arrayOfObj, colorImages }),60*5)
+                return {status: 200,message: "found Product success !", data:{product,listProductDetail:arrayOfObj, colorImages }}
             }
             else
                 return {status: 404,message: "Not found Product !"}
