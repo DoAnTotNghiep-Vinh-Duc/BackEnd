@@ -1,14 +1,10 @@
-import jwt from 'jsonwebtoken';
-import { redisCache } from '../../config/redis-cache';
 import bcrypt from "bcryptjs";
-import {FacebookAccount} from '../../models/facebook-account';
-import {GoogleAccount} from '../../models/google-account';
-import {WebAccount} from '../../models/web-account';
-import {Account} from '../../models/account'
-import {Information} from '../../models/information';
+import jwt from 'jsonwebtoken';
+import { RedisCache } from '../../config/redis-cache';
+import { Account } from '../../models/account';
+import { Information } from '../../models/information';
 import { InformationService } from '../information.service';
-import { SendMailService } from '../send-mail.service';
-import { Response } from 'express';
+import { CartService } from "../cart.service";
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -38,7 +34,7 @@ export class AuthService{
           jwt.sign(payload, `${secret}`, options, async (err: any, token: any) => {
             if (err) reject(err);
             try {
-                await redisCache.setCache(userId.toString(), token, 365 * 24 * 60 * 60);
+                await RedisCache.setCache(userId.toString(), token, 365 * 24 * 60 * 60);
                 resolve(token);
             } catch (error: any) {
                 return reject(error);
@@ -67,6 +63,10 @@ export class AuthService{
             information: data.data._id,
           });
           await newAccount.save();
+          const cart = {
+            account: newAccount._id,
+          }
+          const newCart = await CartService.createCart(cart)
           return {status: 201, 
                   message:"create account facebook success !", 
                   data:{nameDisplay: newAccount.nameDisplay, avatar: newAccount.avatar}} ;
@@ -96,6 +96,10 @@ export class AuthService{
             information: newInformation._id,
           });
           await newAccount.save();
+          const cart = {
+            account: newAccount._id,
+          }
+          const newCart = await CartService.createCart(cart)
 
           return {status: 201, message:"create account google success !", data:{nameDisplay: newAccount.nameDisplay, avatar: newAccount.avatar}} ;
         }
@@ -134,6 +138,11 @@ export class AuthService{
             information: newInformation._id,
           })
           await newAccount.save();
+
+          const cart = {
+            account: newAccount._id,
+          }
+          const newCart = await CartService.createCart(cart);
           return {status: 201, message: newAccount} ;
           // await SendMailService.sendMail(account.name,account.email, "I create account", (data: any)=>{
           // });

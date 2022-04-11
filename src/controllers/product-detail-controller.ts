@@ -6,9 +6,8 @@ export class ProductDetailController{
     static async getProductDetailByProductId (req: Request, res: Response): Promise<any> {
         try {
             const productId = req.params.productId
-            ProductDetailService.getProductDetailByProductId(productId,(data: any) => {
-              res.status(200).send(data);
-            });
+            const data = await ProductDetailService.getProductDetailByProductId(productId);
+            res.status(data.status).send(data);
          
         } catch (error: any) {
             return res.status(500).send({
@@ -21,9 +20,8 @@ export class ProductDetailController{
         try {
             const productDetailId = req.params.ProductDetail_id
             const newProductDetail = req.body
-            ProductDetailService.updateProductDetailById(productDetailId,newProductDetail, (data: any) => {
-              res.status(200).send(data);
-            });
+            const data = await ProductDetailService.updateProductDetailById(productDetailId,newProductDetail);
+            res.status(data.status).send(data);
          
         } catch (error: any) {
             return res.status(500).send({

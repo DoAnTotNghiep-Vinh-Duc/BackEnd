@@ -6,8 +6,6 @@ import { googleStrategy } from "../config/google-strategy";
 import { facebookStrategy } from "../config/facebook-strategy";
 import { NextFunction, Request, Response } from "express";
 import {AuthService} from "../services/authentication/auth.service";
-import {WebAccount} from '../models/web-account';
-import {GoogleAccount} from '../models/google-account';
 
 passport.use(googleStrategy);
 passport.use(facebookStrategy);

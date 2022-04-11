@@ -54,31 +54,7 @@
 
 
 
-"Product":{
-  "product_id": 1,
-  "supplier":"ObjectId<àgffsdffd>",
-  "name": "áo thun con mèo",
-  "description":"abc",
-  "typeProducts":["a","b"],
-  "images": ["a", "b"],
-  "status": "ACTIVE",
-  "voted": 20,
-  "point": 4.5,
-  "list_product_detail": [
-    "1","2","3","4"
-  ],
-  "price": 300000,
-}
 
-"ProductDetail":{
-  "product":"ObjectId<abc>",
-  "color":"ObjectId<abc>",
-  "imageUrl":"andvvsd.com",
-  "status":"ACTIVE",
-  "quantity":10
-}
-
-// List Product detail đẩy dữ liệu cho backend
 [
   {
     "color":"ObjectId<đỏ>",
@@ -111,3 +87,29 @@
     ],
   }
 ]
+
+"product_detail"{
+  "_id": {
+    "$oid": "6249cb491e4a0570f0182337"
+  },
+  "product": {
+    "$oid": "62387765351d36ae90552f55"
+  },
+  "color": {
+    "$oid": "6230af3a0977b634fd932332"
+  },
+  "size_quantity":[
+    {
+      "size": "S",
+      "quantity": 25,
+    },
+    {
+      "size": "L",
+      "quantity": 25,
+    }
+  ],
+  "status": "ACTIVE",
+  "created_at": {
+    "$date": "2022-02-01T00:33:36Z"
+  }
+}
