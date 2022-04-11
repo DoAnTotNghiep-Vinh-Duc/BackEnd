@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
-import { redisCache } from '../../config/redis-cache';
+import { RedisCache } from '../../config/redis-cache';
 import { Account } from '../../models/account';
 import { Information } from '../../models/information';
 import { InformationService } from '../information.service';
@@ -34,7 +34,7 @@ export class AuthService{
           jwt.sign(payload, `${secret}`, options, async (err: any, token: any) => {
             if (err) reject(err);
             try {
-                await redisCache.setCache(userId.toString(), token, 365 * 24 * 60 * 60);
+                await RedisCache.setCache(userId.toString(), token, 365 * 24 * 60 * 60);
                 resolve(token);
             } catch (error: any) {
                 return reject(error);

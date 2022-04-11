@@ -2,6 +2,7 @@ import { Product } from "../models/product";
 import { ProductDetail } from "../models/product-detail";
 import { ColorService } from "./admin/color.service";
 import { ColorImageService } from "./color-image.service";
+import { RedisCache } from "../config/redis-cache";
 export class ProductService {
     static async getAllProduct() {
         try {
@@ -14,6 +15,11 @@ export class ProductService {
 
     static async getProductById(productId: String){
         try {
+            const key: String = `getProductById(${productId})`
+            const data = await RedisCache.getCache(key);
+            if(data){
+                return {status: 200,message: "found Product success !", data: JSON.parse(data)}
+            }
             const product = await Product.findOne({ _id: productId })
             let listProductDetail: Array<any> = []
             if(product){
@@ -25,6 +31,7 @@ export class ProductService {
                     listProductDetail.push(productDetail);
                 }
                 const colorImages = await ColorImageService.getColorImageByProductId(productId)
+                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail, colorImages }),60*5)
                 return {status: 200,message: "found Product success !", data:{product,listProductDetail, colorImages }}
             }
             else

@@ -12,7 +12,7 @@ import {ConnectDatabase} from "./config/database/database"
 
 import cookieSession from "cookie-session"; 
 
-import {redisCache} from "./config/redis-cache";
+import {RedisCache} from "./config/redis-cache";
 ConnectDatabase.connectDatabase();
 const app = express();
 app.use(
@@ -45,6 +45,6 @@ app.use("/", Routes);
 const server = http.createServer(app);
 
 server.listen(process.env.PORT, () => {
-    redisCache.connect();
+    RedisCache.connect();
     console.log(`Listening on port ${process.env.PORT}`);
 });
