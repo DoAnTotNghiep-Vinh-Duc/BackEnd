@@ -59,13 +59,10 @@ export class CartService {
 
     static async addToCart (accountId: String, productDetailId: String){
         try {
-            console.log("productDetailId",productDetailId);
-            
             const productDetail = await ProductDetailService.getProductDetailById(productDetailId);
-            console.log("product detail", productDetail)
             const product = await ProductService.getProductById(productDetail.data.product);
-            
             const cart: any = await Cart.findOne({account: accountId});
+
             let checkExistItem = false;
             for (let index = 0; index < cart.listCartDetail.length; index++) {
                 if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
@@ -77,6 +74,7 @@ export class CartService {
                     break;
                 }
             }
+
             if(!checkExistItem){          
                 const itemInCart = {
                     productDetail: productDetailId,
@@ -87,10 +85,28 @@ export class CartService {
                 cart.listCartDetail.push(itemInCart);
                 cart.total+=itemInCart.total;         
             }
-            await cart.save()   
-            return {status: 204, message:"add item to cart success !"};
+            await cart.save()  
+
+            return {status: 204, message:"add product to cart success !"};
         } catch (error) {
             console.log("err: ", error)
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async removeProductOutCart(accountId: String, productDetailId: String){
+        try {
+            const cart: any = await Cart.findOne({account: accountId});
+            let i = 0;
+            for (let index = 0; index < cart.listCartDetail.length; index++) {
+                if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
+                    i = index;
+                    break;
+                }
+            }
+            cart.listCartDetail.splice(i, 1);
+            return {status: 204, message:"remove product out cart success !"};
+        } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
