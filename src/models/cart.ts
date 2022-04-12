@@ -23,10 +23,14 @@ const CartSchema = new Schema({
                 },
                 price: {
                     type: Number,
+                },
+                total:{
+                    type: Number
                 }
             }
         ],
-        default:[]
+        default:[],
+        _id: false
     }
 },{timestamps: true, collection:"Cart"});
 

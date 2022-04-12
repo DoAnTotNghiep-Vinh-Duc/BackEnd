@@ -23,7 +23,7 @@ export class ProductDetailService {
                 return { message: "found Product Size success !", data: productDetail }
             }
             else
-                return { message: "Not found Product Detail with id: !" + productDetailId }
+                return { message: "Not found Product Detail with id: " + productDetailId }
         } catch (error) {
             return { message: "Something went wrong !", error: error };
         }

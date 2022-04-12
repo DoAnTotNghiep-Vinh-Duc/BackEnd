@@ -13,8 +13,15 @@ export class ProductService {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
-
     static async getProductById(productId: String){
+        try {
+            const product = await Product.findById( productId )
+            return {status: 200, message: "found Product success", data: product}
+        } catch (error) {
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+    static async getProductAndDetailById(productId: String){
         try {
             const key: String = `getProductById(${productId})`
             const data = await RedisCache.getCache(key);

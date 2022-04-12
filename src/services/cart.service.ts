@@ -1,5 +1,8 @@
 import {Cart} from "../models/cart";
 import mongoose from 'mongoose';
+import { ProductDetailService } from "./product-detail.service";
+import { ProductService } from "./product.service";
+import { ObjectId } from "mongodb";
 export class CartService {
 
     static async getCartById(cartId: String){
@@ -18,8 +21,9 @@ export class CartService {
     static async getCartByAccountId(accountId: String){
         try {
             const cart = await Cart.findOne({account: accountId})
+            console.log(cart)
             if(cart){
-                return {status: 200,message: "found Cart success !", data: Cart}
+                return {status: 200,message: "found Cart success !", data: cart}
             }
             else
                 return {status: 404, message: "Not found Cart !"}
@@ -50,6 +54,53 @@ export class CartService {
                 return {status: 404, message: "Not found Color Image !"}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async addToCart (accountId: String, productDetailId: String){
+        try {
+            console.log("productDetailId",productDetailId);
+            
+            const productDetail = await ProductDetailService.getProductDetailById(productDetailId);
+            console.log("product detail", productDetail)
+            const product = await ProductService.getProductById(productDetail.data.product);
+            
+            const cart: any = await Cart.findOne({account: accountId});
+            let checkExistItem = false;
+            for (let index = 0; index < cart.listCartDetail.length; index++) {
+                if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
+                    console.log("Đã tồn tại");
+                    cart.listCartDetail[index].quantity+=1;
+                    cart.listCartDetail[index].total+=product.data.price;
+                    cart.total += product.data.price;
+                    checkExistItem = true;
+                    break;
+                }
+            }
+            if(!checkExistItem){          
+                const itemInCart = {
+                    productDetail: productDetailId,
+                    quantity: 1,
+                    price: product.data.price,
+                    total: product.data.price*1
+                }
+                cart.listCartDetail.push(itemInCart);
+                cart.total+=itemInCart.total;         
+            }
+            await cart.save()   
+            return {status: 204, message:"add item to cart success !"};
+        } catch (error) {
+            console.log("err: ", error)
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async increaseQuantity(accountId: String, productDetailId: String){
+        try {
+            const data = await Cart.updateOne({account: accountId},{$addToSet:{"listCartDetail":{'productDetail':productDetailId,'quantity':'$quantity'+1}}})
+            return {sstatus: 204, message:"update cart success !", data};
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
         }
     }
 }
