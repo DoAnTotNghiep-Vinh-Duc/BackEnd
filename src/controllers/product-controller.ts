@@ -14,10 +14,10 @@ export class ProductController{
         }
     }
     
-    static async getProductById (req: Request, res: Response): Promise<any> {
+    static async getProductAndDetailById (req: Request, res: Response): Promise<any> {
         try {
             const productId = req.params.product_id
-            const data = await ProductService.getProductById(productId)
+            const data = await ProductService.getProductAndDetailById(productId)
             return res.status(data.status).json(data);
          
         } catch (error: any) {
