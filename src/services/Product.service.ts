@@ -3,6 +3,7 @@ import { ProductDetail } from "../models/product-detail";
 import { ColorService } from "./admin/color.service";
 import { ColorImageService } from "./color-image.service";
 import { RedisCache } from "../config/redis-cache";
+import { ObjectId } from "mongodb";
 export class ProductService {
     static async getAllProduct() {
         try {
@@ -21,15 +22,8 @@ export class ProductService {
                 return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             }
             const product = await Product.findOne({ _id: productId })
-            let listProductDetail: Array<any> = [] //await ProductDetail.find({product: productId})
+            let listProductDetail: any = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${productId}`)}},{$lookup:{from:"Color",localField:"color",foreignField:"_id",as:"color"}},{$unwind:"$color"}])
             if(product){
-                let productDetail: any = null;
-                for(let i=0;i<product.listProductDetail.length;i++){
-                    productDetail = await ProductDetail.findOne({_id:product.listProductDetail[i]});
-                    let data = await ColorService.getColorById(productDetail.color)
-                    productDetail.color = data.data
-                    listProductDetail.push(productDetail);
-                }
                 const colorImages = await ColorImageService.getColorImageByProductId(productId)
                 const groupByCategory = listProductDetail.reduce((group: any, product: any) => {
                     const color = product.color;
@@ -37,12 +31,11 @@ export class ProductService {
                     group[color.color].push(product);
                     return group;
                   }, []);
-                  console.log(groupByCategory);
                 
                   const arrayOfObj = Object.entries(groupByCategory).map((e) => ({
                     [e[0]]: e[1],
                   }));
-                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail:arrayOfObj, colorImages }),60*5)
+                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail:listProductDetail, colorImages }),60*5)
                 return {status: 200,message: "found Product success !", data:{product,listProductDetail:arrayOfObj, colorImages }}
             }
             else
