@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { ProductDetailService } from "./product-detail.service";
 import { ProductService } from "./product.service";
 import { ObjectId } from "mongodb";
+import e from "express";
 export class CartService {
 
     static async getCartById(cartId: String){
@@ -57,37 +58,46 @@ export class CartService {
         }
     }
 
-    static async addToCart (accountId: String, productDetailId: String){
+    static async addToCart (accountId: String, productDetailId: String, quantity: number){
         try {
             const productDetail = await ProductDetailService.getProductDetailById(productDetailId);
             const product = await ProductService.getProductById(productDetail.data.product);
             const cart: any = await Cart.findOne({account: accountId});
-
-            let checkExistItem = false;
-            for (let index = 0; index < cart.listCartDetail.length; index++) {
-                if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
-                    console.log("Đã tồn tại");
-                    cart.listCartDetail[index].quantity+=1;
-                    cart.listCartDetail[index].total+=product.data.price;
-                    cart.total += product.data.price;
-                    checkExistItem = true;
-                    break;
+            if(quantity<=productDetail.data.quantity){
+                let checkExistItem = false;
+                for (let index = 0; index < cart.listCartDetail.length; index++) {
+                    if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
+                        console.log("Đã tồn tại");
+                        if(quantity+cart.listCartDetail[index].quantity<=productDetail.data.quantity) {
+                            cart.listCartDetail[index].quantity+=quantity;
+                            cart.listCartDetail[index].total+=product.data.price*quantity;
+                            cart.total += product.data.price*quantity;
+                            checkExistItem = true;
+                        }
+                        else{
+                            return {status: 400, message:"error: quantity > quantity in stock !"};
+                        }
+                        break;
+                    }
                 }
-            }
-
-            if(!checkExistItem){          
-                const itemInCart = {
-                    productDetail: productDetailId,
-                    quantity: 1,
-                    price: product.data.price,
-                    total: product.data.price*1
+    
+                if(!checkExistItem){          
+                    const itemInCart = {
+                        productDetail: productDetailId,
+                        quantity: quantity,
+                        price: product.data.price,
+                        total: product.data.price*quantity
+                    }
+                    cart.listCartDetail.push(itemInCart);
+                    cart.total+=itemInCart.total;         
                 }
-                cart.listCartDetail.push(itemInCart);
-                cart.total+=itemInCart.total;         
+                await cart.save()  
+    
+                return {status: 204, message:"add product to cart success !"};
             }
-            await cart.save()  
-
-            return {status: 204, message:"add product to cart success !"};
+            else{
+                return {status: 400, message:"error: quantity > quantity in stock !"};
+            }
         } catch (error) {
             console.log("err: ", error)
             return {status: 500,message: "Something went wrong !", error: error};
@@ -113,8 +123,49 @@ export class CartService {
 
     static async increaseQuantity(accountId: String, productDetailId: String){
         try {
-            const data = await Cart.updateOne({account: accountId},{$addToSet:{"listCartDetail":{'productDetail':productDetailId,'quantity':'$quantity'+1}}})
-            return {sstatus: 204, message:"update cart success !", data};
+            const productDetail = await ProductDetailService.getProductDetailById(productDetailId);
+            const cart: any = await Cart.findOne({account: accountId});
+            for (let index = 0; index < cart.listCartDetail.length; index++) {
+                if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
+                    if(cart.listCartDetail[index].quantity+1>productDetail.data.quantity){
+                        cart.listCartDetail[index].quantity = productDetail.data.quantity;
+                        cart.total-= cart.listCartDetail[index].price * (productDetail.data.quantity - cart.listCartDetail[index].quantity);
+                        cart.listCartDetail[index].total-=cart.listCartDetail[index].price * (productDetail.data.quantity - cart.listCartDetail[index].quantity);
+                        return {status: 400, message:"error: quantity > quantity in stock !"};
+                    }
+                    else{
+                        cart.total+= cart.listCartDetail[index].price;
+                        cart.listCartDetail[index].quantity+=1;
+                        cart.listCartDetail[index].total+=cart.listCartDetail[index].price;
+                    }
+                    break;
+                }
+            }
+            await cart.save()
+            return {status: 204, message:"update cart success !"};
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async decreaseQuantity(accountId: String, productDetailId: String){
+        try {
+            const cart: any = await Cart.findOne({account: accountId});
+            for (let index = 0; index < cart.listCartDetail.length; index++) {
+                if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
+                    if(cart.listCartDetail[index].quantity===1){
+                        return {status: 400, message:"can not decease because quantity = 1 ! you just remove item !"};
+                    }
+                    else{
+                        cart.total-= cart.listCartDetail[index].price;
+                        cart.listCartDetail[index].quantity-=1;
+                        cart.listCartDetail[index].total-=cart.listCartDetail[index].price;
+                    }
+                    break;
+                }
+            }
+            await cart.save()
+            return {status: 204, message:"update cart success !"};
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
         }
