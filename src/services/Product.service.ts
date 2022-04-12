@@ -42,7 +42,7 @@ export class ProductService {
                   const arrayOfObj = Object.entries(groupByCategory).map((e) => ({
                     [e[0]]: e[1],
                   }));
-                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail:listProductDetail, colorImages }),60*5)
+                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail:arrayOfObj, colorImages }),60*5)
                 return {status: 200,message: "found Product success !", data:{product,listProductDetail:arrayOfObj, colorImages }}
             }
             else
