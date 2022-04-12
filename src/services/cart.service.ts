@@ -97,14 +97,14 @@ export class CartService {
     static async removeProductOutCart(accountId: String, productDetailId: String){
         try {
             const cart: any = await Cart.findOne({account: accountId});
-            let i = 0;
             for (let index = 0; index < cart.listCartDetail.length; index++) {
                 if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
-                    i = index;
+                    cart.total-= cart.listCartDetail[index].total;
+                    cart.listCartDetail.splice(index, 1);
                     break;
                 }
             }
-            cart.listCartDetail.splice(i, 1);
+            await cart.save()
             return {status: 204, message:"remove product out cart success !"};
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};

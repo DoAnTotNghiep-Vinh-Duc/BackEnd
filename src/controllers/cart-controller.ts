@@ -40,5 +40,17 @@ export class CartController {
             });
         }
     }
+
+    static async removeProductOutCart(req: Request, res: Response): Promise<any>{
+        try {
+            const {accountId, productDetailId} = req.body
+            const data = await CartService.removeProductOutCart(accountId, productDetailId);
+            return res.status(data.status).json(data.message)
+        } catch (error: any) {
+            return res.status(500).send({
+                message: error.message,
+            });
+        }
+    }
 }
 
