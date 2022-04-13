@@ -1,9 +1,6 @@
 import {Cart} from "../models/cart";
-import mongoose from 'mongoose';
 import { ProductDetailService } from "./product-detail.service";
 import { ProductService } from "./product.service";
-import { ObjectId } from "mongodb";
-import e from "express";
 export class CartService {
 
     static async getCartById(cartId: String){
