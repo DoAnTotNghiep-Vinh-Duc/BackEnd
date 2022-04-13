@@ -132,7 +132,7 @@ export class AuthService{
           const newAccount = new Account({
             email: account.email,
             password: passwordHashed,
-            name: account.name,
+            nameDisplay: account.name,
             isVerifyPhone: false,
             avatar: "",
             information: newInformation._id,
