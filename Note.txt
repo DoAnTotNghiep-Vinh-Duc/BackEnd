@@ -2,5 +2,5 @@ comment : "Note" là chỗ cần sửa, update thêm
 Note: Chưa có transaction
 Note: chưa có cache (mới cache getProductbyId)
 Note: chuyển callback sang return - Xong
-Note: chuyển dữ liệu size quantity thành array (Tạm hủy)
 Note: tạm thời chưa lấy id bằng token, tự truyền bằng body - Cart controller nhé
+Note: tạm thời truyền page và limit ở product bằng body, cần chuyển lại thành query

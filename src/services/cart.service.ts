@@ -18,8 +18,7 @@ export class CartService {
 
     static async getCartByAccountId(accountId: String){
         try {
-            const cart = await Cart.findOne({account: accountId})
-            console.log(cart)
+            const cart = await Cart.findOne({account: accountId}).populate("listCartDetail.productDetail")
             if(cart){
                 return {status: 200,message: "found Cart success !", data: cart}
             }
