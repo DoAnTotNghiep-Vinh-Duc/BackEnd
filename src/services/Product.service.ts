@@ -37,13 +37,35 @@ export class ProductService {
             if(page<1||limit<1){
                 return {status: 400,message: "limit or page must >=1 !"};
             }
-            const key: String = `getNewProductWithLimitAndPage(limit:${limit},page:${page})`
-            const data = await RedisCache.getCache(key);
-            if(data){
-                return {status: 200,message: "found Product success !", data: JSON.parse(data)}
-            }
+            // const key: String = `getNewProductWithLimitAndPage(limit:${limit},page:${page})`
+            // const data = await RedisCache.getCache(key);
+            // if(data){
+            //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
+            // }
             const products = await Product.find().sort({created_at:-1}).skip((page-1)*limit).limit(limit);
-            await RedisCache.setCache(key,JSON.stringify({products}),60*5)
+            // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
+            return {status: 200,message: "get products success !", data: products};
+        } catch (error) {
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async getProductWithType(limit: number, page: number, listType: Array<String>){
+        try {
+            if(page<1||limit<1){
+                return {status: 400,message: "limit or page must >=1 !"};
+            }
+            // const key: String = `getProductMale(limit:${limit},page:${page},listType:${listType})`
+            // const data = await RedisCache.getCache(key);
+            // if(data){
+            //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
+            // }
+            let convertListType: Array<any> = [];
+            for (let index = 0; index < listType.length; index++) {
+                convertListType.push(new ObjectId(`${listType[index]}`));
+            }
+            const products = await Product.find({typeProducts:{$all:convertListType}}).sort({created_at:-1}).skip((page-1)*limit).limit(limit);
+            // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};

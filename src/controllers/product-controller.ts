@@ -26,6 +26,20 @@ export class ProductController{
             });
         }
     }
+
+    static async getProductWithType (req: Request, res: Response): Promise<any> {
+        try {
+            const {limit,page,listType} = req.body
+            
+            const data = await ProductService.getProductWithType(limit, page, listType);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).json({
+              msg: error.message,
+            });
+        }
+    }
     
     static async updateProductById (req: Request, res: Response): Promise<any> {
         try {
