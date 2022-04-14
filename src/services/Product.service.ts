@@ -19,6 +19,37 @@ export class ProductService {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
+
+    static async getProductWithLimitAndPage(limit: number, page: number){
+        try {
+            if(page<1||limit<1){
+                return {status: 400,message: "limit or page must >=1 !"};
+            }
+            const products = await Product.find().skip((page-1)*limit).limit(limit);
+            return {status: 200,message: "get products success !", data: products};
+        } catch (error) {
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async getNewProductWithLimitAndPage(limit: number, page: number){
+        try {
+            if(page<1||limit<1){
+                return {status: 400,message: "limit or page must >=1 !"};
+            }
+            const key: String = `getNewProductWithLimitAndPage(limit:${limit},page:${page})`
+            const data = await RedisCache.getCache(key);
+            if(data){
+                return {status: 200,message: "found Product success !", data: JSON.parse(data)}
+            }
+            const products = await Product.find().sort({created_at:-1}).skip((page-1)*limit).limit(limit);
+            await RedisCache.setCache(key,JSON.stringify({products}),60*5)
+            return {status: 200,message: "get products success !", data: products};
+        } catch (error) {
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
     static async getProductAndDetailById(productId: String){
         try {
             const key: String = `getProductById(${productId})`
