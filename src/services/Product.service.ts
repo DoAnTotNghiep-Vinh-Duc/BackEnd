@@ -1,7 +1,5 @@
 import { Product } from "../models/product";
 import { ProductDetail } from "../models/product-detail";
-import { ColorService } from "./admin/color.service";
-import { ColorImageService } from "./color-image.service";
 import { RedisCache } from "../config/redis-cache";
 import { ObjectId } from "mongodb";
 export class ProductService {
@@ -31,7 +29,6 @@ export class ProductService {
             const product = await Product.findOne({ _id: productId })
             let listProductDetail: any = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${productId}`)}},{$lookup:{from:"Color",localField:"color",foreignField:"_id",as:"color"}},{$unwind:"$color"}])
             if(product){
-                const colorImages = await ColorImageService.getColorImageByProductId(productId)
                 const groupByCategory = listProductDetail.reduce((group: any, product: any) => {
                     const color = product.color;
                     group[color.color] = group[color.color] ?? [];
@@ -42,8 +39,8 @@ export class ProductService {
                   const arrayOfObj = Object.entries(groupByCategory).map((e) => ({
                     [e[0]]: e[1],
                   }));
-                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail:arrayOfObj, colorImages }),60*5)
-                return {status: 200,message: "found Product success !", data:{product,listProductDetail:arrayOfObj, colorImages }}
+                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail:arrayOfObj }),60*5)
+                return {status: 200,message: "found Product success !", data:{product,listProductDetail:arrayOfObj }}
             }
             else
                 return {status: 404,message: "Not found Product !"}

@@ -7,7 +7,7 @@ export class ProductDetailService {
             const product = await ProductService.getProductById(productId)
             const productDetails = await ProductDetail.find({ product: productId })
             if (productDetails.length > 0) {
-                return {status:200, message: "found Product Size success !", data: productDetails }
+                return {status:200, message: "found Product Detail success !", data: productDetails }
             }
             else
                 return{status:404, message: "Not found Product Detail with product id: !" + productId }
@@ -20,7 +20,7 @@ export class ProductDetailService {
         try {
             const productDetail = await ProductDetail.findOne({ _id: productDetailId })
             if (productDetail) {
-                return { message: "found Product Size success !", data: productDetail }
+                return { message: "found Product Detail success !", data: productDetail }
             }
             else
                 return { message: "Not found Product Detail with id: " + productDetailId }

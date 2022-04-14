@@ -10,6 +10,9 @@ const ProductDetailSchema = new Schema({
         type:Schema.Types.ObjectId,
         ref:"Color"
     },
+    image:{
+        type: String,
+    },
     size:{
         type: String,
         enum:["XS","S","M","L","XL","XXL"],

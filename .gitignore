@@ -12,3 +12,5 @@
 
 # typescript
 dist/
+
+package-lock.json
