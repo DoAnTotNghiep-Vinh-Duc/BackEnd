@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import {Cart} from "../models/cart";
 import { ProductDetailService } from "./product-detail.service";
 import { ProductService } from "./product.service";
@@ -18,7 +19,7 @@ export class CartService {
 
     static async getCartByAccountId(accountId: String){
         try {
-            const cart = await Cart.findOne({account: accountId}).populate("listCartDetail.productDetail")
+            const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.product"},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, total:{$first:"$total"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
             if(cart){
                 return {status: 200,message: "found Cart success !", data: cart}
             }
