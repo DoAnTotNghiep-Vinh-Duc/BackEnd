@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { Product } from "../models/product";
 import {Cart} from "../models/cart";
 import { ProductDetailService } from "./product-detail.service";
 import { ProductService } from "./product.service";
@@ -49,11 +50,34 @@ export class CartService {
                 return {status: 204, message: "update Cart success !", data: result}
             }
             else
-                return {status: 404, message: "Not found Color Image !"}
+                return {status: 404, message: "Not found Cart !"}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
+
+    // static async updateCartAfterChangePriceProduct(productId: String){
+    //     try {
+    //         const carts: any = Cart.aggregate([{ $match: {}},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{$unwind:"$listCartDetail.productDetail.product"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, total:{$first:"$total"}, "listCartDetail": { "$push": "$listCartDetail" } }},{$match:{"listCartDetail":{$elemMatch:{"productDetail.product._id":new ObjectId(`${productId}`)}}}}])
+
+    //         const product = await Product.findById(productId)
+
+    //         for (let i = 0; i < carts.length; i++) {
+    //             for (let j = 0; j < carts[i].listCartDetail.length; j++) {
+    //                 const element = carts[i].listCartDetail[j];
+    //                 if(carts[i].listCartDetail[j].productDetail.product._id===new ObjectId(`${productId}`)){
+    //                     carts[i].listCartDetail[j].price = carts[i].listCartDetail[j].productDetail.product.price;
+    //                     carts[i].total+=carts[i].listCartDetail[j].quantity*carts[i].listCartDetail[j].productDetail.product.price - carts[i].listCartDetail[j].total; // Tổng tiền giỏ hàng sẽ cộng cho tổng số tiền mới từng món - tổng số tiền cũ của từng món
+    //                     carts[i].listCartDetail[j].total = carts[i].listCartDetail[j].quantity*carts[i].listCartDetail[j].productDetail.product.price;
+    //                 }
+    //             }
+                
+    //         }
+    //         return {status: 204, message: "update Cart success !"}
+    //     } catch (error) {
+    //         return {status: 500,message: "Something went wrong !", error: error};
+    //     }
+    // }
 
     static async addToCart (accountId: String, productDetailId: String, quantity: number){
         try {

@@ -26,12 +26,22 @@ export class ProductController{
             });
         }
     }
-
+    static async getNewProduct (req: Request, res: Response): Promise<any> {
+        try {
+            const data = await ProductService.getNewProduct();
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).json({
+              msg: error.message,
+            });
+        }
+    }
     static async getProductWithType (req: Request, res: Response): Promise<any> {
         try {
-            const {limit,page,listType} = req.body
+            const {listType} = req.body
             
-            const data = await ProductService.getProductWithType(limit, page, listType);
+            const data = await ProductService.getProductWithType(listType);
             return res.status(data.status).json(data);
          
         } catch (error: any) {

@@ -7,5 +7,5 @@ import { cartRouter } from './cart-router';
 export const Routes = express.Router();
 Routes.use('/auth', authRouter)
 Routes.use('/admin', adminRoutes);
-Routes.use('/',productRouter )
+Routes.use('/product',productRouter )
 Routes.use('/cart', cartRouter)
