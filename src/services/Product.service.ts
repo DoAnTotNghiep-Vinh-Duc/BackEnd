@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 export class ProductService {
     static async getAllProduct() {
         try {
-            const products = await Product.find().populate("discount");
+            const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             return {status: 200,message: "get all Product success !", data: products};
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
@@ -14,7 +14,7 @@ export class ProductService {
     }
     static async getProductById(productId: String){
         try {
-            const product = await Product.findById( productId ).populate("discount");
+            const product = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             return {status: 200, message: "found Product success", data: product}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
@@ -28,7 +28,7 @@ export class ProductService {
             // if(data){
             //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             // }
-            const products = await Product.find().sort({created_at:-1}).populate("discount");
+            const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}]);
             // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
@@ -48,7 +48,7 @@ export class ProductService {
             for (let index = 0; index < listType.length; index++) {
                 convertListType.push(new ObjectId(`${listType[index]}`));
             }
-            const products = await Product.find({typeProducts:{$all:convertListType}}).sort({created_at:-1}).populate("discount");
+            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}])
             // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
