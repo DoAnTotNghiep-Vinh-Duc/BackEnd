@@ -2,6 +2,7 @@ import { Product } from "../models/product";
 import { ProductDetail } from "../models/product-detail";
 import { RedisCache } from "../config/redis-cache";
 import { Discount } from "../models/discount";
+import { TypeProduct } from "../models/type-product";
 import { ObjectId } from "mongodb";
 export class ProductService {
     static async getAllProduct() {
@@ -36,7 +37,7 @@ export class ProductService {
         }
     }
 
-    static async getProductWithType(listType: Array<String>){
+    static async getProductWithNameType(listType: Array<String>){
         try {
             
             // const key: String = `getProductMale(listType:${listType})`
@@ -44,9 +45,13 @@ export class ProductService {
             // if(data){
             //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             // }
+            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$project:{_id:1}}])
+            if(listType.length!==listTypeProduct.length){
+                return {status: 404,message: "Not found product !", data: []};
+            }
             let convertListType: Array<any> = [];
-            for (let index = 0; index < listType.length; index++) {
-                convertListType.push(new ObjectId(`${listType[index]}`));
+            for (let index = 0; index < listTypeProduct.length; index++) {
+                convertListType.push(listTypeProduct[index]._id);
             }
             const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}])
             // await RedisCache.setCache(key,JSON.stringify({products}),60*5)

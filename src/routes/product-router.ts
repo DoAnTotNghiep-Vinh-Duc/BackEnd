@@ -2,7 +2,7 @@ import express from 'express';
 import { ProductController } from '../controllers/product-controller';
 export const productRouter = express.Router();
 
-productRouter.get("/types", ProductController.getProductWithType);
+productRouter.get("/types", ProductController.getProductWithNameType);
 productRouter.get("/new-product", ProductController.getNewProduct);
 productRouter.get("/", ProductController.getAllProduct);
 productRouter.get("/:product_id", ProductController.getProductAndDetailById);

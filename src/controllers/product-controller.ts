@@ -37,11 +37,11 @@ export class ProductController{
             });
         }
     }
-    static async getProductWithType (req: Request, res: Response): Promise<any> {
+    static async getProductWithNameType (req: Request, res: Response): Promise<any> {
         try {
             const {listType} = req.body
             
-            const data = await ProductService.getProductWithType(listType);
+            const data = await ProductService.getProductWithNameType(listType);
             return res.status(data.status).json(data);
          
         } catch (error: any) {
