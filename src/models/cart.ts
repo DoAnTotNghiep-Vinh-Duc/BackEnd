@@ -6,10 +6,6 @@ const CartSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref:'Account'
     },
-    total: {
-        type: Number,
-        default:0
-    },
     listCartDetail: {
         type:[
             {
@@ -21,12 +17,6 @@ const CartSchema = new Schema({
                     type: Number,
                     default: 1
                 },
-                price: {
-                    type: Number,
-                },
-                total:{
-                    type: Number
-                }
             }
         ],
         default:[],

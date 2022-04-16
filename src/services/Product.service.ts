@@ -1,11 +1,12 @@
 import { Product } from "../models/product";
 import { ProductDetail } from "../models/product-detail";
 import { RedisCache } from "../config/redis-cache";
+import { Discount } from "../models/discount";
 import { ObjectId } from "mongodb";
 export class ProductService {
     static async getAllProduct() {
         try {
-            const products = await Product.find();
+            const products = await Product.find().populate("discount");
             return {status: 200,message: "get all Product success !", data: products};
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
@@ -13,7 +14,7 @@ export class ProductService {
     }
     static async getProductById(productId: String){
         try {
-            const product = await Product.findById( productId )
+            const product = await Product.findById( productId ).populate("discount");
             return {status: 200, message: "found Product success", data: product}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
@@ -27,7 +28,7 @@ export class ProductService {
             // if(data){
             //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             // }
-            const products = await Product.find().sort({created_at:-1});
+            const products = await Product.find().sort({created_at:-1}).populate("discount");
             // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
@@ -47,7 +48,7 @@ export class ProductService {
             for (let index = 0; index < listType.length; index++) {
                 convertListType.push(new ObjectId(`${listType[index]}`));
             }
-            const products = await Product.find({typeProducts:{$all:convertListType}}).sort({created_at:-1});
+            const products = await Product.find({typeProducts:{$all:convertListType}}).sort({created_at:-1}).populate("discount");
             // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
@@ -57,12 +58,12 @@ export class ProductService {
 
     static async getProductAndDetailById(productId: String){
         try {
-            const key: String = `getProductById(${productId})`
-            const data = await RedisCache.getCache(key);
-            if(data){
-                return {status: 200,message: "found Product success !", data: JSON.parse(data)}
-            }
-            const product = await Product.findOne({ _id: productId })
+            // const key: String = `getProductById(${productId})`
+            // const data = await RedisCache.getCache(key);
+            // if(data){
+            //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
+            // }
+            const product = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             let listProductDetail: any = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${productId}`)}},{$lookup:{from:"Color",localField:"color",foreignField:"_id",as:"color"}},{$unwind:"$color"}])
             if(product){
                 const groupByCategory = listProductDetail.reduce((group: any, product: any) => {
@@ -75,12 +76,14 @@ export class ProductService {
                   const arrayOfObj = Object.entries(groupByCategory).map((e) => ({
                     [e[0]]: e[1],
                   }));
-                await RedisCache.setCache(key,JSON.stringify({product,listProductDetail:arrayOfObj }),60*5)
+                // await RedisCache.setCache(key,JSON.stringify({product,listProductDetail:arrayOfObj }),60*5)
                 return {status: 200,message: "found Product success !", data:{product,listProductDetail:arrayOfObj }}
             }
             else
                 return {status: 404,message: "Not found Product !"}
         } catch (error) {
+            console.log(error);
+            
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }

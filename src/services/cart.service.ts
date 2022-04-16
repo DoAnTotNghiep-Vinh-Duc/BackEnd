@@ -20,7 +20,7 @@ export class CartService {
 
     static async getCartByAccountId(accountId: String){
         try {
-            const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.product"},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, total:{$first:"$total"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
+            const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.product"},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{"$lookup": { "from": "Discount", "localField": "listCartDetail.productDetail.product.discount", "foreignField": "_id", "as": "listCartDetail.productDetail.product.discount" }},{$unwind:"$listCartDetail.productDetail.product.discount"},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
             if(cart){
                 return {status: 200,message: "found Cart success !", data: cart[0]}
             }
@@ -39,20 +39,6 @@ export class CartService {
            
         } catch (error) {
             return{status:500,message: "Something went wrong !", error: error};
-        }
-    }
-
-    static async updateCartByAccountId(accountId: String, newCart: any){
-        try {
-            const cart = await Cart.findOne({account: accountId })
-            if(cart){
-                const result = await Cart.findByIdAndUpdate(cart._id, newCart);
-                return {status: 204, message: "update Cart success !", data: result}
-            }
-            else
-                return {status: 404, message: "Not found Cart !"}
-        } catch (error) {
-            return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 
@@ -91,8 +77,6 @@ export class CartService {
                         console.log("Đã tồn tại");
                         if(quantity+cart.listCartDetail[index].quantity<=productDetail.data.quantity) {
                             cart.listCartDetail[index].quantity+=quantity;
-                            cart.listCartDetail[index].total+=product.data.price*quantity;
-                            cart.total += product.data.price*quantity;
                             checkExistItem = true;
                         }
                         else{
@@ -106,11 +90,8 @@ export class CartService {
                     const itemInCart = {
                         productDetail: productDetailId,
                         quantity: quantity,
-                        price: product.data.price,
-                        total: product.data.price*quantity
                     }
                     cart.listCartDetail.push(itemInCart);
-                    cart.total+=itemInCart.total;         
                 }
                 await cart.save()  
     
@@ -130,7 +111,6 @@ export class CartService {
             const cart: any = await Cart.findOne({account: accountId});
             for (let index = 0; index < cart.listCartDetail.length; index++) {
                 if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
-                    cart.total-= cart.listCartDetail[index].total;
                     cart.listCartDetail.splice(index, 1);
                     break;
                 }
@@ -150,14 +130,10 @@ export class CartService {
                 if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
                     if(cart.listCartDetail[index].quantity+1>productDetail.data.quantity){
                         cart.listCartDetail[index].quantity = productDetail.data.quantity;
-                        cart.total-= cart.listCartDetail[index].price * (productDetail.data.quantity - cart.listCartDetail[index].quantity);
-                        cart.listCartDetail[index].total-=cart.listCartDetail[index].price * (productDetail.data.quantity - cart.listCartDetail[index].quantity);
                         return {status: 400, message:"error: quantity > quantity in stock !"};
                     }
                     else{
-                        cart.total+= cart.listCartDetail[index].price;
                         cart.listCartDetail[index].quantity+=1;
-                        cart.listCartDetail[index].total+=cart.listCartDetail[index].price;
                     }
                     break;
                 }
@@ -178,9 +154,7 @@ export class CartService {
                         return {status: 400, message:"can not decease because quantity = 1 ! you just remove item !"};
                     }
                     else{
-                        cart.total-= cart.listCartDetail[index].price;
                         cart.listCartDetail[index].quantity-=1;
-                        cart.listCartDetail[index].total-=cart.listCartDetail[index].price;
                     }
                     break;
                 }
