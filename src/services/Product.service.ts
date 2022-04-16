@@ -15,7 +15,7 @@ export class ProductService {
     static async getProductById(productId: String){
         try {
             const product = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
-            return {status: 200, message: "found Product success", data: product}
+            return {status: 200, message: "found Product success", data: product[0]}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
         }
