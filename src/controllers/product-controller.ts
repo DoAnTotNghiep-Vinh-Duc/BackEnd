@@ -39,8 +39,8 @@ export class ProductController{
     }
     static async getProductWithNameType (req: Request, res: Response): Promise<any> {
         try {
-            const {listType} = req.body
-            
+            const listTypeQuery: any = req.query.listType
+            const listType =JSON.parse(listTypeQuery)
             const data = await ProductService.getProductWithNameType(listType);
             return res.status(data.status).json(data);
          
