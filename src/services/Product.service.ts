@@ -70,6 +70,8 @@ export class ProductService {
             // }
             const products = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             const product = products[0]
+            console.log("PRODUCT: ", product);
+            
             let listProductDetail: any = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${productId}`)}},{$lookup:{from:"Color",localField:"color",foreignField:"_id",as:"color"}},{$unwind:"$color"}])
             if(product){
                 const groupByCategory = listProductDetail.reduce((group: any, product: any) => {

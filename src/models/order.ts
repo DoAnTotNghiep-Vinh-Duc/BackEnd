@@ -27,7 +27,7 @@ const OrderSchema = new Schema({
     },
     status:{
         type: String,
-        enum : ['HANDLING','DELIVERING','DƠN','CANCELED'],
+        enum : ['HANDLING','DELIVERING','DONE','CANCELED'],
         default: 'HANDLING'
     },
     total:{

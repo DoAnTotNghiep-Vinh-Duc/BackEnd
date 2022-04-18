@@ -20,7 +20,7 @@ export class CartService {
 
     static async getCartByAccountId(accountId: String){
         try {
-            const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.product"},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{"$lookup": { "from": "Discount", "localField": "listCartDetail.productDetail.product.discount", "foreignField": "_id", "as": "listCartDetail.productDetail.product.discount" }},{$unwind:"$listCartDetail.productDetail.product.discount"},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
+            const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.product"},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
             if(cart){
                 return {status: 200,message: "found Cart success !", data: cart[0]}
             }
@@ -68,7 +68,8 @@ export class CartService {
     static async addToCart (accountId: String, productDetailId: String, quantity: number){
         try {
             const productDetail = await ProductDetailService.getProductDetailById(productDetailId);
-            const product = await ProductService.getProductById(productDetail.data.product);
+            const products = await Product.aggregate([{$match:{_id:new ObjectId(`${productDetail.data.product}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            const product = products[0]
             const cart: any = await Cart.findOne({account: accountId});
             if(quantity<=productDetail.data.quantity){
                 let checkExistItem = false;
@@ -90,6 +91,8 @@ export class CartService {
                     const itemInCart = {
                         productDetail: productDetailId,
                         quantity: quantity,
+                        price: product.price,
+                        priceDiscount: product.price*(1-product.discount.percentDiscount)
                     }
                     cart.listCartDetail.push(itemInCart);
                 }
