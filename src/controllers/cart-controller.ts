@@ -19,7 +19,6 @@ export class CartController {
         try {
             const accountId = req.params.accountId
             const data = await CartService.getCartByAccountId(accountId);
-            console.log("data controller ", data)
             return res.status(data.status).json(data)
          
         } catch (error: any) {

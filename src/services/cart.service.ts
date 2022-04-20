@@ -20,12 +20,20 @@ export class CartService {
 
     static async getCartByAccountId(accountId: String){
         try {
+            const c = await Cart.findOne({account: accountId})
+            console.log(c);
+            
+            if(!c){
+                return {status: 404, message: "Not found Cart !"}
+            }
             const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.product"},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
-            if(cart){
+            console.log("cart", cart);
+            
+            if(cart[0]){
                 return {status: 200,message: "found Cart success !", data: cart[0]}
             }
             else
-                return {status: 404, message: "Not found Cart !"}
+                return {status: 200,message: "found Cart success !", data: c}
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
         }
