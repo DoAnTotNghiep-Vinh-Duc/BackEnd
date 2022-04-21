@@ -61,6 +61,30 @@ export class ProductService {
         }
     }
 
+    static async getProductWithNameTypeLimitPage(listType: Array<String>, page: number, limit: number){
+        try {
+            
+            // const key: String = `getProductMale(listType:${listType})`
+            // const data = await RedisCache.getCache(key);
+            // if(data){
+            //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
+            // }
+            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$project:{_id:1}}])
+            if(listType.length!==listTypeProduct.length){
+                return {status: 404,message: "Not found type product !", data: []};
+            }
+            let convertListType: Array<any> = [];
+            for (let index = 0; index < listTypeProduct.length; index++) {
+                convertListType.push(listTypeProduct[index]._id);
+            }
+            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}},{$skip:(page-1)*limit},{$limit:limit}])
+            // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
+            return {status: 200,message: "get products success !", data: products};
+        } catch (error) {
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
     static async getProductAndDetailById(productId: String){
         try {
             // const key: String = `getProductById(${productId})`
