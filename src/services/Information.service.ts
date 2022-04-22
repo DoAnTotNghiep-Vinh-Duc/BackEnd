@@ -1,26 +1,8 @@
 import {Information} from "../models/information";
+import {Account} from "../models/account"
+import {Twilio} from "twilio"
+import { ObjectId } from "mongodb";
 export class InformationService {
-    // static async getAllInformation(callback: any) {
-    //     try {
-    //         const Informations = await Information.find();
-    //         callback({message: "get all Information success !", data: Informations});
-    //     } catch (error) {
-    //         callback({message: "Something went wrong !", error: error});
-    //     }
-    // }
-
-    // static async getInformationById(InformationId: String, callback: any){
-    //     try {
-    //         const Information = await Information.findOne({ _id: InformationId })
-    //         if(Information){
-    //             callback({message: "found Information success !", data: Information})
-    //         }
-    //         else
-    //             callback({message: "Not found Information !"})
-    //     } catch (error) {
-    //         callback({message: "Something went wrong !", error: error});
-    //     }
-    // }
 
     static async createInformation(information: any){
         try {
@@ -46,4 +28,52 @@ export class InformationService {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
+
+    static async sendSmsOTP(phone: String){
+        const accountSid:any = process.env.ACOUNTSID_TWILIO;
+        const authToken: any = process.env.TOKEN_TWILIO;
+        const serviceId: any = process.env.SERVICESID_TWILIO;
+        const client = new Twilio(accountSid, authToken);
+        console.log("Phone: ", phone);
+        
+        try {
+            const verification = await client.verify.services(serviceId).verifications.create({ to: `+84${phone}`, channel: "sms" });
+            if (verification) return {status: 200, message:"OTP code has been sent successfully"};
+            else return {status: 500, message:"can't send otp code"};
+        } catch (error) {
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+    
+    static async verifyOtpAndUpdateAccount (accountId: String, phone: String, otp: any)  {
+        try {
+            const accountSid: any = process.env.ACOUNTSID_TWILIO;
+            const authToken: any = process.env.TOKEN_TWILIO;
+            const serviceId: any = process.env.SERVICESID_TWILIO;
+            const client = new Twilio(accountSid, authToken);
+            const verification_check = await client.verify.services(serviceId).verificationChecks.create({ to: `+84${phone}`, code: otp });
+            console.log(verification_check);
+            if (verification_check.valid) {
+            console.log("Verify phone success");
+            console.log("accounid: ", accountId);
+            
+            const account = await Account.findOne({_id: new ObjectId(`${accountId}`)});
+            account.isVerifyPhone = true;
+            await account.save()
+            console.log("account", account);
+            
+            const information = await Information.findOne({_id: account.information});
+            information.phone = phone;
+            await information.save();
+            console.log("information: ", information);
+            
+            return {status: 201, message:"verify otp success !"};
+          } else {
+            return {status: 400, message:"wrong code !"};
+          }
+        } catch (error) {
+          console.log(error);
+          return {status: 500,message:"Something went wrong !"};
+        }
+      };
 }

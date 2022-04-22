@@ -37,6 +37,7 @@
     "passport-google-token": "^0.1.2",
     "redis": "^4.0.4",
     "ts-node": "^10.5.0",
+    "twilio": "^3.76.1",
     "util": "^0.12.4"
   },
   "devDependencies": {
