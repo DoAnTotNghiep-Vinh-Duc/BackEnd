@@ -45,6 +45,14 @@ const OrderSchema = new Schema({
     phone:{
         type:String,
         required: true
+    },
+    deliveryDay:{
+        type: Date,
+        required:false
+    },
+    receiveDay:{
+        type: Date,
+        required:false
     }
 },{timestamps: true, collection:"Order"});
 

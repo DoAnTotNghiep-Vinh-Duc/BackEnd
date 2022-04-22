@@ -5,3 +5,4 @@ Note: chuyển callback sang return - Xong
 Note: tạm thời chưa lấy id bằng token, tự truyền bằng body - Cart controller nhé
 Note: tạm thời truyền page và limit ở product bằng body, cần chuyển lại thành query
 Note: chưa có pub sub để cập nhật khuyến mãi trong giỏ hàng
+Note: chưa có xác thực số điện thoại, phải xác thực số điện thoại mới được đặt hàng
