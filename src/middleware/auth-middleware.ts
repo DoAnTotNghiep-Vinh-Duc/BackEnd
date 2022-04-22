@@ -5,7 +5,8 @@ import {client} from "../config/redis";
 export class AuthMiddleware {
 
   static async verifyAccessToken (req: Request, res: Response, next: any): Promise<any>  {
-    const authHeader: any = req.headers["Authorization"];
+    const authHeader: any = req.headers.authorization;
+    
     const bearerToken = authHeader.split(' ');
     const token = bearerToken[1];
     const accessToken = process.env.ACCESS_TOKEN_SECRET;

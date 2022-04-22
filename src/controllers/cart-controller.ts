@@ -2,27 +2,14 @@ import { CartService } from "../services/cart.service";
 import { Request, Response } from "express";
 
 export class CartController {
-    static async getCartById(req: Request, res: Response): Promise<any> {
-        try {
-            const CartId = req.params.CartId
-            const data = await CartService.getCartById(CartId);
-            return res.status(data.status).json(data)
-         
-        } catch (error: any) {
-            return res.status(500).send({
-              message: error.message,
-            });
-        }
-    }
 
     static async getCartByAccountId(req: Request, res: Response): Promise<any>{
         try {
-            const accountId = req.params.accountId
-            const data = await CartService.getCartByAccountId(accountId);
+            const data = await CartService.getCartByAccountId(req.payload.userId);
             return res.status(data.status).json(data)
          
         } catch (error: any) {
-            return res.status(500).send({
+            return res.status(500).json({
               message: error.message,
             });
         }
@@ -30,11 +17,12 @@ export class CartController {
 
     static async addItemToCart(req: Request, res: Response): Promise<any>{
         try {
-            const {accountId, productDetailId, quantity} = req.body
-            const data = await CartService.addToCart(accountId, productDetailId,quantity);
+            const {productDetailId, quantity} = req.body
+            
+            const data = await CartService.addToCart(req.payload.userId, productDetailId,quantity);
             return res.status(data.status).json(data.message)
         } catch (error: any) {
-            return res.status(500).send({
+            return res.status(500).json({
                 message: error.message,
             });
         }
@@ -42,8 +30,8 @@ export class CartController {
 
     static async removeProductOutCart(req: Request, res: Response): Promise<any>{
         try {
-            const {accountId, productDetailId} = req.body
-            const data = await CartService.removeProductOutCart(accountId, productDetailId);
+            const {productDetailId} = req.body
+            const data = await CartService.removeProductOutCart(req.payload.userId, productDetailId);
             return res.status(data.status).json(data.message)
         } catch (error: any) {
             return res.status(500).send({
@@ -54,8 +42,8 @@ export class CartController {
 
     static async increaseQuantity(req: Request, res: Response): Promise<any>{
         try {
-            const {accountId, productDetailId} = req.body
-            const data = await CartService.increaseQuantity(accountId, productDetailId);
+            const { productDetailId} = req.body
+            const data = await CartService.increaseQuantity(req.payload.userId, productDetailId);
             return res.status(data.status).json(data.message)
         } catch (error: any) {
             return res.status(500).send({
@@ -66,8 +54,8 @@ export class CartController {
 
     static async decreaseQuantity(req: Request, res: Response): Promise<any>{
         try {
-            const {accountId, productDetailId} = req.body
-            const data = await CartService.decreaseQuantity(accountId, productDetailId);
+            const {productDetailId} = req.body
+            const data = await CartService.decreaseQuantity(req.payload.userId, productDetailId);
             return res.status(data.status).json(data.message)
         } catch (error: any) {
             return res.status(500).send({

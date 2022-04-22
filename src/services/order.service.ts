@@ -1,7 +1,6 @@
 import {Order} from "../models/order";
 import {Cart} from "../models/cart"
 import { ProductDetail } from "../models/product-detail";
-import { ObjectId } from "mongodb";
 export class OrderService {
 
     static async getOrderByAccountId(accountId: String){
@@ -31,20 +30,26 @@ export class OrderService {
                     if(result.productDetail.quantity<result.quantity){
                         listOutOfStock.push(result)
                     }
-                    else{
-                        const productDetail = await ProductDetail.findById(result.productDetail._id)
-                        listOrderDetail.push({productDetail:result.productDetail,quantity:result.quantity, price: result.priceDiscount})
-                        totalOrderPrice+=result.quantity*result.priceDiscount
-                        
-                        productDetail.quantity-=result.quantity; // Giảm số lượng trong kho
-                        await productDetail.save()
-                        await Cart.findByIdAndUpdate({_id:cart._id},{$pull:{'listCartDetail':{productDetail:result.productDetail._id}}})
-                    }
                 }
             }
             if(listOutOfStock.length>0){
                 return {status: 400, message: "can not create order ! product out of stock !", data:listOutOfStock}
             }
+            for(let i =0;i< order.listOrderDetail.length; i++){
+                let result = cart.listCartDetail.find((obj: any) => {
+                    return obj.productDetail.toString() === order.listOrderDetail[i]
+                })          
+                if(result){
+                    const productDetail = await ProductDetail.findById(result.productDetail._id)
+                    listOrderDetail.push({productDetail:result.productDetail,quantity:result.quantity, price: result.priceDiscount})
+                    totalOrderPrice+=result.quantity*result.priceDiscount
+                    
+                    productDetail.quantity-=result.quantity; // Giảm số lượng trong kho
+                    await productDetail.save()
+                    await Cart.findByIdAndUpdate({_id:cart._id},{$pull:{'listCartDetail':{productDetail:result.productDetail._id}}})         
+                }
+            }
+            
             if(totalOrderPrice>0){
                 const newOrder = new Order({
                     account: order.account,
