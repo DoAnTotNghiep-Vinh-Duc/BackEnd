@@ -55,8 +55,9 @@ export class ProductController{
         try {
             const listTypeQuery: any = req.query.listType
             const listType =JSON.parse(listTypeQuery)
-            const {page, limit} = req.body
-            const data = await ProductService.getProductWithNameTypeLimitPage(listType, page, limit);
+            const page: any = req.params.page
+            const limit: any = req.params.limit
+            const data = await ProductService.getProductWithNameTypeLimitPage(listType, Number.parseInt(page), Number.parseInt(limit));
             return res.status(data.status).json(data);
          
         } catch (error: any) {
