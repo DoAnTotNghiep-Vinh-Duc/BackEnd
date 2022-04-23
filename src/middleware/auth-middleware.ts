@@ -6,20 +6,24 @@ export class AuthMiddleware {
 
   static async verifyAccessToken (req: Request, res: Response, next: any): Promise<any>  {
     const authHeader: any = req.headers.authorization;
-    
-    const bearerToken = authHeader.split(' ');
-    const token = bearerToken[1];
-    const accessToken = process.env.ACCESS_TOKEN_SECRET;
-    jwt.verify(token, `${accessToken}`, (err: any, payload: any) => {
-      if (err) {
-        if (err.name === "JsonWebTokenError") {
-          return res.status(403).json({ error: { message: "Unauthorized" } });
+    if(authHeader){
+      const bearerToken = authHeader.split(' ');
+      const token = bearerToken[1];
+      const accessToken = process.env.ACCESS_TOKEN_SECRET;
+      jwt.verify(token, `${accessToken}`, (err: any, payload: any) => {
+        if (err) {
+          if (err.name === "JsonWebTokenError") {
+            return res.status(403).json({ error: { message: "Unauthorized" } });
+          }
+          return res.status(401).json({ error: { message: err.message } });
         }
-        return res.status(401).json({ error: { message: err.message } });
-      }
-      req.payload = payload;
-      next();
-    });
+        req.payload = payload;
+        next();
+      });
+    }
+    else{
+      return res.status(403).json({ error: { message: "Unauthorized" } });
+    }
   };
 
   static async verifyRefreshToken (refreshToken: any) : Promise<any>  {
