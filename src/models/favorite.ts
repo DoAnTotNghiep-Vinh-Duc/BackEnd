@@ -7,7 +7,16 @@ const FavoriteSchema = new Schema({
         ref:'Account'
     },
     listProductDetail: {
-        type: Array,
+        type:[
+            {
+                productDetail:{
+                    type: Schema.Types.ObjectId,
+                    ref:'ProductDetail'
+                },
+            }
+        ],
+        default:[],
+        _id: false
     }
 },{timestamps: true, collection:"Favorite"});
 

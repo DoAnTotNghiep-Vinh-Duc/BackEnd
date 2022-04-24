@@ -4,7 +4,7 @@ import {Rate} from "../models/rate";
 export class RateService {
     static async getAllRateProduct(productId: String) {
         try {
-            const rates = await Rate.find({product:new ObjectId(`${productId}`)});
+            const rates = await Rate.find({product:new ObjectId(`${productId}`)}).populate("Account");
             return {status: 200, message: "get all rates product success !", data: rates};
         } catch (error) {
             return{status: 500, message: "Something went wrong !", error: error};
@@ -14,7 +14,7 @@ export class RateService {
     static async getRateByAccountAndProduct(accountId: String,productId: String){
         try {
 
-            const rate = await Rate.findOne({account: new ObjectId(`${accountId}`), product: new ObjectId(`${productId}`)})
+            const rate = await Rate.findOne({account: new ObjectId(`${accountId}`), product: new ObjectId(`${productId}`)}).populate("Account")
             if(rate){
                 return {status: 200,message: "found Rate success !", data: rate}
             }

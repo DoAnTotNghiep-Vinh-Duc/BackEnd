@@ -18,7 +18,7 @@ export class InformationService {
     static async getInformationByAccountId(accountId: String){
         try {
             const account = await Account.findOne({_id: accountId})
-            const information = await Information.findOne(account.information);
+            const information = await Information.findOne({_id:account.information});
             return {status: 200,message: "get Information success !", data: information}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
