@@ -56,7 +56,6 @@ export class AuthService{
         if(!account){
           const newInformation = {
             name: "",
-            address: "",
             email: "",
             phone: ""
           }
@@ -90,7 +89,6 @@ export class AuthService{
         if(!account){
           const newInformation = new Information({
             name: "",
-            address: "",
             email: "",
             phone: ""
           })
@@ -125,7 +123,6 @@ export class AuthService{
         if(!user){
           const newInformation = new Information({
             name: "",
-            address: "",
             email: account.email,
             phone: ""
           })

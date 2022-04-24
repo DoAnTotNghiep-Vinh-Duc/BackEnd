@@ -7,15 +7,18 @@ const InformationSchema = new Schema({
         type: String,
         default:""
     },
-    county: {
-        type: String,
-        default:""
-    },
     district: {
         type: String,
         default:""
     },
-    address: String,
+    ward: {
+        type: String,
+        default:""
+    },
+    street: {
+        type: String,
+        default:""
+    },
     email: String,
     phone: String,
 },{timestamps: true, collection:"Information"});
