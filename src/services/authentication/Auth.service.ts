@@ -5,6 +5,7 @@ import { Account } from '../../models/account';
 import { Information } from '../../models/information';
 import { InformationService } from '../information.service';
 import { CartService } from "../cart.service";
+import { AuthMiddleware } from "../../middleware/auth-middleware";
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -42,6 +43,12 @@ export class AuthService{
           });
         });
     };
+
+    static async verifyRefreshToken(refreshToken: String): Promise<any>{
+      const {userId} = await AuthMiddleware.verifyRefreshToken(refreshToken);
+      const accessToken = await this.signAccessToken(userId)
+      return {status: 200, message: "verify Refresh Token success !",data:{accessToken, refreshToken}}
+    }
     
     static async createAccountFacebook(profile: any): Promise<any>{
       try {

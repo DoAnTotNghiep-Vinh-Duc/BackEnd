@@ -45,3 +45,5 @@ authRouter.get(
 
 authRouter.post("/signup",AuthController.registerWebAccount)
 authRouter.post("/signin",AuthController.signInWithWebAccount)
+
+authRouter.post("/verify-refresh-token", AuthController.verifyRefreshToken)

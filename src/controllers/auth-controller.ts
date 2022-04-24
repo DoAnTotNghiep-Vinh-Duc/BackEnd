@@ -54,6 +54,19 @@ export class AuthController{
       }
     }
 
+    static async verifyRefreshToken(req: Request, res: Response) : Promise<any>{
+      try {
+        const {refreshToken} = req.body
+        const data = await AuthService.verifyRefreshToken(refreshToken);
+        return res.status(data.status).json(data)
+       
+      } catch (error: any) {
+          return res.status(500).send({
+            msg: error.message,
+          });
+      }
+    }
+
     static async signInWithWebAccount  (req: Request, res: Response, next: NextFunction) : Promise<any> {
       try {
         const { email, password } = req.body;

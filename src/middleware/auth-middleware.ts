@@ -28,25 +28,22 @@ export class AuthMiddleware {
 
   static async verifyRefreshToken (refreshToken: any) : Promise<any>  {
     return new Promise((resolve: any, reject: any) => {
-        try {
-            jwt.verify(
-                refreshToken,
-                `${process.env.REFRESH_TOKEN_SECRET}`, async (err: any, payload: any) => {
-                  if (err) {
-                    return reject(err);
-                  }
-                  
-                  const token = await client.get(payload.userId);
-                  if(refreshToken===token)
-                  {
-                      return resolve(payload)
-                  }
-                  return reject(err);
-                }
-              );   
-        } catch (error) {
-            reject(error);
-        }
+      try {
+        jwt.verify(refreshToken, `${process.env.REFRESH_TOKEN_SECRET}`, async (err: any, payload: any) => {
+          if (err) {
+            return reject(err);
+          }
+          
+          const token = await client.get(payload.userId);
+          if(refreshToken===token)
+          {
+            return resolve(payload)
+          }
+          return reject(err);  
+        });   
+      } catch (error) {
+          reject(error);
+      }
     });
   };
 }
