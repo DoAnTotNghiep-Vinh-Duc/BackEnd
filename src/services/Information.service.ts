@@ -15,15 +15,11 @@ export class InformationService {
         }
     }
 
-    static async updateInformationById(informationId: String, newInformation: any){
+    static async updateInformation(accountId: String, newInformation: any){
         try {
-            const information = await Information.findOne({ _id: informationId })
-            if(information){
-                const result = await Information.findByIdAndUpdate(informationId, newInformation);
-                return {status: 204,message: "update Information success !", data: result}
-            }
-            else
-                return {status: 404,message: "Not found Information !"}
+            const account = await Account.findOne({_id: accountId})
+            const result = await Information.findByIdAndUpdate(account.information, newInformation);
+            return {status: 204,message: "update Information success !", data: result}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
         }

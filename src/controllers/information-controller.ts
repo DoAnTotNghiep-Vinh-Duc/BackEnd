@@ -29,5 +29,19 @@ export class InformationController {
             });
         }
     }
+
+    static async updateInformation(req: Request, res: Response): Promise<any> {
+        try {
+            const accountId = req.payload.userId
+            const newInformation = req.body
+            const data = await InformationService.updateInformation(accountId,newInformation);
+            return res.status(data.status).json(data)
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              message: error.message,
+            });
+        }
+    }
 }
 
