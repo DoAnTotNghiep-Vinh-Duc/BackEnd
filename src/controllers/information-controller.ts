@@ -30,6 +30,19 @@ export class InformationController {
         }
     }
 
+    static async getInformationByAccountId(req: Request, res: Response): Promise<any> {
+        try {
+            const accountId = req.payload.userId
+            const data = await InformationService.getInformationByAccountId(accountId);
+            return res.status(data.status).json(data)
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              message: error.message,
+            });
+        }
+    }
+
     static async updateInformation(req: Request, res: Response): Promise<any> {
         try {
             const accountId = req.payload.userId
