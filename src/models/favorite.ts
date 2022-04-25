@@ -6,12 +6,12 @@ const FavoriteSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref:'Account'
     },
-    listProductDetail: {
+    listProduct: {
         type:[
             {
-                productDetail:{
+                product:{
                     type: Schema.Types.ObjectId,
-                    ref:'ProductDetail'
+                    ref:'Product'
                 },
             }
         ],
