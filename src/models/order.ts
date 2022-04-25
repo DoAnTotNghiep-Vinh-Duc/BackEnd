@@ -38,9 +38,21 @@ const OrderSchema = new Schema({
         type: String,
         required: true
     },
-    address:{
+    city: {
         type: String,
-        required: true
+        default:""
+    },
+    district: {
+        type: String,
+        default:""
+    },
+    ward: {
+        type: String,
+        default:""
+    },
+    street: {
+        type: String,
+        default:""
     },
     phone:{
         type:String,

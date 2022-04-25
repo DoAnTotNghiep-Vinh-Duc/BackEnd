@@ -56,7 +56,10 @@ export class OrderService {
                     listOrderDetail,
                     total: totalOrderPrice,
                     name: order.name,
-                    address: order.address,
+                    city: order.city,
+                    district: order.city, 
+                    ward: order.city, 
+                    street: order.city,
                     phone: order.phone
                 })
                 await newOrder.save();
