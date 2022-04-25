@@ -9,7 +9,7 @@ export class CheckPhoneMiddleware {
   static async checkVerifyPhone (req: Request, res: Response, next: any): Promise<any>  {
     const userId = req.payload.userId;
     const account = await Account.findOne({_id: new ObjectId(`${userId}`)})
-    if(account){
+    if(account.isVerifyPhone){
         next();
     }
     else{
