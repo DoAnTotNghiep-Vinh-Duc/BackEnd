@@ -30,6 +30,14 @@ const OrderSchema = new Schema({
         enum : ['HANDLING','DELIVERING','DONE','CANCELED'],
         default: 'HANDLING'
     },
+    subTotal: {
+        type: Number,
+        required: true
+    },
+    feeShip:{
+        type: Number,
+        required: true
+    },
     total:{
         type: Number,
         required: true

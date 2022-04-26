@@ -54,12 +54,14 @@ export class OrderService {
                 const newOrder = new Order({
                     account: order.account,
                     listOrderDetail,
-                    total: totalOrderPrice,
+                    subTotal: totalOrderPrice,
+                    feeShip: 30000,
+                    total: totalOrderPrice+30000,
                     name: order.name,
                     city: order.city,
-                    district: order.city, 
-                    ward: order.city, 
-                    street: order.city,
+                    district: order.district, 
+                    ward: order.ward, 
+                    street: order.street,
                     phone: order.phone
                 })
                 await newOrder.save();
