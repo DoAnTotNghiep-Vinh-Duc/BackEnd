@@ -13,6 +13,20 @@ export class ProductController{
             });
         }
     }
+
+    static async getAllProductLimitPage (req: Request, res: Response): Promise<any> {
+        try {
+            const page: any = req.params.page;
+            const limit: any = req.params.limit;
+            const data = await ProductService.getAllProductLimitPage(Number.parseInt(page), Number.parseInt(limit));
+            return res.status(data.status).json(data);
+        
+        } catch (error: any) {
+            return res.status(500).send({
+            msg: error.message,
+            });
+        }
+    }
     
     static async getProductAndDetailById (req: Request, res: Response): Promise<any> {
         try {

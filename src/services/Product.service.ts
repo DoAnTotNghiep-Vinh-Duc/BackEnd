@@ -13,6 +13,16 @@ export class ProductService {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
+
+    static async getAllProductLimitPage(page: number, limit: number) {
+        try {
+            const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$skip:(page-1)*limit},{$limit:limit}])
+            return {status: 200,message: "get all Product success !", data: products};
+        } catch (error) {
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
     static async getProductById(productId: String){
         try {
             const product = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
