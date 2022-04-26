@@ -1,4 +1,4 @@
-import { SupplierService } from "../services/admin/supplier.service";
+import { SupplierService } from "../services/supplier.service";
 import { Request, Response } from "express";
 
 export class SupplierController {

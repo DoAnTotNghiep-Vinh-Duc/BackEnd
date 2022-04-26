@@ -5,3 +5,4 @@ import { AuthMiddleware } from '../middleware/auth-middleware';
 export const orderRouter = express.Router();
 
 orderRouter.post("/",AuthMiddleware.verifyAccessToken,CheckPhoneMiddleware.checkVerifyPhone, OrderController.createOrder);
+orderRouter.post("/by-date", OrderController.getOrdersByDate);

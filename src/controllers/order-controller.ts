@@ -16,5 +16,20 @@ export class OrderController {
             });
         }
     }
+
+    static async getOrdersByDate(req: Request, res: Response): Promise<any> {
+        try {
+            const {beginDate, endDate} = req.body;
+            const {typeRequest} = req.body;
+            const data = await OrderService.getOrdersByDate(typeRequest, beginDate, endDate);
+            
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
 }
 

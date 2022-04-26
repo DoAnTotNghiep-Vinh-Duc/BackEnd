@@ -1,4 +1,4 @@
-import {TypeProduct} from "../../models/type-product";
+import {TypeProduct} from "../models/type-product";
 export class TypeProductService {
     static async getAllTypeProduct() {
         try {

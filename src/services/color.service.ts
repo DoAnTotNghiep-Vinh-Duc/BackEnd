@@ -1,4 +1,4 @@
-import {Color} from "../../models/color";
+import {Color} from "../models/color";
 export class ColorService {
     static async getAllColor() {
         try {

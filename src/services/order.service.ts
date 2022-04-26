@@ -1,6 +1,12 @@
 import {Order} from "../models/order";
 import {Cart} from "../models/cart"
 import { ProductDetail } from "../models/product-detail";
+import startOfWeek from 'date-fns/startOfWeek';
+import endOfWeek from 'date-fns/endOfWeek';
+import startOfMonth from 'date-fns/startOfMonth';
+import endOfMonth from 'date-fns/endOfMonth';
+import vi from "date-fns/locale/vi";
+import { zonedTimeToUtc,utcToZonedTime } from 'date-fns-tz';
 export class OrderService {
 
     static async getOrderByAccountId(accountId: String){
@@ -75,6 +81,103 @@ export class OrderService {
             console.log("error",error);
             
             return{status:500,message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async getOrdersByDate(typeRequest: String, beginDate?: Date, endDate?: Date){
+        try {
+            let orders = null;
+            if(typeRequest==="TODAY"){
+                let start = new Date();
+                start.setHours(0,0,0,0);
+
+                let end = new Date();
+                end.setHours(23,59,59,999);
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
+            }
+
+            else if(typeRequest==="YESTERDAY"){
+                let yesterdayStart = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+                yesterdayStart.setHours(0,0,0,0);
+                let yesterdayEnd = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+                yesterdayEnd.setHours(23,59,59,999);
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: yesterdayStart, $lte: yesterdayEnd}}}])
+            }
+
+            else if(typeRequest === "THISWEEK"){
+                const timezone = "Asia/Ho_Chi_Minh";
+                let date = zonedTimeToUtc(new Date(), timezone);
+
+                let start = startOfWeek(date,{locale:vi,weekStartsOn: 1 });
+                let end = endOfWeek(date,{locale: vi,weekStartsOn: 1 });
+                start.setHours(start.getHours()+7);
+                end.setHours(end.getHours()+7);
+                
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
+            }
+
+            else if(typeRequest === "LASTWEEK"){
+                const timezone = "Asia/Ho_Chi_Minh";
+                let date = zonedTimeToUtc(new Date(), timezone);
+
+                let start = startOfWeek(date,{locale:vi,weekStartsOn: 1 });
+                let end = endOfWeek(date,{locale: vi,weekStartsOn: 1 });
+                start.setHours(start.getHours()+7);
+                start.setDate(start.getDate()-7);
+                end.setHours(end.getHours()+7);
+                end.setDate(end.getDate()-7);
+                
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
+            }
+
+            else if(typeRequest === "THISMONTH"){
+                const timezone = "Asia/Ho_Chi_Minh";
+                let date = zonedTimeToUtc(new Date(), timezone);
+
+                let start = startOfMonth(date);
+                let end = endOfMonth(date);
+                start.setHours(start.getHours()+7);
+                end.setHours(end.getHours()+7);
+                
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
+            }
+
+            else if(typeRequest === "LASTMONTH"){
+                const timezone = "Asia/Ho_Chi_Minh";
+                let date = zonedTimeToUtc(new Date(), timezone);
+
+                let start = startOfMonth(date);
+                let end = endOfMonth(date);
+                start.setHours(start.getHours()+7);
+                start.setMonth(start.getMonth()-1);
+                end.setHours(end.getHours()+7);
+                end.setMonth(end.getMonth()-1);
+
+                console.log("start: ",start)
+                console.log("end: ", end);
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
+            }
+
+            else if(typeRequest === "TWODATE"){
+                if(beginDate&&endDate){
+                    const timezone = "Asia/Ho_Chi_Minh";
+                    let date = zonedTimeToUtc(new Date(), timezone);
+    
+                    let start = zonedTimeToUtc(new Date(beginDate), timezone);
+                    let end = zonedTimeToUtc(new Date(endDate), timezone);
+                    end.setHours(23,59,59,999);
+                    orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
+                }
+                
+            }
+
+            if(orders){
+                return {status: 200,message: "found Orders success !", data: orders}
+            }
+            else
+                return {status: 404, message: "Not found Orders !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
         }
     }
 }

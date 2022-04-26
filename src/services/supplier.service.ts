@@ -1,4 +1,4 @@
-import {Supplier} from "../../models/supplier";
+import {Supplier} from "../models/supplier";
 export class SupplierService {
     static async getAllSupplier() {
         try {

@@ -1,4 +1,4 @@
-import { TypeProductService } from "../services/admin/type-product.service";
+import { TypeProductService } from "../services/type-product.service";
 import { Request, Response } from "express";
 
 export class TypeProductController {
