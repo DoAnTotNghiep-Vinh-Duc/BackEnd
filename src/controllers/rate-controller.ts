@@ -2,6 +2,19 @@ import { RateService } from "../services/rate.service";
 import { Request, Response } from "express";
 
 export class RateController {
+    static async uploadImage (req: Request, res: Response): Promise<any> {
+        try {
+            const uploadFile = req.file;
+            const data = await RateService.uploadImage(uploadFile);
+            return res.status(data.status).json(data);
+        
+        } catch (error: any) {
+            return res.status(500).send({
+            message: error.message,
+            });
+        }
+    }
+
     static async getAllRateProduct (req: Request, res: Response): Promise<any> {
         try {
             const {productId} = req.params

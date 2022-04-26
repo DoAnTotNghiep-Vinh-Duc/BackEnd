@@ -1,7 +1,43 @@
 import { ObjectId } from "mongodb";
 import { Product } from "../models/product";
 import {Rate} from "../models/rate";
+import AWS from "aws-sdk";
+import multer from "multer";
+import multerS3 from 'multer-s3';
+import fs from "fs";
+import { v4 as uuid } from "uuid";
+
 export class RateService {
+    static async uploadImage(uploadFile: any){
+        try {          
+            console.log("uploadFile",uploadFile);
+            
+            const ul = uploadFile.originalname.split(".");
+            const filesTypes = ul[ul.length - 1];
+            const filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
+            const params: any = {
+                Body: uploadFile.buffer,
+                Bucket: `${process.env.AWS_BUCKET_NAME}`,
+                Key: `${filePath}`,
+                ACL: "public-read",
+                ContentType: uploadFile.mimetype,
+            };
+            const s3 = new AWS.S3({
+                accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+                secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+                region:"us-east-1"
+            });
+            let s3Response = await s3.upload(params).promise();
+            console.log(s3Response);
+            
+            return{status: 201, message: "Upload success????????????????????// !",s3Response };
+        } catch (error) {
+            console.log("error:", error);
+            
+            return{status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
     static async getAllRateProduct(productId: String) {
         try {
             const rates = await Rate.find({product:new ObjectId(`${productId}`)}).populate("Account");

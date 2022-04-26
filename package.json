@@ -16,6 +16,7 @@
     "@types/mongoose": "^5.11.97",
     "@types/passport-facebook": "^2.1.11",
     "@types/passport-google-oauth20": "^2.0.11",
+    "aws-sdk": "^2.1120.0",
     "bcryptjs": "^2.4.3",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
@@ -29,6 +30,8 @@
     "mongodb": "^4.5.0",
     "mongoose": "^6.2.6",
     "morgan": "^1.10.0",
+    "multer": "^1.4.4",
+    "multer-s3": "^2.10.0",
     "node": "v16.13.2",
     "passport": "^0.5.2",
     "passport-facebook": "^3.0.0",
@@ -48,7 +51,10 @@
     "@types/express": "^4.17.13",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/morgan": "^1.9.3",
+    "@types/multer": "^1.4.7",
+    "@types/multer-s3": "^2.7.12",
     "@types/node": "^17.0.16",
+    "@types/uuid": "^8.3.4",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.5.5"
   }
