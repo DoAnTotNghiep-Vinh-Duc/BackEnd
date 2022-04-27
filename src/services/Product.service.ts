@@ -24,6 +24,15 @@ export class ProductService {
         }
     }
 
+    static async getProductLowQuantity() {
+        try {
+            const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$unwind:"$productDetail"},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$sort:{"quantity":1}}])
+            return {status: 200,message: "get products success !", data: products};
+        } catch (error) {
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
     static async getProductById(productId: String){
         try {
             const product = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])

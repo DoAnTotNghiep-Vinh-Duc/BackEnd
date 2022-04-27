@@ -5,6 +5,7 @@ export const productRouter = express.Router();
 productRouter.get("/types", ProductController.getProductWithNameType);
 productRouter.get("/types-with-limit-page/:page/:limit", ProductController.getProductWithNameTypeLimitPage);
 productRouter.get("/new-product", ProductController.getNewProduct);
+productRouter.get("/low-quantity", ProductController.getProductLowQuantity);
 productRouter.get("/", ProductController.getAllProduct);
 productRouter.get("/get-all/:page/:limit", ProductController.getAllProductLimitPage);
 productRouter.get("/:product_id", ProductController.getProductAndDetailById);

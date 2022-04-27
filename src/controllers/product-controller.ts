@@ -65,6 +65,18 @@ export class ProductController{
         }
     }
 
+    static async getProductLowQuantity (req: Request, res: Response): Promise<any> {
+        try {
+            const data = await ProductService.getProductLowQuantity();
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).json({
+              msg: error.message,
+            });
+        }
+    }
+
     static async getProductWithNameTypeLimitPage (req: Request, res: Response): Promise<any> {
         try {
             const listTypeQuery: any = req.query.listType
