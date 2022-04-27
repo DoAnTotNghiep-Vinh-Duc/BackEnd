@@ -180,4 +180,30 @@ export class OrderService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
+
+    static async getTopCustomer(){
+        try {
+            const orders = await Order.aggregate([{$match:{}},{$group:{"_id":"$account",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:-1}},{$lookup:{from:"Account", localField:"_id",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"account.information":1, totalQuantity:1, totalPrice:1}},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"information":"$account", totalQuantity:1, totalPrice:1}}])
+            if(orders){
+                return {status: 200,message: "found Order success !", data: orders}
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+   
+    static async getTopSellProduct(){
+        try {
+            const orders = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}}])
+            if(orders){
+                return {status: 200,message: "found Order success !", data: orders}
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
 }

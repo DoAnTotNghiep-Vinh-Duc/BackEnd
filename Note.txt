@@ -7,3 +7,4 @@ Note: tạm thời truyền page và limit ở product bằng body, cần chuy�
 Note: chưa có pub sub để cập nhật khuyến mãi trong giỏ hàng
 Note: chưa có xác thực số điện thoại, phải xác thực số điện thoại mới được đặt hàng (Xong)
 Note: Cần phải tạo 1 middleware check xác thực điện thoại chưa (Xong)
+Note: Chưa có phân quyền admin trong order router

@@ -6,3 +6,5 @@ export const orderRouter = express.Router();
 
 orderRouter.post("/",AuthMiddleware.verifyAccessToken,CheckPhoneMiddleware.checkVerifyPhone, OrderController.createOrder);
 orderRouter.post("/by-date", OrderController.getOrdersByDate);
+orderRouter.get("/top-customer", OrderController.getTopCustomer);
+orderRouter.get("/top-sell-product", OrderController.getTopSellProduct);
