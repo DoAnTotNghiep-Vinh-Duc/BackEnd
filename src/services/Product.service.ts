@@ -4,6 +4,7 @@ import { RedisCache } from "../config/redis-cache";
 import { Discount } from "../models/discount";
 import { TypeProduct } from "../models/type-product";
 import { ObjectId } from "mongodb";
+import { Order } from "../models/order";
 export class ProductService {
     static async getAllProduct() {
         try {
@@ -139,7 +140,18 @@ export class ProductService {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
-
+    static async getTopSellProduct(){
+        try {
+            const orders = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$unwind:"$product"},{$project:{"_id":0,"totalQuantity":0}}, { "$replaceRoot": { "newRoot": "$product" }  }])
+            if(orders){
+                return {status: 200,message: "found Order success !", data: orders}
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
     static async filterProduct(optionSort: String, limit: number, page: number, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
         if(optionPrice){
         }

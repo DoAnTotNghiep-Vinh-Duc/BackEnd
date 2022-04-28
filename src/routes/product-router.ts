@@ -7,6 +7,7 @@ productRouter.get("/types-with-limit-page/:page/:limit", ProductController.getPr
 productRouter.get("/new-product", ProductController.getNewProduct);
 productRouter.get("/low-quantity", ProductController.getProductLowQuantity);
 productRouter.get("/", ProductController.getAllProduct);
+productRouter.get("/top-sell", ProductController.getTopSellProduct);
 productRouter.get("/get-all/:page/:limit", ProductController.getAllProductLimitPage);
 productRouter.get("/:product_id", ProductController.getProductAndDetailById);
 productRouter.put("/:product_id", ProductController.updateProductById);
