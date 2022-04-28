@@ -4,12 +4,12 @@ export class FavoriteService {
 
     static async getFavoriteByAccountId(accountId: String){
         try {
-            const favorites = await Favorite.aggregate([{$match: { account:new ObjectId(`${accountId}`)}},{$unwind:"$listProduct"},{ "$lookup": { "from": "Product", "localField": "listProduct.product", "foreignField": "_id", "as": "listProduct" }},{$unwind:"$listProduct"},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listProduct": { "$push": "$listProduct" } }}])
-            if(favorites){
-                return {status: 200,message: "found Favorite success !", data: favorites}
+            let favorites: any = await Favorite.aggregate([{$match: { account:new ObjectId(`${accountId}`)}}]);
+            if(favorites.listProduct.length>0){
+                favorites = await Favorite.aggregate([{$match: { account:new ObjectId(`${accountId}`)}},{$unwind:"$listProduct"},{ "$lookup": { "from": "Product", "localField": "listProduct.product", "foreignField": "_id", "as": "listProduct" }},{$unwind:"$listProduct"},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listProduct": { "$push": "$listProduct" } }}])
             }
-            else
-                return {status: 404, message: "Not found Favorite !"}
+            
+            return {status: 200,message: "found Favorite success !", data: favorites}
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
         }
@@ -28,24 +28,31 @@ export class FavoriteService {
 
     static async addProductToFavorite(accountId: String, productId: String){
         try {
-            const favorite: any = await this.getFavoriteByAccountId(accountId)
+            let favorite = await Favorite.findOne({ account:new ObjectId(`${accountId}`)});
+            console.log(favorite);
+            
             if(favorite){
-                const result = await Favorite.updateOne({_id: favorite._id},{$push:{listProductDetail:productId}});
-                return {status: 204, message: "update Favorite success !", data: result}
+                favorite.listProduct.push({product:new ObjectId(`${productId}`)})
+                await favorite.save()
+                
+                return {status: 200, message: "update Favorite success !", data: favorite}
             }
             else
                 return {status: 404, message: "Not found account !"}
         } catch (error) {
+            console.log(error);
+            
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
 
     static async removeProductFromFavorite(accountId: String, productId: String){
         try {
-            const favorite: any = await this.getFavoriteByAccountId(accountId)
+            let favorite = await Favorite.findOne({ account:new ObjectId(`${accountId}`)});
             if(favorite){
-                const result = await Favorite.updateOne({_id: favorite._id},{$pull:{listProductDetail:productId}});
-                return {status: 204, message: "update Favorite success !", data: result}
+                favorite.listProduct.pull({product:new ObjectId(`${productId}`)})
+                await favorite.save()
+                return {status: 204, message: "update Favorite success !", data: favorite}
             }
             else
                 return {status: 404, message: "Not found account !"}

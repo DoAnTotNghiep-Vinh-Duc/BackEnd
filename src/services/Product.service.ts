@@ -139,6 +139,35 @@ export class ProductService {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
+
+    static async filterProduct(optionSort: String, limit: number, page: number, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
+        if(optionPrice){
+        }
+        if(optionSizes){
+            
+        }
+        if(optionColors){
+            
+        }
+        if(optionRates){
+            
+        }
+        // Tìm mấy cái ở trên, rồi phía dưới thì dùng $in, sau đó sort nhé
+        if(optionSort==="price-esc"){
+
+        }
+        else if(optionSort==="price-desc"){
+
+        }
+        else if(optionSort==="best-selling"){
+
+        }
+        else if(optionSort === "new-product"){
+
+        }
+    }
+
+    
     // Chỗ này phải tạo cả product detail
     // product:{
     //     supplier: ObjectId<abc>,
