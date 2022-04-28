@@ -32,9 +32,10 @@ export class OrderController {
         }
     }
 
-    static async getTopCustomer(req: Request, res: Response): Promise<any> {
+    static async getTopCustomerLimitPage(req: Request, res: Response): Promise<any> {
         try {
-            const data = await OrderService.getTopCustomer();
+            const {page, limit} = req.params
+            const data = await OrderService.getTopCustomerLimitPage(Number.parseInt(page), Number.parseInt(limit));
             return res.status(data.status).json(data);
          
         } catch (error: any) {
@@ -44,9 +45,10 @@ export class OrderController {
         }
     }
 
-    static async getTopSellProduct(req: Request, res: Response): Promise<any> {
+    static async getTopSellProductLimitPage(req: Request, res: Response): Promise<any> {
         try {
-            const data = await OrderService.getTopSellProduct();
+            const {page, limit} = req.params
+            const data = await OrderService.getTopSellProductLimitPage(Number.parseInt(page), Number.parseInt(limit));
             return res.status(data.status).json(data);
          
         } catch (error: any) {
