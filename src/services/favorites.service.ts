@@ -5,12 +5,16 @@ export class FavoriteService {
     static async getFavoriteByAccountId(accountId: String){
         try {
             let favorites: any = await Favorite.aggregate([{$match: { account:new ObjectId(`${accountId}`)}}]);
-            if(favorites.listProduct.length>0){
+            console.log(favorites);
+            
+            if(favorites[0].listProduct.length>0){
                 favorites = await Favorite.aggregate([{$match: { account:new ObjectId(`${accountId}`)}},{$unwind:"$listProduct"},{ "$lookup": { "from": "Product", "localField": "listProduct.product", "foreignField": "_id", "as": "listProduct" }},{$unwind:"$listProduct"},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listProduct": { "$push": "$listProduct" } }}])
             }
             
-            return {status: 200,message: "found Favorite success !", data: favorites}
+            return {status: 200,message: "found Favorite success !", data: favorites[0]}
         } catch (error) {
+            console.log(error);
+            
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
