@@ -21,7 +21,7 @@ authRouter.get("/login/success", AuthController.loginSuccess);
 
 authRouter.get("/login/failed", AuthController.loginFail);
 
-authRouter.get("/logout", AuthController.logout);
+authRouter.post("/logout", AuthController.logout);
 
 authRouter.get("/google", passport.authenticate("google", { scope: ["profile"] }));
 

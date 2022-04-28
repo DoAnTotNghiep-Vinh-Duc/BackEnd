@@ -6,6 +6,9 @@ import { googleStrategy } from "../config/google-strategy";
 import { facebookStrategy } from "../config/facebook-strategy";
 import { NextFunction, Request, Response } from "express";
 import {AuthService} from "../services/authentication/auth.service";
+import { AuthMiddleware } from "../middleware/auth-middleware";
+import { Account } from "../models/account";
+import { RedisCache } from "../config/redis-cache";
 
 passport.use(googleStrategy);
 passport.use(facebookStrategy);
@@ -36,8 +39,20 @@ export class AuthController{
     }
 
     static async logout (req: Request, res: Response, next: NextFunction): Promise<any>{
-        req.logout();
-        res.redirect(CLIENT_URL);
+        try {
+          const { refreshToken } = req.body;
+          // console.log(req.headers);
+          if (!refreshToken) {
+            return res.status(403).json({ message: "Have not refreshtoken" });
+          }
+          const { userId } = await AuthMiddleware.verifyRefreshToken(refreshToken);
+          const user = await Account.findById(userId);
+          
+          await RedisCache.delCache(userId.toString());
+          return res.status(200).json({ message: "Đăng xuất thành công !!!!" });
+        } catch (error) {
+          next(error);
+        }
     }
 
     static async registerWebAccount (req: Request, res: Response) : Promise<any>{
