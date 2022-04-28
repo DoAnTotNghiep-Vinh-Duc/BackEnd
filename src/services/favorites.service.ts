@@ -8,7 +8,7 @@ export class FavoriteService {
             console.log(favorites);
             
             if(favorites[0].listProduct.length>0){
-                favorites = await Favorite.aggregate([{$match: { account:new ObjectId(`${accountId}`)}},{$unwind:"$listProduct"},{ "$lookup": { "from": "Product", "localField": "listProduct.product", "foreignField": "_id", "as": "listProduct" }},{$unwind:"$listProduct"},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listProduct": { "$push": "$listProduct" } }}])
+                favorites = await Favorite.aggregate([{$match: {  account:new ObjectId(`${accountId}`)}},{$unwind:"$listProduct"},{ "$lookup": { "from": "Product", "localField": "listProduct.product", "foreignField": "_id", "as": "listProduct" }},{$unwind:"$listProduct"},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listProduct": { "$push": "$listProduct" } }}, {$unwind:"$listProduct"},{$lookup:{from:"Discount", localField:"listProduct.discount",foreignField:"_id", as:"listProduct.discount"}},{$unwind:"$listProduct.discount"},{$group:{"_id":"$account", listProduct:{$push:"$$ROOT"}}},{$project:{"listProduct._id":0, "listProduct.account": 0}}])
             }
             
             return {status: 200,message: "found Favorite success !", data: favorites[0]}
