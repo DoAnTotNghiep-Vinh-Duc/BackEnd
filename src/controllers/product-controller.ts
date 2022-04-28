@@ -77,6 +77,30 @@ export class ProductController{
         }
     }
 
+    static async getProductOnSale (req: Request, res: Response): Promise<any> {
+        try {
+            const data = await ProductService.getProductOnSale();
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).json({
+              msg: error.message,
+            });
+        }
+    }
+
+    static async getProductWithSortPoint (req: Request, res: Response): Promise<any> {
+        try {
+            const data = await ProductService.getProductWithSortPoint();
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).json({
+              msg: error.message,
+            });
+        }
+    }
+
     static async getProductLowQuantity (req: Request, res: Response): Promise<any> {
         try {
             const data = await ProductService.getProductLowQuantity();

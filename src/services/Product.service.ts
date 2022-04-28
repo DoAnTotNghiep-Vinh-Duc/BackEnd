@@ -152,6 +152,33 @@ export class ProductService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
+
+    static async getProductOnSale(){
+        try {
+            const products = await Product.aggregate([{$match:{discount:{$ne:new ObjectId('62599849f8f6be052f0a901d')}}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}}])
+            if(products){
+                return {status: 200,message: "found Product success !", data: products}
+            }
+            else
+                return {status: 404, message: "Not found Product !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async getProductWithSortPoint(){
+        try {
+            const products = await Product.aggregate([{$sort:{point:-1}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}}])
+            if(products){
+                return {status: 200,message: "found Products success !", data: products}
+            }
+            else
+                return {status: 404, message: "Not found Products !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
     static async filterProduct(optionSort: String, limit: number, page: number, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
         if(optionPrice){
         }
