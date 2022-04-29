@@ -142,7 +142,7 @@ export class ProductService {
     }
     static async getTopSellProduct(){
         try {
-            const orders = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$unwind:"$product"},{$project:{"_id":0,"totalQuantity":0}}, { "$replaceRoot": { "newRoot": "$product" }  },{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}}])
+            const orders = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$unwind:"$product"},{$project:{"_id":0,"totalQuantity":0}}, { "$replaceRoot": { "newRoot": "$product" }  },{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             if(orders){
                 return {status: 200,message: "found Order success !", data: orders}
             }
@@ -155,7 +155,7 @@ export class ProductService {
 
     static async getProductOnSale(){
         try {
-            const products = await Product.aggregate([{$match:{discount:{$ne:new ObjectId('62599849f8f6be052f0a901d')}}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}}])
+            const products = await Product.aggregate([{$match:{discount:{$ne:new ObjectId('62599849f8f6be052f0a901d')}}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             if(products){
                 return {status: 200,message: "found Product success !", data: products}
             }
@@ -168,7 +168,7 @@ export class ProductService {
 
     static async getProductWithSortPoint(){
         try {
-            const products = await Product.aggregate([{$sort:{point:-1}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}}])
+            const products = await Product.aggregate([{$sort:{point:-1}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             if(products){
                 return {status: 200,message: "found Products success !", data: products}
             }
