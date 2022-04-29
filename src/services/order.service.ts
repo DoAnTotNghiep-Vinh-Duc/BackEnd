@@ -7,6 +7,8 @@ import startOfMonth from 'date-fns/startOfMonth';
 import endOfMonth from 'date-fns/endOfMonth';
 import vi from "date-fns/locale/vi";
 import { zonedTimeToUtc,utcToZonedTime } from 'date-fns-tz';
+import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 export class OrderService {
 
     static async getOrderByAccountId(accountId: String){
@@ -23,6 +25,9 @@ export class OrderService {
     }
 
     static async createOrder(order: any){
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        const opts = {session,returnOriginal: false}
         try {
             const cart = await Cart.findOne({account: order.account})
             let totalOrderPrice = 0;
@@ -51,8 +56,8 @@ export class OrderService {
                     totalOrderPrice+=result.quantity*result.priceDiscount
                     
                     productDetail.quantity-=result.quantity; // Giảm số lượng trong kho
-                    await productDetail.save()
-                    await Cart.findByIdAndUpdate({_id:cart._id},{$pull:{'listCartDetail':{productDetail:result.productDetail._id}}})         
+                    await productDetail.save(opts);
+                    await Cart.findByIdAndUpdate({_id:cart._id},{$pull:{'listCartDetail':{productDetail:result.productDetail._id}}}, opts);         
                 }
             }
             
@@ -70,16 +75,23 @@ export class OrderService {
                     street: order.street,
                     phone: order.phone
                 })
-                await newOrder.save();
+                await newOrder.save(opts);
+
+                await session.commitTransaction();
+                session.endSession();
+
                 return {status: 201, message: "create Order success !", data:newOrder}
             }
             else{
+                await session.abortTransaction();
+                session.endSession();
                 return {status: 400, message: "can not create order !",}
             }
            
         } catch (error) {
             console.log("error",error);
-            
+            await session.abortTransaction();
+            session.endSession();
             return{status:500,message: "Something went wrong !", error: error};
         }
     }
@@ -229,6 +241,20 @@ export class OrderService {
             else
                 return {status: 404, message: "Not found Order !"}
         } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+    static async testTransaction(){
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const opts = {session,returnOriginal: false}
+            const a = await Order.findOneAndUpdate({_id:new ObjectId("626a8c05d5b146dd050c67a5")},{status:"OKOK"},opts);
+            throw new Error("Lỗi nè");
+            
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
