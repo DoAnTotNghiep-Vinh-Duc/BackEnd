@@ -327,6 +327,7 @@ export class ProductService {
                 for(let j=0;j < sizeQuantity.length;i++){
                     const productDetail = {
                         product: newProduct._id,
+                        image: productDetails[i].image,
                         color: productDetails[i].color,
                         size: sizeQuantity[j].size,
                         quantity: sizeQuantity[j].quantity
