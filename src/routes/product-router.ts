@@ -14,3 +14,5 @@ productRouter.get("/get-all/:page/:limit", ProductController.getAllProductLimitP
 productRouter.get("/:product_id", ProductController.getProductAndDetailById);
 productRouter.put("/:product_id", ProductController.updateProductById);
 productRouter.post("/", ProductController.createProduct);
+productRouter.get("/find/:nameFind", ProductController.getProductWithNameFind);
+productRouter.post("/filter-product", ProductController.filterProduct);

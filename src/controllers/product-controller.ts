@@ -113,6 +113,34 @@ export class ProductController{
         }
     }
 
+    static async getProductWithNameFind (req: Request, res: Response): Promise<any> {
+        try {
+            const {nameFind} = req.params
+            console.log(nameFind);
+            
+            const data = await ProductService.getProductWithNameFind(nameFind);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).json({
+              msg: error.message,
+            });
+        }
+    }
+
+    static async filterProduct (req: Request, res: Response): Promise<any> {
+        try {
+            const {optionSort, optionPrice, optionSizes, optionColors, optionRates} = req.body;
+            const data: any = await ProductService.filterProduct(optionSort, optionPrice, optionSizes, optionColors, optionRates);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).json({
+              msg: error.message,
+            });
+        }
+    }
+
     static async getProductWithNameTypeLimitPage (req: Request, res: Response): Promise<any> {
         try {
             const listTypeQuery: any = req.query.listType
