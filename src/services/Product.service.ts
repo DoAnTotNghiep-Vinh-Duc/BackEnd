@@ -5,6 +5,8 @@ import { Discount } from "../models/discount";
 import { TypeProduct } from "../models/type-product";
 import { ObjectId } from "mongodb";
 import { Order } from "../models/order";
+import {Supplier} from "../models/supplier"
+import { Color } from "../models/color";
 export class ProductService {
     static async getAllProduct() {
         try {
@@ -318,24 +320,28 @@ export class ProductService {
    
     static async createProduct(product: any,productDetails: Array<any>){
         try {
+            const supplier = await Supplier.findOne({_id: product.supplier});
+            product.supplier = supplier._id;
+            const finalTypeProduct = product.typeProduct.map(function (obj: any) {
+                return new ObjectId(`${obj}`);
+            });
+            product.typeProduct = finalTypeProduct;
             const listObjectIdProductDetail: Array<any> = [];
             const newProduct = new Product(product);
             await newProduct.save();
 
             for(let i =0;i< productDetails.length;i++){
-                let sizeQuantity:Array<any> = productDetails[i].sizeQuantity;
-                for(let j=0;j < sizeQuantity.length;i++){
-                    const productDetail = {
-                        product: newProduct._id,
-                        image: productDetails[i].image,
-                        color: productDetails[i].color,
-                        size: sizeQuantity[j].size,
-                        quantity: sizeQuantity[j].quantity
-                    }
-                    const newProductDetail = new ProductDetail(productDetail)
-                    await newProductDetail.save();
-                    listObjectIdProductDetail.push(newProductDetail._id)
+                const color = await Color.findOne({_id:productDetails[i].color})
+                const productDetail = {
+                    product: newProduct._id,
+                    image: productDetails[i].image,
+                    color: color._id,
+                    size: productDetails[i].size,
+                    quantity: productDetails[i].quantity
                 }
+                const newProductDetail = new ProductDetail(productDetail)
+                await newProductDetail.save();
+                listObjectIdProductDetail.push(newProductDetail._id)
             }
             await Product.findOneAndUpdate({_id: newProduct._id},{listProductDetail: listObjectIdProductDetail},{new: true});
             return {status:201,message: "create Product success !", data: newProduct};
