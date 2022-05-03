@@ -8,3 +8,4 @@ Note: Chưa có transaction (đã có trong order)
 Note: chưa có cache (mới cache getProductbyId)
 Note: chưa có pub sub để cập nhật khuyến mãi trong giỏ hàng
 Note: Chưa có phân quyền admin trong order router
+Note: Chưa phân quyền admin trong discount router
