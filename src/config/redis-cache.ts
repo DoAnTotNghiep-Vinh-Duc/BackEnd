@@ -14,14 +14,13 @@ async function del(key: any) {
 }
 
 async function clearCache(){
-    return await client.flushDb();
+    return client.flushdb();
 }
 
 
 export class RedisCache {
     static async connect() {
         client.on("error", (err: any) => console.log("Redis Client Error", err));
-        await client.connect();
     }
 
     static async setCache(key: any, data: any, ttl?: any) {

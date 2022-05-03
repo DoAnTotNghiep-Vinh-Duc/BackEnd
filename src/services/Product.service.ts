@@ -7,6 +7,21 @@ import { ObjectId } from "mongodb";
 import { Order } from "../models/order";
 import {Supplier} from "../models/supplier"
 import { Color } from "../models/color";
+import {createClient} from 'redis';
+import { v4 as uuid } from "uuid";
+import AWS from "aws-sdk";
+const subscribe = createClient({
+    url: `redis://127.0.0.1:6379`,
+});
+subscribe.psubscribe("__keyevent@0__:expired", (message: any, channel: any) => {
+    console.log(message, channel); // 'message', 'channel'
+  });
+subscribe.on('pmessage', async (pattern: any, channel: any, message: any) => {
+    console.log(`message:::::`, message);
+    console.log('Sau khi chung ta co orderID:::', message);
+    await RedisCache.setCache("key",4,4);
+    //Update trong BD la orderID chua thanh toan...
+})
 export class ProductService {
     static async getAllProduct() {
         try {
@@ -317,15 +332,46 @@ export class ProductService {
     //         ]
     //     }
     // ]
-   
+    // static async uploadImage(uploadFile: any){
+    //     try {          
+    //         console.log("uploadFile",uploadFile);
+            
+    //         const ul = uploadFile.originalname.split(".");
+    //         const filesTypes = ul[ul.length - 1];
+    //         const filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
+    //         const params: any = {
+    //             Body: uploadFile.buffer,
+    //             Bucket: `${process.env.AWS_BUCKET_NAME}`,
+    //             Key: `${filePath}`,
+    //             ACL: "public-read",
+    //             ContentType: uploadFile.mimetype,
+    //         };
+    //         const s3 = new AWS.S3({
+    //             accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+    //             secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+    //             region:"us-east-1"
+    //         });
+    //         let s3Response = await s3.upload(params).promise();
+    //         console.log(s3Response);
+            
+    //         return{status: 201, message: "Upload success????????????????????// !",s3Response };
+    //     } catch (error) {
+    //         console.log("error:", error);
+            
+    //         return{status: 500, message: "Something went wrong !", error: error};
+    //     }
+    // }
     static async createProduct(product: any,productDetails: Array<any>){
         try {
             const supplier = await Supplier.findOne({_id: product.supplier});
             product.supplier = supplier._id;
-            const finalTypeProduct = product.typeProduct.map(function (obj: any) {
+            const finalTypeProducts = product.typeProducts.map(function (obj: any) {
                 return new ObjectId(`${obj}`);
             });
-            product.typeProduct = finalTypeProduct;
+            product.typeProducts = finalTypeProducts;
+            const discount = await Discount.findOne({_id: product.discount});
+            product.discount = discount._id
+            
             const listObjectIdProductDetail: Array<any> = [];
             const newProduct = new Product(product);
             await newProduct.save();
@@ -347,6 +393,8 @@ export class ProductService {
             return {status:201,message: "create Product success !", data: newProduct};
            
         } catch (error) {
+            console.log(error);
+            
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }

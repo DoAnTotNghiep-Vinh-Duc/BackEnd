@@ -17,4 +17,4 @@ rateRouter.get("/all/:productId", RateController.getAllRateProduct);
 rateRouter.get("/:productId",AuthMiddleware.verifyAccessToken ,RateController.getRateByAccountAndProduct);
 rateRouter.post("/",AuthMiddleware.verifyAccessToken, RateController.createRate);
 rateRouter.put("/",AuthMiddleware.verifyAccessToken, RateController.updateRateProduct);
-rateRouter.post("/upload-image",AuthMiddleware.verifyAccessToken,upload.single("file"), RateController.uploadImage);
+rateRouter.post("/upload-image",upload.any(), RateController.uploadImage);

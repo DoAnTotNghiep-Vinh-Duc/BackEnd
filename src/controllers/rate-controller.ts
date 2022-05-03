@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 export class RateController {
     static async uploadImage (req: Request, res: Response): Promise<any> {
         try {
-            const uploadFile = req.file;
+            const uploadFile = req.files;
             const data = await RateService.uploadImage(uploadFile);
             return res.status(data.status).json(data);
         
