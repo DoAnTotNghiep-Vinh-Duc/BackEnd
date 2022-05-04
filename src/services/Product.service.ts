@@ -337,9 +337,9 @@ export class ProductService {
 
     static async createProduct(uploadFile: any,product: any,productDetails: Array<any>){
         try {
-            // if(!checkCanCreateProduct(productDetails)){
-            //     return {status:400,message: "can not create product !"};
-            // }
+            if(!checkCanCreateProduct(productDetails)){
+                return {status:400,message: "can not create product !"};
+            }
             const s3 = new AWS.S3({
                 accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
                 secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
@@ -435,20 +435,26 @@ function checkCanCreateProduct(productDetails: any[]) {
     let result: Boolean = true;
     // Kiểm tra có trùng màu không
     for(let i = 0; i< productDetails.length; i++){
-        for(let j = i; j< productDetails.length-1;j++){
+        for(let j = i+1; j< productDetails.length;j++){
             if(productDetails[i].color===productDetails[j].color){
                 result = false;
                 break;
             }
         }
+        if(result===false){
+            break;
+        }
         // Kiểm tra có trùng size trong 1 màu không
         let details = productDetails[i].details;
+        
         for(let k = 0; k< details.length; k++){
             if(Number.parseInt(details[k].quantity)<0){
                 result = false;
                 break;
             }
-            for (let p = k; p<details.length-1; p++){
+            for (let p = k+1; p<details.length; p++){
+                console.log("details k: ",details[k].size);
+                console.log("details p: ",details[p].size);
                 if(details[k].size===details[p].size){
                     result = false;
                     break;
@@ -456,7 +462,6 @@ function checkCanCreateProduct(productDetails: any[]) {
             }
         }
     }
-
     return result;
 }
 
