@@ -17,10 +17,11 @@ subscribe.psubscribe("__keyevent@0__:expired", (message: any, channel: any) => {
     console.log(message, channel); // 'message', 'channel'
   });
 subscribe.on('pmessage', async (pattern: any, channel: any, message: any) => {
-    console.log(`message:::::`, message);
-    console.log('Sau khi chung ta co orderID:::', message);
-    await RedisCache.setCache("key",4,4);
-    //Update trong BD la orderID chua thanh toan...
+    if(message.toString().split('_')[0]==="discount"){
+        console.log("discount "+ message.toString().split('_')[1]+ " expire");
+        const discountId = message.toString().split('_')[1];
+        await Product.updateMany({'discount': new ObjectId(`${discountId}`)},{$set:{'discount':new ObjectId('62599849f8f6be052f0a901d')}})
+    }
 })
 export class ProductService {
     static async getAllProduct() {
@@ -332,37 +333,41 @@ export class ProductService {
     //         ]
     //     }
     // ]
-    // static async uploadImage(uploadFile: any){
-    //     try {          
-    //         console.log("uploadFile",uploadFile);
-            
-    //         const ul = uploadFile.originalname.split(".");
-    //         const filesTypes = ul[ul.length - 1];
-    //         const filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
-    //         const params: any = {
-    //             Body: uploadFile.buffer,
-    //             Bucket: `${process.env.AWS_BUCKET_NAME}`,
-    //             Key: `${filePath}`,
-    //             ACL: "public-read",
-    //             ContentType: uploadFile.mimetype,
-    //         };
-    //         const s3 = new AWS.S3({
-    //             accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
-    //             secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
-    //             region:"us-east-1"
-    //         });
-    //         let s3Response = await s3.upload(params).promise();
-    //         console.log(s3Response);
-            
-    //         return{status: 201, message: "Upload success????????????????????// !",s3Response };
-    //     } catch (error) {
-    //         console.log("error:", error);
-            
-    //         return{status: 500, message: "Something went wrong !", error: error};
-    //     }
-    // }
-    static async createProduct(product: any,productDetails: Array<any>){
+    
+
+    static async createProduct(uploadFile: any,product: any,productDetails: Array<any>){
         try {
+            // if(!checkCanCreateProduct(productDetails)){
+            //     return {status:400,message: "can not create product !"};
+            // }
+            const s3 = new AWS.S3({
+                accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+                secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+                region:"us-east-1"
+            });
+            let listResponse = [];
+            for(let i = 0; i< uploadFile.length; i++){
+                let ul = uploadFile[i].originalname.split(".");
+                let filesTypes = ul[ul.length - 1];
+                let filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
+                console.log("filePath", filePath);
+                
+                let params: any = {
+                    Body: uploadFile[i].buffer,
+                    Bucket: `${process.env.AWS_BUCKET_NAME}`,
+                    Key: `${filePath}`,
+                    ACL: "public-read",
+                    ContentType: uploadFile[i].mimetype,
+                };
+                let s3Response = await s3.upload(params).promise();
+                console.log("s3Response",s3Response);
+                
+                listResponse.push({
+                    idColor: uploadFile[i].fieldname,
+                    url: s3Response.Location
+                })
+            }
+
             const supplier = await Supplier.findOne({_id: product.supplier});
             product.supplier = supplier._id;
             const finalTypeProducts = product.typeProducts.map(function (obj: any) {
@@ -378,16 +383,25 @@ export class ProductService {
 
             for(let i =0;i< productDetails.length;i++){
                 const color = await Color.findOne({_id:productDetails[i].color})
-                const productDetail = {
-                    product: newProduct._id,
-                    image: productDetails[i].image,
-                    color: color._id,
-                    size: productDetails[i].size,
-                    quantity: productDetails[i].quantity
-                }
-                const newProductDetail = new ProductDetail(productDetail)
-                await newProductDetail.save();
-                listObjectIdProductDetail.push(newProductDetail._id)
+                listResponse.forEach(async element => {
+                    if(color._id.toString()===element.idColor){
+                        let details = productDetails[i].details;
+                        for(let j=0;j<details.length;j++){
+                            const productDetail = {
+                                product: newProduct._id,
+                                image: element.url.toString(),
+                                color: color._id,
+                                size: details[j].size,
+                                quantity:Number.parseInt(details[j].quantity) 
+                            }
+                            const newProductDetail = new ProductDetail(productDetail)
+                            await newProductDetail.save();
+                            listObjectIdProductDetail.push(newProductDetail._id)
+                        }
+                    }
+                });
+                
+                
             }
             await Product.findOneAndUpdate({_id: newProduct._id},{listProductDetail: listObjectIdProductDetail},{new: true});
             return {status:201,message: "create Product success !", data: newProduct};
@@ -413,3 +427,36 @@ export class ProductService {
         }
     }
 }
+
+
+
+
+function checkCanCreateProduct(productDetails: any[]) {
+    let result: Boolean = true;
+    // Kiểm tra có trùng màu không
+    for(let i = 0; i< productDetails.length; i++){
+        for(let j = i; j< productDetails.length-1;j++){
+            if(productDetails[i].color===productDetails[j].color){
+                result = false;
+                break;
+            }
+        }
+        // Kiểm tra có trùng size trong 1 màu không
+        let details = productDetails[i].details;
+        for(let k = 0; k< details.length; k++){
+            if(Number.parseInt(details[k].quantity)<0){
+                result = false;
+                break;
+            }
+            for (let p = k; p<details.length-1; p++){
+                if(details[k].size===details[p].size){
+                    result = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+

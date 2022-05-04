@@ -16,8 +16,8 @@ export class DiscountController {
     
     static async createDiscount(req: Request, res: Response): Promise<any> {
         try {
-            const newDiscount = req.body
-            const data = await DiscountService.createDiscount(newDiscount);
+            const {nameDiscount, description, startDate, endDate, percentDiscount} = req.body
+            const data = await DiscountService.createDiscount({nameDiscount, description, startDate, endDate, percentDiscount} );
             return res.status(data.status).json(data)
          
         } catch (error: any) {

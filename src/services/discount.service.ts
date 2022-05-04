@@ -1,4 +1,5 @@
 import {Discount} from "../models/discount";
+import { RedisCache } from "../config/redis-cache";
 export class DiscountService {
 
     static async getAllDiscount(){
@@ -18,6 +19,9 @@ export class DiscountService {
         try {
             const newDiscount = new Discount(discount);
             await newDiscount.save();
+            const key = "discount_"+newDiscount._id.toString();
+            const times = (discount.startDate.getTime() - discount.endDate.getTime()) / 1000;
+            await RedisCache.setCache(key, newDiscount._id, times);
             return {status: 201, message: "create Discount success !", data: newDiscount}
            
         } catch (error) {

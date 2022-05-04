@@ -174,13 +174,20 @@ export class ProductController{
     static async createProduct(req: Request, res: Response): Promise<any> {
         try {
             const {product,productDetails } = req.body
-            const data = await ProductService.createProduct(product, productDetails);
+            const uploadFile = req.files;
+            console.log(product);
+            console.log(productDetails);
+            console.log(uploadFile);
+            
+            
+            
+            const data = await ProductService.createProduct(uploadFile,JSON.parse(product) , JSON.parse(productDetails));
             res.status(data.status).send(data);
          
         } catch (error: any) {
-            return res.status(500).send({
-              msg: error.message,
-            });
+            console.log(error);
+            
+            return res.status(500).send({msg: error.message});
         }
     }
 }

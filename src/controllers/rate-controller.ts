@@ -1,14 +1,19 @@
 import { RateService } from "../services/rate.service";
 import { Request, Response } from "express";
-
+import util from 'util';
 export class RateController {
     static async uploadImage (req: Request, res: Response): Promise<any> {
         try {
             const uploadFile = req.files;
             const data = await RateService.uploadImage(uploadFile);
+            const kaka = req.body
+            console.log("kaka",kaka);
+            
             return res.status(data.status).json(data);
         
         } catch (error: any) {
+            console.log(error);
+            
             return res.status(500).send({
             message: error.message,
             });
