@@ -28,8 +28,8 @@ const ProductSchema = new Schema({
     },
     status:{
         type: String,
-        enum : ['NEW','DELETE', 'SOLDOUT', 'NONE','SALE'],
-        default: 'NEW'
+        enum : ['ACTIVE','DELETE'],
+        default: 'ACTIVE'
     },
     voted: {
         type: Number,

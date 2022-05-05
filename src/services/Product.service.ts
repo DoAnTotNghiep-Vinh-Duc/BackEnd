@@ -10,19 +10,29 @@ import { Color } from "../models/color";
 import {createClient} from 'redis';
 import { v4 as uuid } from "uuid";
 import AWS from "aws-sdk";
+import { Cart } from "../models/cart";
+import { CartDetail } from "../models/cart-detail";
 const subscribe = createClient({
     url: `redis://127.0.0.1:6379`,
 });
 subscribe.psubscribe("__keyevent@0__:expired", (message: any, channel: any) => {
     console.log(message, channel); // 'message', 'channel'
-  });
+});
 subscribe.on('pmessage', async (pattern: any, channel: any, message: any) => {
     if(message.toString().split('_')[0]==="discount"){
         console.log("discount "+ message.toString().split('_')[1]+ " expire");
         const discountId = message.toString().split('_')[1];
+        const products = await Product.find({'discount': new ObjectId(`${discountId}`)});
+        for (let index = 0; index < products.length; index++) {
+            let productDetails = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${products[index]._id}`)}},{$match:{status:"ACTIVE"}},{$project:{_id:1}}])
+            let productDetailsConvert = productDetails.map(function(id) {
+                return id;
+            });
+            await CartDetail.updateMany({productDetail:{$in:productDetailsConvert}},{$set:{priceDiscount:products[index].price}});
+        }
         await Product.updateMany({'discount': new ObjectId(`${discountId}`)},{$set:{'discount':new ObjectId('62599849f8f6be052f0a901d')}})
     }
-})
+});
 export class ProductService {
     static async getAllProduct() {
         try {
@@ -35,7 +45,6 @@ export class ProductService {
 
     static async getAllProductLimitPage(page: number, limit: number) {
         try {
-            // const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$skip:(page-1)*limit},{$limit:limit}])
             const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$skip:(page-1)*limit},{$limit:limit},{$unwind:"$productDetail"},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             return {status: 200,message: "get all Product success !", data: products};
         } catch (error) {
@@ -413,16 +422,157 @@ export class ProductService {
         }
     }
 
-    static async updateProductById(productId: String, newProduct: any){
+    static async updateProductById(uploadFile: any, product: any, productDetails: Array<any>){
         try {
-            const product = await Product.findOne({ _id: productId })
-            if(product){
-                const result = await Product.findByIdAndUpdate(productId, newProduct);
-                return {status: 204,message: "update Product success !", data: result};
+            console.log("PRODUCT DETAILS", productDetails);
+            
+            if(!checkCanCreateProduct(productDetails)){
+                return {status:400,message: "can not update product !"};
+            }
+            console.log("pass success !");
+            
+            const s3 = new AWS.S3({
+                accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+                secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+                region:"us-east-1"
+            });
+            let listResponse = [];
+            for(let i = 0; i< uploadFile.length; i++){
+                let ul = uploadFile[i].originalname.split(".");
+                let filesTypes = ul[ul.length - 1];
+                let filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
+                console.log("filePath", filePath);
+                
+                let params: any = {
+                    Body: uploadFile[i].buffer,
+                    Bucket: `${process.env.AWS_BUCKET_NAME}`,
+                    Key: `${filePath}`,
+                    ACL: "public-read",
+                    ContentType: uploadFile[i].mimetype,
+                };
+                let s3Response = await s3.upload(params).promise();
+                console.log("s3Response",s3Response);
+                
+                listResponse.push({
+                    idColor: uploadFile[i].fieldname,
+                    url: s3Response.Location
+                })
+            }
+            const supplier = await Supplier.findOne({_id: product.supplier});
+            product.supplier = supplier._id;
+            const finalTypeProducts = product.typeProducts.map(function (obj: any) {
+                return new ObjectId(`${obj}`);
+            });
+            product.typeProducts = finalTypeProducts;
+            const discount = await Discount.findOne({_id: product.discount});
+            product.discount = discount._id
+            
+            let productNeedUpdate = await Product.findOne({_id: new ObjectId(`${product._id}`)})
+            
+            if(productNeedUpdate){
+                productNeedUpdate.name = product.name;
+                productNeedUpdate.description = product.description;
+                productNeedUpdate.name = product.name;
+                productNeedUpdate.status = product.status;
+                productNeedUpdate.typeProducts = product.typeProducts;
+                productNeedUpdate.images = product.images;
+                productNeedUpdate.suplier = product.suplier;
+                productNeedUpdate.discount = product.discount;
+                productNeedUpdate.price = product.price;
+                
+                await productNeedUpdate.save();
+
+                for(let i =0;i< productDetails.length;i++){
+                    const color = await Color.findOne({_id:new ObjectId(`${productDetails[i].color}`)})
+                    console.log("productDetails[i]",productDetails[i]);
+                    // Nếu bị đổi ảnh
+                    if(productDetails[i].image&&Object.keys(productDetails[i].image).length===0){
+                        console.log("NULL nef kakakaka");
+                        let imageUrl = listResponse.map(async (element)=>{
+                            if(color._id.toString()===element.idColor){
+                                for (let index = 0; index < productDetails[i].listProductDetail.length; index++) {
+                                    console.log(productDetails[i].listProductDetail[index]);
+                                    // Nếu đây là product detail đã tồn tại
+                                    if(productDetails[i].listProductDetail[index]._id){
+                                        // Nếu product detail bị xóa
+                                        if(productDetails[i].listProductDetail[index].status==="DELETE"){
+                                            await ProductDetail.findOneAndUpdate({_id:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)},{$set:{status:"DELETE"}})
+                                        }
+                                        else{
+                                            await ProductDetail.findOneAndUpdate({_id:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)},{$set:{size:productDetails[i].listProductDetail[index].size, quantity:productDetails[i].listProductDetail[index].quantity, image:element.url}})
+                                        }
+                                    }
+                                    // Nếu đây là product detail mới được thêm vào (Mới thêm thì sẽ không có id)
+                                    else{
+                                        let newProductDetail = new ProductDetail({
+                                            size:productDetails[i].listProductDetail[index].size,
+                                            quantity: productDetails[i].listProductDetail[index].quantity,
+                                            image:element.url,
+                                            product:productNeedUpdate._id,
+                                            color:color._id
+                                        });
+        
+                                        await newProductDetail.save();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else{
+                        for (let index = 0; index < productDetails[i].listProductDetail.length; index++) {
+                            console.log(productDetails[i].listProductDetail[index]);
+                            // Nếu đây là product detail đã tồn tại
+                            if(productDetails[i].listProductDetail[index]._id){
+                                // Nếu product detail bị xóa
+                                if(productDetails[i].listProductDetail[index].status==="DELETE"){
+                                    await ProductDetail.findOneAndUpdate({_id:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)},{$set:{status:"DELETE"}})
+                                }
+                                else{
+                                    await ProductDetail.findOneAndUpdate({_id:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)},{$set:{size:productDetails[i].listProductDetail[index].size, quantity:productDetails[i].listProductDetail[index].quantity}})
+                                }
+                            }
+                            // Nếu đây là product detail mới được thêm vào (Mới thêm thì sẽ không có id)
+                            else{
+                                let newProductDetail = new ProductDetail({
+                                    size:productDetails[i].listProductDetail[index].size,
+                                    quantity: productDetails[i].listProductDetail[index].quantity,
+                                    image:productDetails[i].image,
+                                    product:productNeedUpdate._id,
+                                    color:color._id
+                                });
+
+                                await newProductDetail.save();
+                            }
+                        }
+                    }
+                    // listResponse.forEach(async element => {
+                    //     if(color._id.toString()===element.idColor){
+                    //         let details = productDetails[i].details;
+                    //         for(let j=0;j<details.length;j++){
+                    //             const productDetail = {
+                    //                 product: newProduct._id,
+                    //                 image: element.url.toString(),
+                    //                 color: color._id,
+                    //                 size: details[j].size,
+                    //                 quantity:Number.parseInt(details[j].quantity) 
+                    //             }
+                    //             const newProductDetail = new ProductDetail(productDetail)
+                    //             await newProductDetail.save();
+                    //             listObjectIdProductDetail.push(newProductDetail._id)
+                    //         }
+                    //     }
+                    // });
+                    
+                    
+                }
+
+                return {status: 204,message: "update Product success !"};
             }
             else
                 return {status: 404,message: "Not found Product !"};
         } catch (error) {
+            console.log(error);
+            
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
@@ -445,7 +595,7 @@ function checkCanCreateProduct(productDetails: any[]) {
             break;
         }
         // Kiểm tra có trùng size trong 1 màu không
-        let details = productDetails[i].details;
+        let details = productDetails[i].listProductDetail;
         
         for(let k = 0; k< details.length; k++){
             if(Number.parseInt(details[k].quantity)<0){
@@ -453,8 +603,6 @@ function checkCanCreateProduct(productDetails: any[]) {
                 break;
             }
             for (let p = k+1; p<details.length; p++){
-                console.log("details k: ",details[k].size);
-                console.log("details p: ",details[p].size);
                 if(details[k].size===details[p].size){
                     result = false;
                     break;
@@ -462,6 +610,7 @@ function checkCanCreateProduct(productDetails: any[]) {
             }
         }
     }
+    
     return result;
 }
 

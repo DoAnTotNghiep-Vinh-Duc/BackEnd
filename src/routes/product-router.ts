@@ -22,7 +22,7 @@ productRouter.get("/on-sell", ProductController.getProductOnSale);
 productRouter.get("/sort-point", ProductController.getProductWithSortPoint);
 productRouter.get("/get-all/:page/:limit", ProductController.getAllProductLimitPage);
 productRouter.get("/:product_id", ProductController.getProductAndDetailById);
-productRouter.put("/:product_id", ProductController.updateProductById);
+productRouter.put("/:product_id",upload.any(), ProductController.updateProductById);
 productRouter.post("/",upload.any(), ProductController.createProduct);
 productRouter.get("/find/:nameFind", ProductController.getProductWithNameFind);
 productRouter.post("/filter-product", ProductController.filterProduct);
