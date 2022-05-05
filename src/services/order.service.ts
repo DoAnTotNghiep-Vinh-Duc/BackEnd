@@ -37,7 +37,7 @@ export class OrderService {
             let listOutOfStock = [];
             for(let i =0;i< order.listOrderDetail.length; i++){
                 let result = cartDetail.find((obj: any) => {
-                    return obj._id.toString() === order.listOrderDetail[i]
+                    return obj.productDetail.toString() === order.listOrderDetail[i]
                 })          
                 if(result){
                     const productDetail = await ProductDetail.findOne({_id: result.productDetail})
@@ -50,17 +50,20 @@ export class OrderService {
                 return {status: 400, message: "can not create order ! product out of stock !"}
             }
             for(let i =0;i< order.listOrderDetail.length; i++){
-                let result = cart.listCartDetail.find((obj: any) => {
+                let result = cartDetail.find((obj: any) => {
                     return obj.productDetail.toString() === order.listOrderDetail[i]
                 })          
                 if(result){
-                    const productDetail = await ProductDetail.findById(result.productDetail._id)
+                    const productDetail = await ProductDetail.findById(result.productDetail)
                     listOrderDetail.push({productDetail:result.productDetail,quantity:result.quantity, price: result.priceDiscount})
                     totalOrderPrice+=result.quantity*result.priceDiscount
                     
                     productDetail.quantity-=result.quantity; // Giảm số lượng trong kho
                     await productDetail.save(opts);
-                    await Cart.findByIdAndUpdate({_id:cart._id},{$pull:{'listCartDetail':{productDetail:result.productDetail._id}}}, opts);         
+                    const cartDetail = await CartDetail.findById({_id:result._id});
+                    cartDetail.status = "PAID";
+                    await cartDetail.save(opts);
+                    await Cart.findByIdAndUpdate({_id:cart._id},{$pull:{'listCartDetail':result._id}}, opts);         
                 }
             }
             

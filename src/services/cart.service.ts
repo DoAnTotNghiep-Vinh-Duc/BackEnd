@@ -77,7 +77,9 @@ export class CartService {
     static async addToCart (accountId: String, productDetailId: String, quantity: number){
         try {
             const cart: any = await Cart.findOne({account: accountId});
-            const cartDetail = await CartDetail.findOne({$and:[{cartId:cart._id},{productDetailId: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
+            const cartDetail = await CartDetail.findOne({$and:[{cartId:cart._id},{productDetail: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
+            console.log(cartDetail);
+            
             const productDetail = await ProductDetailService.getProductDetailById(productDetailId);
             const products = await Product.aggregate([{$match:{_id:new ObjectId(`${productDetail.data.product}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             const product = products[0];
@@ -118,7 +120,7 @@ export class CartService {
     static async removeProductOutCart(accountId: String, productDetailId: String){
         try {
             const cart: any = await Cart.findOne({account: accountId});
-            const cartDetail = await CartDetail.findOneAndDelete({$and:[{cartId:cart._id},{productDetailId: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
+            const cartDetail = await CartDetail.findOneAndDelete({$and:[{cartId:cart._id},{productDetail: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
             
             for (let index = 0; index < cart.listCartDetail.length; index++) {
                 if(cart.listCartDetail[index].toString() === cartDetail._id .toString()){
@@ -139,7 +141,7 @@ export class CartService {
         try {
             const productDetail = await ProductDetailService.getProductDetailById(productDetailId);
             const cart = await Cart.findOne({account: new ObjectId(`${accountId}`)})
-            const cartDetail = await CartDetail.findOne({$and:[{cartId: cart._id},{productDetailId: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
+            const cartDetail = await CartDetail.findOne({$and:[{cartId: cart._id},{productDetail: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
             if(cartDetail.quantity+1> productDetail.data.quantity){
                 cartDetail.quantity = productDetail.data.quantity;
                 await cartDetail.save();
@@ -156,7 +158,7 @@ export class CartService {
     static async decreaseQuantity(accountId: String, productDetailId: String){
         try {
             const cart = await Cart.findOne({account: new ObjectId(`${accountId}`)})
-            const cartDetail = await CartDetail.findOne({$and:[{cartId:cart._id},{productDetailId: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
+            const cartDetail = await CartDetail.findOne({$and:[{cartId:cart._id},{productDetail: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
             if(cartDetail.quantity===1){
                 return {status: 400, message:"can not decease because quantity = 1 ! you just remove item !"};
             }
