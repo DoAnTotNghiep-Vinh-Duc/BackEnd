@@ -9,21 +9,9 @@ const CartSchema = new Schema({
     listCartDetail: {
         type:[
             {
-                productDetail:{
-                    type: Schema.Types.ObjectId,
-                    ref:'ProductDetail'
-                },
-                quantity: {
-                    type: Number,
-                    default: 1
-                },
-                price:{
-                    type: Number,
-                },
-                priceDiscount:{
-                    type: Number
-                },
-            }
+                type: Schema.Types.ObjectId,
+                ref:'CartDetail'
+            },
         ],
         default:[],
         _id: false

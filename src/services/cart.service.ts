@@ -3,6 +3,7 @@ import { Product } from "../models/product";
 import {Cart} from "../models/cart";
 import { ProductDetailService } from "./product-detail.service";
 import { ProductService } from "./product.service";
+import {CartDetail} from "../models/cart-detail";
 export class CartService {
 
     static async getCartById(cartId: String){
@@ -25,7 +26,8 @@ export class CartService {
             if(!tmpCart){
                 return {status: 404, message: "Not found Cart !"}
             }
-            const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.product"},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
+            const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{ "$lookup": { "from": "CartDetail", "localField": "listCartDetail", "foreignField": "_id", "as": "listCartDetail" }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{$unwind:"$listCartDetail.productDetail.product"},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
+            // const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.product"},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
             console.log("cart", cart);
             
             if(cart[0]){
@@ -74,38 +76,35 @@ export class CartService {
 
     static async addToCart (accountId: String, productDetailId: String, quantity: number){
         try {
+            const cart: any = await Cart.findOne({account: accountId});
+            const cartDetail = await CartDetail.findOne({$and:[{cartId:cart._id},{productDetailId: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
             const productDetail = await ProductDetailService.getProductDetailById(productDetailId);
             const products = await Product.aggregate([{$match:{_id:new ObjectId(`${productDetail.data.product}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
-            const product = products[0]
-            const cart: any = await Cart.findOne({account: accountId});
+            const product = products[0];
             if(quantity<=productDetail.data.quantity){
-                let checkExistItem = false;
-                for (let index = 0; index < cart.listCartDetail.length; index++) {
-                    if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
-                        console.log("Đã tồn tại");
-                        if(quantity+cart.listCartDetail[index].quantity<=productDetail.data.quantity) {
-                            cart.listCartDetail[index].quantity+=quantity;
-                            checkExistItem = true;
-                        }
-                        else{
-                            return {status: 400, message:"error: quantity > quantity in stock !"};
-                        }
-                        break;
+                if(cartDetail){
+                    if(quantity+cartDetail.quantity<= productDetail.data.quantity){
+                        cartDetail.quantity+=quantity;
+                        await cartDetail.save();
+                        return {status: 204, message:"add product to cart success !"};
+                    }
+                    else{
+                        return {status: 400, message:"error: quantity > quantity in stock !"};
                     }
                 }
-    
-                if(!checkExistItem){          
-                    const itemInCart = {
+                else{
+                    const newCartDetail = new CartDetail({
+                        cartId: cart._id,
                         productDetail: productDetailId,
                         quantity: quantity,
                         price: product.price,
                         priceDiscount: product.price*(1-product.discount.percentDiscount)
-                    }
-                    cart.listCartDetail.push(itemInCart);
+                    }) 
+                    await newCartDetail.save();
+                    cart.listCartDetail.push(newCartDetail._id);
+                    await cart.save();
+                    return {status: 204, message:"add product to cart success !"};
                 }
-                await cart.save()  
-    
-                return {status: 204, message:"add product to cart success !"};
             }
             else{
                 return {status: 400, message:"error: quantity > quantity in stock !"};
@@ -119,8 +118,10 @@ export class CartService {
     static async removeProductOutCart(accountId: String, productDetailId: String){
         try {
             const cart: any = await Cart.findOne({account: accountId});
+            const cartDetail = await CartDetail.findOneAndDelete({$and:[{cartId:cart._id},{productDetailId: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
+            
             for (let index = 0; index < cart.listCartDetail.length; index++) {
-                if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
+                if(cart.listCartDetail[index].toString() === cartDetail._id .toString()){
                     cart.listCartDetail.splice(index, 1);
                     break;
                 }
@@ -128,6 +129,8 @@ export class CartService {
             await cart.save()
             return {status: 204, message:"remove product out cart success !"};
         } catch (error) {
+            console.log(error);
+            
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
@@ -135,20 +138,15 @@ export class CartService {
     static async increaseQuantity(accountId: String, productDetailId: String){
         try {
             const productDetail = await ProductDetailService.getProductDetailById(productDetailId);
-            const cart: any = await Cart.findOne({account: accountId});
-            for (let index = 0; index < cart.listCartDetail.length; index++) {
-                if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
-                    if(cart.listCartDetail[index].quantity+1>productDetail.data.quantity){
-                        cart.listCartDetail[index].quantity = productDetail.data.quantity;
-                        return {status: 400, message:"error: quantity > quantity in stock !"};
-                    }
-                    else{
-                        cart.listCartDetail[index].quantity+=1;
-                    }
-                    break;
-                }
+            const cart = await Cart.findOne({account: new ObjectId(`${accountId}`)})
+            const cartDetail = await CartDetail.findOne({$and:[{cartId: cart._id},{productDetailId: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
+            if(cartDetail.quantity+1> productDetail.data.quantity){
+                cartDetail.quantity = productDetail.data.quantity;
+                await cartDetail.save();
+                return {status: 400, message:"error: quantity > quantity in stock !"};
             }
-            await cart.save()
+            cartDetail.quantity+=1;
+            await cartDetail.save();
             return {status: 204, message:"update cart success !"};
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
@@ -157,20 +155,17 @@ export class CartService {
 
     static async decreaseQuantity(accountId: String, productDetailId: String){
         try {
-            const cart: any = await Cart.findOne({account: accountId});
-            for (let index = 0; index < cart.listCartDetail.length; index++) {
-                if(cart.listCartDetail[index].productDetail.toString() === productDetailId ){
-                    if(cart.listCartDetail[index].quantity===1){
-                        return {status: 400, message:"can not decease because quantity = 1 ! you just remove item !"};
-                    }
-                    else{
-                        cart.listCartDetail[index].quantity-=1;
-                    }
-                    break;
-                }
+            const cart = await Cart.findOne({account: new ObjectId(`${accountId}`)})
+            const cartDetail = await CartDetail.findOne({$and:[{cartId:cart._id},{productDetailId: new ObjectId(`${productDetailId}`)}, {status:"ACTIVE"}]});
+            if(cartDetail.quantity===1){
+                return {status: 400, message:"can not decease because quantity = 1 ! you just remove item !"};
             }
-            await cart.save()
-            return {status: 204, message:"update cart success !"};
+            else{
+                cartDetail.quantity-=1;
+                await cartDetail.save();
+                return {status: 204, message:"update cart success !"};
+            }
+            
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
         }

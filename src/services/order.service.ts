@@ -9,6 +9,7 @@ import vi from "date-fns/locale/vi";
 import { zonedTimeToUtc,utcToZonedTime } from 'date-fns-tz';
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
+import { CartDetail } from "../models/cart-detail";
 export class OrderService {
 
     static async getOrderByAccountId(accountId: String){
@@ -30,21 +31,23 @@ export class OrderService {
         const opts = {session,returnOriginal: false}
         try {
             const cart = await Cart.findOne({account: order.account})
+            const cartDetail = await CartDetail.find({$and:[{cartId:cart._id}, {status:"ACTIVE"}]});
             let totalOrderPrice = 0;
             let listOrderDetail = [];
             let listOutOfStock = [];
             for(let i =0;i< order.listOrderDetail.length; i++){
-                let result = cart.listCartDetail.find((obj: any) => {
-                    return obj.productDetail.toString() === order.listOrderDetail[i]
+                let result = cartDetail.find((obj: any) => {
+                    return obj._id.toString() === order.listOrderDetail[i]
                 })          
                 if(result){
-                    if(result.productDetail.quantity<result.quantity){
+                    const productDetail = await ProductDetail.findOne({_id: result.productDetail})
+                    if(result.quantity>productDetail.quantity){
                         listOutOfStock.push(result)
                     }
                 }
             }
             if(listOutOfStock.length>0){
-                return {status: 400, message: "can not create order ! product out of stock !", data:listOutOfStock}
+                return {status: 400, message: "can not create order ! product out of stock !"}
             }
             for(let i =0;i< order.listOrderDetail.length; i++){
                 let result = cart.listCartDetail.find((obj: any) => {
