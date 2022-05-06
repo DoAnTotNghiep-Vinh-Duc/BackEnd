@@ -78,5 +78,45 @@ export class OrderController {
             });
         }
     }
+
+    static async paymentWithPayPal(req: Request, res: Response): Promise<any> {
+        try {
+            const data: any = await OrderService.paymentWithPayPal();
+            if(data.status===400){
+                res.redirect("localhost:3000/order/cancel")
+            }
+            return res.redirect(data.link);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
+    static async paymentPayPalCacel(req: Request, res: Response): Promise<any> {
+        try {
+            console.log("Cancel");
+            return res.redirect("localhost:3000/order/cancel");
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
+    static async paymentPayPalSuccess(req: Request, res: Response): Promise<any> {
+        try {
+            const data: any = await OrderService.paymentWithPayPal();
+            if(data.status===400){
+                res.redirect("localhost:3000/order/cancel")
+            }
+            return res.redirect(data.link);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
 }
 

@@ -10,6 +10,45 @@ import { zonedTimeToUtc,utcToZonedTime } from 'date-fns-tz';
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 import { CartDetail } from "../models/cart-detail";
+import paypal from "paypal-rest-sdk"
+paypal.configure({
+    'mode': 'sandbox', //sandbox or live
+    'client_id': 'ATStXMWKaLIbz91tuL_W6Zt4Mor9WbYytaisCdVdse-62sP3YYbzELeoGvlgO6Mrfx6gUF-Kkg5m5bwm',
+    'client_secret': 'ENeq_uLxVXKoLb37jwFQkUQdRzIsi7jNoQh--DtN-30F26iChl4OV7qRysYF8KLY8l9CgAl8-gvDiDnz'
+});
+const items=   [{
+    "name": "Red Sox Hat",
+    "sku": "001",
+    "price": "1.0",
+    "currency": "USD",
+    "quantity": 15
+},
+{
+  "name": "Blue Sox Hat",
+  "sku": "002",
+  "price": "1.5",
+  "currency": "USD",
+  "quantity": 1
+},
+{
+    "name": "Blue Sox Hat",
+    "sku": "003",
+    "price": "1.5",
+    "currency": "USD",
+    "quantity": 1
+  },
+  {
+    "name": "Blue Sox Hat",
+    "sku": "004",
+    "price": "1.5",
+    "currency": "USD",
+    "quantity": 1
+  }];
+var total =0;
+for(let i = 0;i<items.length;i++)
+{
+    total+=parseFloat(items[i].price)*items[i].quantity;
+}
 export class OrderService {
 
     static async getOrderByAccountId(accountId: String){
@@ -263,5 +302,39 @@ export class OrderService {
             session.endSession();
             return {status: 500, message: "Something went wrong !", error: error};
         }
+    }
+
+    static async paymentWithPayPal(){
+        const create_payment_json = {
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": "http://localhost:5000/order/success",
+                "cancel_url": "http://localhost:5000/order/cancel"
+            },
+            "transactions": [{
+                "item_list": {
+                    "items": items
+                },
+                "amount": {
+                    "currency": "USD",
+                    "total": total.toString()
+                },
+                "description": "Hat for the best team ever"
+            }]
+        }
+        paypal.payment.create(create_payment_json, function (error: any, payment: any) {
+            if (error) {
+              return {status: 400, message:"cancel"}
+            } else {
+                for(let i = 0;i < payment.links.length;i++){
+                  if(payment.links[i].rel === 'approval_url'){
+                    return {status: 200, message:"payment", link: payment.links[i].href}
+                  }
+                }
+            }
+        });
     }
 }

@@ -2,7 +2,7 @@ import express, { NextFunction } from 'express';
 import { AuthController } from '../controllers/auth-controller';
 import { googleStrategy } from "../config/google-strategy";
 import { facebookStrategy } from "../config/facebook-strategy";
-export const authRouter = express.Router();
+export const authRoutes = express.Router();
 
 import passport from "passport";
 
@@ -17,15 +17,15 @@ passport.deserializeUser((user: any, done: any) => {
 });
 const CLIENT_URL = "http://localhost:3000/";
 
-authRouter.get("/login/success", AuthController.loginSuccess);
+authRoutes.get("/login/success", AuthController.loginSuccess);
 
-authRouter.get("/login/failed", AuthController.loginFail);
+authRoutes.get("/login/failed", AuthController.loginFail);
 
-authRouter.post("/logout", AuthController.logout);
+authRoutes.post("/logout", AuthController.logout);
 
-authRouter.get("/google", passport.authenticate("google", { scope: ["profile"] }));
+authRoutes.get("/google", passport.authenticate("google", { scope: ["profile"] }));
 
-authRouter.get(
+authRoutes.get(
   "/google/callback",
   passport.authenticate("google", {
     successRedirect: CLIENT_URL,
@@ -33,9 +33,9 @@ authRouter.get(
   })
 );
 
-authRouter.get("/facebook", passport.authenticate("facebook",));
+authRoutes.get("/facebook", passport.authenticate("facebook",));
 
-authRouter.get(
+authRoutes.get(
   "/facebook/callback",
   passport.authenticate("facebook", {
     successRedirect: CLIENT_URL,
@@ -43,7 +43,7 @@ authRouter.get(
   })
 );
 
-authRouter.post("/signup",AuthController.registerWebAccount)
-authRouter.post("/signin",AuthController.signInWithWebAccount)
+authRoutes.post("/signup",AuthController.registerWebAccount)
+authRoutes.post("/signin",AuthController.signInWithWebAccount)
 
-authRouter.post("/verify-refresh-token", AuthController.verifyRefreshToken)
+authRoutes.post("/verify-refresh-token", AuthController.verifyRefreshToken)

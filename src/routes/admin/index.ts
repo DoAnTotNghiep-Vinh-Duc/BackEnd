@@ -1,8 +1,8 @@
 import express, { Router } from 'express';
-import { supplierRouter } from './supplier-router';
-import { typeProductRouter } from './type-product-router';
-import { colorRouter } from './color-router';
+import { supplierRoutes } from './supplier.routes';
+import { typeProductRoutes } from './type-product.routes';
+import { colorRoutes } from './color.routes';
 export const adminRoutes = express.Router();
-adminRoutes.use('/', supplierRouter);
-adminRoutes.use('/', typeProductRouter);
-adminRoutes.use('/', colorRouter);
+adminRoutes.use('/', supplierRoutes);
+adminRoutes.use('/', typeProductRoutes);
+adminRoutes.use('/', colorRoutes);
