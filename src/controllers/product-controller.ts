@@ -161,11 +161,6 @@ export class ProductController{
         try {
             const {product,productDetails } = req.body
             const uploadFile = req.files;
-            console.log(JSON.parse(product));
-            console.log(JSON.parse(productDetails));
-            console.log("uploadFile",uploadFile);
-            
-            
             const data = await ProductService.updateProductById(uploadFile,JSON.parse(product),JSON.parse(productDetails));
             res.status(data.status).send(data);
          

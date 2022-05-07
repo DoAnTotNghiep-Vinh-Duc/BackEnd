@@ -7,6 +7,7 @@ import { InformationService } from '../information.service';
 import { CartService } from "../cart.service";
 import { AuthMiddleware } from "../../middleware/auth-middleware";
 import {FavoriteService} from "../favorites.service";
+import { SendMailService } from "../send-mail.service";
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -141,7 +142,6 @@ export class AuthService{
           // Generate a password hash (salt + hash)
           const passwordHashed = await bcrypt.hash(account.password, salt);
           // Re-assign password hashed
-          const newPassword = passwordHashed;
           const newAccount = new Account({
             email: account.email,
             password: passwordHashed,
@@ -149,6 +149,7 @@ export class AuthService{
             isVerifyPhone: false,
             avatar: "",
             information: newInformation._id,
+            isVerifyAccountWeb:false
           })
           await newAccount.save();
 
@@ -160,16 +161,54 @@ export class AuthService{
             account: newAccount._id
           }
           const newFavorite = await FavoriteService.createFavorite(favorite)
-          return {status: 201, message: newAccount} ;
-          // await SendMailService.sendMail(account.name,account.email, "I create account", (data: any)=>{
-          // });
+          const verifyCode = await bcrypt.hash(account.email+account.password, salt);
+          await RedisCache.setCache(`${verifyCode}`,account.email);
+          await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
+          return {status: 201, message: "create account success, please check your email for verify !"} ;
+        }
+        else if(!user.isVerifyAccountWeb){
+          // Generate a salt
+          const salt = await bcrypt.genSalt(10);
+          // Generate a password hash (salt + hash)
+          const passwordHashed = await bcrypt.hash(account.password, salt);
+          user.password = passwordHashed;
+          user.nameDisplay = account.name;
+          await user.save();
+          const verifyCode = await bcrypt.hash(account.email+account.password, salt);
+          await RedisCache.setCache(`${verifyCode}`,account.email);
+          await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
+          return {status: 201, message: "create account success, please check your email for verify !"} ;
         }
         else{
-          return {status: 409, message:"Account already exists ! "} ;
+          return {status: 409, message:"account is already exist !"};
         }
       } catch (error) {
         return {status: 500,message:"Something error when register account ! Please try again !", error: error} ;
       }
+    }
+
+    static async verifyAccountWeb(veriyCode: any): Promise<any>{
+      try {
+        const emailNeedVerify = await RedisCache.getCache(`${veriyCode}`);
+        if(emailNeedVerify){
+          console.log(emailNeedVerify);
+          
+          const account = await Account.findOne({email:emailNeedVerify});
+          console.log(account);
+          
+          account.isVerifyAccountWeb = true;
+          await account.save();
+          return {status:200, message:"Verify success, you can login !"};
+        }
+        else{
+          return {status: 400, message:"wrong code verify !"};
+        }
+      } catch (error) {
+        console.log(error);
+        
+        return {status: 500, message:"Something went wrong"};
+      }
+      
     }
 
     static async signInWithWebAccount(account: any): Promise<any>{
@@ -184,12 +223,14 @@ export class AuthService{
       if (!isValid) {
         return {status:403,message:"Sai mật khẩu !"}
       }
+      if(!foundAccount.isVerifyAccountWeb){
+        return {status:403, message:"Tài khoản chưa được xác thực. "}
+      }
       else{
         const accessToken = await AuthService.signAccessToken(foundAccount._id);
         const refreshToken = await AuthService.signRefreshToken(foundAccount._id);
         
-        return{status: 200, message:{account: foundAccount, accessToken, refreshToken}
+        return{status: 200, message:{account: {email:foundAccount.email,nameDisplay:foundAccount.nameDisplay}, accessToken, refreshToken}}
       }
-    }
     }
 }

@@ -26,6 +26,10 @@ const AccountSchema = new Schema({
         type: Boolean,
         default: false
     },
+    isVerifyAccountWeb:{
+        type: Boolean,
+        required: false  
+    },
     avatar: {
         type: String,
         required: false
@@ -44,6 +48,7 @@ const AccountSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Information",
     }
+    
 },{timestamps: true, collection:"Account"});
 AccountSchema.methods.isValidPassword = async function (newPassword: string) {
     try {

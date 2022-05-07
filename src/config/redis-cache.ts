@@ -14,7 +14,7 @@ async function del(key: any) {
 }
 
 async function clearCache(){
-    return client.flushdb();
+    return client.flushDb();
 }
 
 

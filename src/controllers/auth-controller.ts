@@ -77,7 +77,7 @@ export class AuthController{
        
       } catch (error: any) {
           return res.status(500).send({
-            msg: error.message,
+            message: error.message,
           });
       }
     }
@@ -106,8 +106,17 @@ export class AuthController{
       } catch (error) {
         next(error);
       }    
-        // Assign a token
     };
+
+    static async verifyAccountWeb(req: Request, res: Response, next: NextFunction) : Promise<any> {
+      try {
+        const {verifyCode} = req.body;
+        const data = await AuthService.verifyAccountWeb(verifyCode);
+        return res.status(data.status).json(data);
+      } catch (error) {
+        return res.status(500).send({message:"Something went wrong"});
+      }
+    }
     //   static async signUp (req: IGetPayloadAuthInfoRequest, res: Response, next: NextFunction) : Promise<any>{
     //     try {
     //       const { name, phone, password } = req.value.body;

@@ -43,7 +43,8 @@ authRoutes.get(
   })
 );
 
-authRoutes.post("/signup",AuthController.registerWebAccount)
-authRoutes.post("/signin",AuthController.signInWithWebAccount)
+authRoutes.post("/signup",AuthController.registerWebAccount);
+authRoutes.post("/signin",AuthController.signInWithWebAccount);
+authRoutes.post("/verify-account-web", AuthController.verifyAccountWeb);
 
 authRoutes.post("/verify-refresh-token", AuthController.verifyRefreshToken)

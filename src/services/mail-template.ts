@@ -46,7 +46,7 @@ export class MaiTemplateService {
                     </div>
                     <div style="width: 100%; height: 55%">
                       <div style="text-align: left; width: 100%; color: #0d0e43">
-                        Chào <b> Đỗ Đạt Đức, </b>
+                        Chào <b> ${data.name}, </b>
                       </div>
                       <div style="color: #0d0e43; margin-top: 10px; margin-bottom: 10px">
                         Chúng tôi rất vui mừng vì bạn đã lựa chọn chúng tôi. Chúng tôi cần
@@ -63,7 +63,7 @@ export class MaiTemplateService {
                           cursor: pointer;
                           text-decoration: none;
                         "
-                        href="http://localhost:3000/verifyAccount"
+                        href="http://localhost:3000/successVerify/${encodeURIComponent(data.verifyCode)}"
                         target="_blank"
                       >
                         Xác thực tài khoản

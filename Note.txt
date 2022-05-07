@@ -9,9 +9,9 @@ Note: chưa có cache (mới cache getProductbyId)
 Note: chưa có pub sub để cập nhật khuyến mãi trong giỏ hàng
 Note: Chưa có phân quyền admin trong order router
 Note: Chưa phân quyền admin trong discount router
-Note: Cần xử lý lại cái discount (có nên thêm 1 bảng discountDetail không) hoặc bỏ thẳng discount vào product luôn
+Note: Cần xử lý lại cái discount (có nên thêm 1 bảng discountDetail không) hoặc bỏ thẳng discount vào product luôn (xong)
 Note: Cần xử lý cái ngày bắt đầu của discount, phải đưa vào redis để nó start
-
+Note: đăng ký bằng email chưa xong
 productDetails:[
     {
             // Cái này là không xóa màu, muốn xóa màu thì chuyển status của tất cả detals sang DELETE

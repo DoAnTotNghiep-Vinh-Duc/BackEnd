@@ -12,10 +12,11 @@ import { v4 as uuid } from "uuid";
 import AWS from "aws-sdk";
 import { Cart } from "../models/cart";
 import { CartDetail } from "../models/cart-detail";
+import util from "util";
 const subscribe = createClient({
     url: `redis://127.0.0.1:6379`,
 });
-subscribe.psubscribe("__keyevent@0__:expired", (message: any, channel: any) => {
+subscribe.pSubscribe("__keyevent@0__:expired", (message: any, channel: any) => {
     console.log(message, channel); // 'message', 'channel'
 });
 subscribe.on('pmessage', async (pattern: any, channel: any, message: any) => {
@@ -36,7 +37,7 @@ subscribe.on('pmessage', async (pattern: any, channel: any, message: any) => {
 export class ProductService {
     static async getAllProduct() {
         try {
-            const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            const products = await Product.aggregate([{$match:{status:"ACTIVE"}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$unwind:"$productDetail"},{$match:{"productDetail.status":"ACTIVE"}},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             return {status: 200,message: "get all Product success !", data: products};
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
@@ -45,7 +46,7 @@ export class ProductService {
 
     static async getAllProductLimitPage(page: number, limit: number) {
         try {
-            const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$skip:(page-1)*limit},{$limit:limit},{$unwind:"$productDetail"},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            const products = await Product.aggregate([{$match:{status:"ACTIVE"}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$skip:(page-1)*limit},{$limit:limit},{$unwind:"$productDetail"},{$match:{"productDetail.status":"ACTIVE"}},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             return {status: 200,message: "get all Product success !", data: products};
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
@@ -54,7 +55,7 @@ export class ProductService {
 
     static async getProductLowQuantity() {
         try {
-            const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$unwind:"$productDetail"},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$sort:{"quantity":1}}])
+            const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$unwind:"$productDetail"},{$match:{"productDetail.status":"ACTIVE"}},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$sort:{"quantity":1}}])
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
@@ -63,7 +64,8 @@ export class ProductService {
 
     static async getProductById(productId: String){
         try {
-            const product = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            
+            const product = await Product.aggregate([{$match:{$and:[{_id:new ObjectId(`${productId}`)},{status:"ACTIVE"}]}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             return {status: 200, message: "found Product success", data: product[0]}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
@@ -77,7 +79,7 @@ export class ProductService {
             // if(data){
             //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             // }
-            const products = await Product.aggregate([{$match:{}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}]);
+            const products = await Product.aggregate([{$match:{status:"ACTIVE"}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}]);
             // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
@@ -93,7 +95,7 @@ export class ProductService {
             // if(data){
             //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             // }
-            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$project:{_id:1}}])
+            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$match:{status:"ACTIVE"}},{$project:{_id:1}}])
             if(listType.length!==listTypeProduct.length){
                 return {status: 404,message: "Not found product !", data: []};
             }
@@ -101,7 +103,7 @@ export class ProductService {
             for (let index = 0; index < listTypeProduct.length; index++) {
                 convertListType.push(listTypeProduct[index]._id);
             }
-            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}])
+            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}},{$match:{status:"ACTIVE"}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}])
             // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
@@ -117,7 +119,7 @@ export class ProductService {
             // if(data){
             //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             // }
-            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$project:{_id:1}}])
+            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$match:{status:"ACTIVE"}},{$project:{_id:1}}])
             if(listType.length!==listTypeProduct.length){
                 return {status: 404,message: "Not found type product !", data: []};
             }
@@ -125,7 +127,7 @@ export class ProductService {
             for (let index = 0; index < listTypeProduct.length; index++) {
                 convertListType.push(listTypeProduct[index]._id);
             }
-            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}},{$skip:(page-1)*limit},{$limit:limit}])
+            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}},{$match:{status:"ACTIVE"}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}},{$skip:(page-1)*limit},{$limit:limit}])
             // await RedisCache.setCache(key,JSON.stringify({products}),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
@@ -140,11 +142,11 @@ export class ProductService {
             // if(data){
             //     return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             // }
-            const products = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            const products = await Product.aggregate([{$match:{$and:[{_id:new ObjectId(`${productId}`)},{status:"ACTIVE"}]}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             const product = products[0]
             console.log("PRODUCT: ", product);
             
-            let listProductDetail: any = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${productId}`)}},{$lookup:{from:"Color",localField:"color",foreignField:"_id",as:"color"}},{$unwind:"$color"}])
+            let listProductDetail: any = await ProductDetail.aggregate([{$match:{$and:[{product:new ObjectId(`${productId}`)},{status:"ACTIVE"}]}},{$lookup:{from:"Color",localField:"color",foreignField:"_id",as:"color"}},{$unwind:"$color"}])
             if(product){
                 const groupByCategory = listProductDetail.reduce((group: any, product: any) => {
                     const color = product.color;
@@ -169,7 +171,7 @@ export class ProductService {
     }
     static async getTopSellProduct(){
         try {
-            const orders = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$unwind:"$product"},{$project:{"_id":0,"totalQuantity":0}}, { "$replaceRoot": { "newRoot": "$product" }  },{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            const orders = await Order.aggregate([{$match:{status:{$ne:"CANCELED"}}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$unwind:"$product"},{$project:{"_id":0,"totalQuantity":0}}, { "$replaceRoot": { "newRoot": "$product" }  },{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             if(orders){
                 return {status: 200,message: "found Order success !", data: orders}
             }
@@ -182,7 +184,7 @@ export class ProductService {
 
     static async getProductOnSale(){
         try {
-            const products = await Product.aggregate([{$match:{discount:{$ne:new ObjectId('62599849f8f6be052f0a901d')}}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            const products = await Product.aggregate([{$match:{$and:[{discount:{$ne:new ObjectId('62599849f8f6be052f0a901d')}},{status:"ACTIVE"}]}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             if(products){
                 return {status: 200,message: "found Product success !", data: products}
             }
@@ -195,7 +197,7 @@ export class ProductService {
 
     static async getProductWithSortPoint(){
         try {
-            const products = await Product.aggregate([{$sort:{point:-1}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            const products = await Product.aggregate([{$match:{status:"ACTIVE"}},{$sort:{point:-1}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             if(products){
                 return {status: 200,message: "found Products success !", data: products}
             }
@@ -217,7 +219,7 @@ export class ProductService {
             }
             console.log(query);
             
-            const products = await Product.aggregate([{$match:{$or:query}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            const products = await Product.aggregate([{$match:{status:"ACTIVE"}},{$match:{$or:query}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             if(products){
                 return {status: 200,message: "found Products success !", data: products}
             }
@@ -231,6 +233,7 @@ export class ProductService {
     static async filterProduct(optionSort: String, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
         try {
             let query = [];
+            query.push({$match:{status:"ACTIVE"}})
             query.push({$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}});
             query.push({$unwind:"$discount"});
             if(optionPrice){
@@ -295,54 +298,6 @@ export class ProductService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
-
-    
-    // Chỗ này phải tạo cả product detail
-    // product:{
-    //     supplier: ObjectId<abc>,
-    //     name: "abc",
-    //     description:"abcc",
-    //     typeProducts:[ObjectId<abc1>,ObjectId<abc2>],
-    //     images:[abc.png, gfv.png],
-    //     price:50000
-    // }
-    // productDetails:[
-    //     {
-    //         color: ObjectId<abc>,
-    //         sizeQuantity:[
-    //             {
-    //                 size:"M",
-    //                 quantity:20
-    //             },
-    //             {
-    //                 size:"S",
-    //                 quantity:20
-    //             },
-    //             {
-    //                 size:"L",
-    //                 quantity:20
-    //             },
-    //         ]
-    //     },
-    //     {
-    //         color: ObjectId<abc>,
-    //         sizeQuantity:[
-    //             {
-    //                 size:"M",
-    //                 quantity:20
-    //             },
-    //             {
-    //                 size:"S",
-    //                 quantity:20
-    //             },
-    //             {
-    //                 size:"L",
-    //                 quantity:20
-    //             },
-    //         ]
-    //     }
-    // ]
-    
 
     static async createProduct(uploadFile: any,product: any,productDetails: Array<any>){
         try {
@@ -424,8 +379,7 @@ export class ProductService {
 
     static async updateProductById(uploadFile: any, product: any, productDetails: Array<any>){
         try {
-            console.log("PRODUCT DETAILS", productDetails);
-            
+            console.log("PRODUCT DETAILS",util.inspect(productDetails, {showHidden: false, depth: null}))
             if(!checkCanCreateProduct(productDetails)){
                 return {status:400,message: "can not update product !"};
             }
@@ -481,17 +435,14 @@ export class ProductService {
                 productNeedUpdate.price = product.price;
                 
                 await productNeedUpdate.save();
-
+                
                 for(let i =0;i< productDetails.length;i++){
                     const color = await Color.findOne({_id:new ObjectId(`${productDetails[i].color}`)})
-                    console.log("productDetails[i]",productDetails[i]);
                     // Nếu bị đổi ảnh
                     if(productDetails[i].image&&Object.keys(productDetails[i].image).length===0){
-                        console.log("NULL nef kakakaka");
                         let imageUrl = listResponse.map(async (element)=>{
                             if(color._id.toString()===element.idColor){
                                 for (let index = 0; index < productDetails[i].listProductDetail.length; index++) {
-                                    console.log(productDetails[i].listProductDetail[index]);
                                     // Nếu đây là product detail đã tồn tại
                                     if(productDetails[i].listProductDetail[index]._id){
                                         // Nếu product detail bị xóa
@@ -520,7 +471,6 @@ export class ProductService {
                     }
                     else{
                         for (let index = 0; index < productDetails[i].listProductDetail.length; index++) {
-                            console.log(productDetails[i].listProductDetail[index]);
                             // Nếu đây là product detail đã tồn tại
                             if(productDetails[i].listProductDetail[index]._id){
                                 // Nếu product detail bị xóa
