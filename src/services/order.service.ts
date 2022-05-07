@@ -53,7 +53,7 @@ export class OrderService {
 
     static async getAllOrderWithUser(){
         try {
-            const order = await Order.aggregate([{$lookup:{from:"Account", localField:"_id",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}}])
+            const order = await Order.aggregate([{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}}])
             if(order){
                 return {status: 200,message: "found Order success !", data: order}
             }
