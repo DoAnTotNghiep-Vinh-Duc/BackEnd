@@ -13,6 +13,7 @@ import AWS from "aws-sdk";
 import { Cart } from "../models/cart";
 import { CartDetail } from "../models/cart-detail";
 import util from "util";
+import { Favorite } from "../models/favorite";
 const subscribe = createClient({
     url: `redis://127.0.0.1:6379`,
 });
@@ -530,7 +531,13 @@ export class ProductService {
     static async deleteProduct(productId: String){
         try {
             await Product.updateOne({_id:new ObjectId(`${productId}`)},{$set:{status:"DELETE"}})
+            let listProductDetail = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${productId}`)}}, {$project:{_id:1}}])
             await ProductDetail.updateMany({product:new ObjectId(`${productId}`)},{$set:{status:"DELETE"}})
+            let productDetailsConvert = listProductDetail.map(function(id) {
+                return id;
+            });
+            await CartDetail.deleteMany({productDetail:{$in:productDetailsConvert}, status:"ACTIVE"})
+            await Favorite.updateMany({},{$pull:{"listProduct":new ObjectId(`${productId}`)}})
             return {status: 200, message:"Delete product success !"};
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
@@ -544,6 +551,7 @@ export class ProductService {
 function checkCanCreateProduct(productDetails: any[]) {
     let result: Boolean = true;
     // Kiểm tra có trùng màu không
+    console.log(productDetails);
     for(let i = 0; i< productDetails.length; i++){
         for(let j = i+1; j< productDetails.length;j++){
             if(productDetails[i].color===productDetails[j].color){
@@ -556,7 +564,7 @@ function checkCanCreateProduct(productDetails: any[]) {
         }
         // Kiểm tra có trùng size trong 1 màu không
         let details = productDetails[i].listProductDetail;
-        
+                
         for(let k = 0; k< details.length; k++){
             if(Number.parseInt(details[k].quantity)<0){
                 result = false;

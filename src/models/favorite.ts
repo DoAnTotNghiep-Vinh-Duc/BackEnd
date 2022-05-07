@@ -9,10 +9,8 @@ const FavoriteSchema = new Schema({
     listProduct: {
         type:[
             {
-                product:{
-                    type: Schema.Types.ObjectId,
-                    ref:'Product'
-                },
+                type: Schema.Types.ObjectId,
+                ref:'Product'
             }
         ],
         default:[],

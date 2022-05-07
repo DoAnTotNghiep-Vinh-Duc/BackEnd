@@ -8,7 +8,7 @@ export class FavoriteService {
             console.log(favorites);
             
             if(favorites[0].listProduct.length>0){
-                favorites = await Favorite.aggregate([{$match: {  account:new ObjectId(`${accountId}`)}},{$unwind:"$listProduct"},{ "$lookup": { "from": "Product", "localField": "listProduct.product", "foreignField": "_id", "as": "listProduct" }},{$unwind:"$listProduct"},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listProduct": { "$push": "$listProduct" } }}, {$unwind:"$listProduct"},{$lookup:{from:"Discount", localField:"listProduct.discount",foreignField:"_id", as:"listProduct.discount"}},{$unwind:"$listProduct.discount"},{$group:{"_id":"$account", listProduct:{$push:"$$ROOT"}}},{$project:{"listProduct._id":0, "listProduct.account": 0}}])
+                favorites = await Favorite.aggregate([{$match: {  account:new ObjectId(`${accountId}`)}},{ "$lookup": { "from": "Product", "localField": "listProduct", "foreignField": "_id", "as": "listProduct" }},{$unwind:"$listProduct"},{$lookup:{from:"Discount", localField:"listProduct.discount",foreignField:"_id", as:"listProduct.discount"}},{$unwind:"$listProduct.discount"},{$group:{"_id":"$account", listProduct:{$push:"$listProduct"}}},{$project:{"listProduct._id":0, "listProduct.account": 0}}])
             }
             
             return {status: 200,message: "found Favorite success !", data: favorites[0]}
@@ -36,10 +36,20 @@ export class FavoriteService {
             console.log(favorite);
             
             if(favorite){
-                favorite.listProduct.push({product:new ObjectId(`${productId}`)})
-                await favorite.save()
+                let isAlreadyExist = false;
+                for (let index = 0; index < favorite.listProduct.length; index++) {
+                    const element = favorite.listProduct[index];
+                    if(element.toString()===productId){
+                        isAlreadyExist = true;
+                        break;
+                    }
+                }
+                if(!isAlreadyExist){
+                    favorite.listProduct.push(new ObjectId(`${productId}`))
+                    await favorite.save()
+                }
                 
-                return {status: 200, message: "update Favorite success !", data: favorite}
+                return {status: 200, message: "add product to favorite success !", data: favorite}
             }
             else
                 return {status: 404, message: "Not found account !"}
@@ -54,7 +64,7 @@ export class FavoriteService {
         try {
             let favorite = await Favorite.findOne({ account:new ObjectId(`${accountId}`)});
             if(favorite){
-                favorite.listProduct.pull({product:new ObjectId(`${productId}`)})
+                favorite.listProduct.pull(new ObjectId(`${productId}`))
                 await favorite.save()
                 return {status: 204, message: "update Favorite success !", data: favorite}
             }

@@ -64,7 +64,7 @@ export class AuthController{
        
       } catch (error: any) {
           return res.status(500).send({
-            msg: error.message,
+            msg: error,
           });
       }
     }
@@ -77,7 +77,7 @@ export class AuthController{
        
       } catch (error: any) {
           return res.status(500).send({
-            message: error.message,
+            message: error,
           });
       }
     }
