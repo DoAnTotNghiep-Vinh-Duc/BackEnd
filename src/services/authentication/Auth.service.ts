@@ -190,6 +190,8 @@ export class AuthService{
     static async verifyAccountWeb(veriyCode: any): Promise<any>{
       try {
         const emailNeedVerify = await RedisCache.getCache(`${veriyCode}`);
+        console.log(veriyCode);
+        
         if(emailNeedVerify){
           console.log(emailNeedVerify);
           
@@ -198,6 +200,7 @@ export class AuthService{
           
           account.isVerifyAccountWeb = true;
           await account.save();
+          await RedisCache.delCache(`${veriyCode}`)
           return {status:200, message:"Verify success, you can login !"};
         }
         else{

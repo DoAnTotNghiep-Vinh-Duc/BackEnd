@@ -111,7 +111,8 @@ export class AuthController{
     static async verifyAccountWeb(req: Request, res: Response, next: NextFunction) : Promise<any> {
       try {
         const {verifyCode} = req.body;
-        const data = await AuthService.verifyAccountWeb(verifyCode);
+        
+        const data = await AuthService.verifyAccountWeb(decodeURIComponent(verifyCode));
         return res.status(data.status).json(data);
       } catch (error) {
         return res.status(500).send({message:"Something went wrong"});
