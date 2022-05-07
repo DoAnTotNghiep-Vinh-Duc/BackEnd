@@ -26,3 +26,4 @@ productRoutes.put("/:product_id",upload.any(), ProductController.updateProductBy
 productRoutes.post("/",upload.any(), ProductController.createProduct);
 productRoutes.get("/find/:nameFind", ProductController.getProductWithNameFind);
 productRoutes.post("/filter-product", ProductController.filterProduct);
+productRoutes.delete("/:productId", ProductController.deleteProduct);

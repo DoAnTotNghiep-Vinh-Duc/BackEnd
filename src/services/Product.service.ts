@@ -526,6 +526,16 @@ export class ProductService {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
+
+    static async deleteProduct(productId: String){
+        try {
+            await Product.updateOne({_id:new ObjectId(`${productId}`)},{$set:{status:"DELETE"}})
+            await ProductDetail.updateMany({product:new ObjectId(`${productId}`)},{$set:{status:"DELETE"}})
+            return {status: 200, message:"Delete product success !"};
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
 }
 
 

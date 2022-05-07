@@ -184,5 +184,18 @@ export class ProductController{
             return res.status(500).send({msg: error.message});
         }
     }
+
+    static async deleteProduct(req: Request, res: Response): Promise<any> {
+        try {
+            const {productId } = req.params
+            const data = await ProductService.deleteProduct(productId);
+            res.status(data.status).send(data);
+         
+        } catch (error: any) {
+            console.log(error);
+            
+            return res.status(500).send({msg: error.message});
+        }
+    }
 }
 
