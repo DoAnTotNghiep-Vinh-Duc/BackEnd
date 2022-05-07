@@ -44,7 +44,7 @@ app.use("/", Routes);
 
 const server = http.createServer(app);
 
-server.listen(process.env.PORT, () => {
-    RedisCache.connect();
+server.listen(process.env.PORT,async () => {
+    await RedisCache.connect();
     console.log(`Listening on port ${process.env.PORT}`);
 });

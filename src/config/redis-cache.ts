@@ -20,6 +20,7 @@ async function clearCache(){
 
 export class RedisCache {
     static async connect() {
+        await client.connect();
         client.on("error", (err: any) => console.log("Redis Client Error", err));
     }
 

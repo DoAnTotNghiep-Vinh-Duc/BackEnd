@@ -7,7 +7,7 @@ import { ObjectId } from "mongodb";
 import { Order } from "../models/order";
 import {Supplier} from "../models/supplier"
 import { Color } from "../models/color";
-import {createClient} from 'redis';
+import {createClient} from "redis"
 import { v4 as uuid } from "uuid";
 import AWS from "aws-sdk";
 import { Cart } from "../models/cart";
