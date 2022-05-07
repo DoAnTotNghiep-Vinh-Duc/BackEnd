@@ -51,6 +51,19 @@ for(let i = 0;i<items.length;i++)
 }
 export class OrderService {
 
+    static async getAllOrderWithUser(){
+        try {
+            const order = await Order.aggregate([{$lookup:{from:"Account", localField:"_id",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}}])
+            if(order){
+                return {status: 200,message: "found Order success !", data: order}
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
     static async getOrderByAccountId(accountId: String){
         try {
             const order = await Order.findOne({account: accountId})

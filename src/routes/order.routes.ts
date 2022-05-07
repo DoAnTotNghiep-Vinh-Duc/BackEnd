@@ -74,6 +74,7 @@ orderRoutes.get("/success",(req, res)=>{
         }
     });
 })
+orderRoutes.get("/all-order-with-user", OrderController.getAllOrderWithUser);
 orderRoutes.post("/",AuthMiddleware.verifyAccessToken,CheckPhoneMiddleware.checkVerifyPhone, OrderController.createOrder);
 orderRoutes.post("/by-date", OrderController.getOrdersByDate);
 orderRoutes.get("/all-top-customer", OrderController.getTopCustomer);
