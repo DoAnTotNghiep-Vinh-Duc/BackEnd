@@ -332,7 +332,14 @@ export class ProductService {
                     url: s3Response.Location
                 })
             }
-
+            let listImageUrl = [];
+            for (let index = 0; index < listResponse.length; index++) {
+                listImageUrl.push(listResponse[index].url);
+                console.log(listResponse[index].url);
+                
+            }
+            console.log("listImageUrl",listImageUrl);
+            
             const supplier = await Supplier.findOne({_id: product.supplier});
             product.supplier = supplier._id;
             const finalTypeProducts = product.typeProducts.map(function (obj: any) {
@@ -342,10 +349,11 @@ export class ProductService {
             const discount = await Discount.findOne({_id: product.discount});
             product.discount = discount._id
             
-            const listObjectIdProductDetail: Array<any> = [];
+            product.images = listImageUrl;
             const newProduct = new Product(product);
             await newProduct.save();
-
+            
+            const listObjectIdProductDetail: Array<any> = [];
             for(let i =0;i< productDetails.length;i++){
                 const color = await Color.findOne({_id:productDetails[i].color})
                 let findImage = null;
@@ -449,19 +457,19 @@ export class ProductService {
                 productNeedUpdate.name = product.name;
                 productNeedUpdate.status = product.status;
                 productNeedUpdate.typeProducts = product.typeProducts;
-                productNeedUpdate.images = product.images;
                 productNeedUpdate.suplier = product.suplier;
                 productNeedUpdate.discount = product.discount;
                 productNeedUpdate.price = product.price;
-                
-                await productNeedUpdate.save();
-                
+                while (productNeedUpdate.images.length>0) {
+                    productNeedUpdate.images.pop();
+                }
                 for(let i =0;i< productDetails.length;i++){
                     const color = await Color.findOne({_id:new ObjectId(`${productDetails[i].color}`)})
                     // Nếu bị đổi ảnh
                     if(productDetails[i].image&&Object.keys(productDetails[i].image).length===0){
                         let imageUrl = listResponse.map(async (element)=>{
                             if(color._id.toString()===element.idColor){
+                                productNeedUpdate.images.push(element.url);
                                 for (let index = 0; index < productDetails[i].listProductDetail.length; index++) {
                                     // Nếu đây là product detail đã tồn tại
                                     if(productDetails[i].listProductDetail[index]._id){
@@ -492,6 +500,7 @@ export class ProductService {
                     else{
                         for (let index = 0; index < productDetails[i].listProductDetail.length; index++) {
                             // Nếu đây là product detail đã tồn tại
+                            productNeedUpdate.images.push(productDetails[i].image)
                             if(productDetails[i].listProductDetail[index]._id){
                                 // Nếu product detail bị xóa
                                 if(productDetails[i].listProductDetail[index].status==="DELETE"){
@@ -515,27 +524,8 @@ export class ProductService {
                             }
                         }
                     }
-                    // listResponse.forEach(async element => {
-                    //     if(color._id.toString()===element.idColor){
-                    //         let details = productDetails[i].details;
-                    //         for(let j=0;j<details.length;j++){
-                    //             const productDetail = {
-                    //                 product: newProduct._id,
-                    //                 image: element.url.toString(),
-                    //                 color: color._id,
-                    //                 size: details[j].size,
-                    //                 quantity:Number.parseInt(details[j].quantity) 
-                    //             }
-                    //             const newProductDetail = new ProductDetail(productDetail)
-                    //             await newProductDetail.save();
-                    //             listObjectIdProductDetail.push(newProductDetail._id)
-                    //         }
-                    //     }
-                    // });
-                    
-                    
                 }
-
+                await productNeedUpdate.save();
                 return {status: 204,message: "update Product success !"};
             }
             else
