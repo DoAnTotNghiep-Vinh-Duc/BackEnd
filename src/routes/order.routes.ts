@@ -75,7 +75,6 @@ orderRoutes.get("/success",(req, res)=>{
     });
 })
 orderRoutes.get("/sortOrder", OrderController.sortOrder); 
-orderRoutes.get("/:orderId", OrderController.getOrderByOrderId);
 orderRoutes.get("/all-order-with-user", OrderController.getAllOrderWithUser);
 orderRoutes.post("/",AuthMiddleware.verifyAccessToken,CheckPhoneMiddleware.checkVerifyPhone, OrderController.createOrder);
 orderRoutes.post("/by-date", OrderController.getOrdersByDate);
@@ -83,3 +82,4 @@ orderRoutes.get("/all-top-customer", OrderController.getTopCustomer);
 orderRoutes.get("/all-top-sell-product", OrderController.getTopSellProduct);
 orderRoutes.get("/top-customer/:page/:limit", OrderController.getTopCustomerLimitPage);
 orderRoutes.get("/top-sell-product/:page/:limit", OrderController.getTopSellProductLimitPage);
+orderRoutes.get("/get-order-by-id/:orderId", OrderController.getOrderByOrderId);

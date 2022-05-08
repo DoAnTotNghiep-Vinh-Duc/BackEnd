@@ -11,6 +11,7 @@ import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 import { CartDetail } from "../models/cart-detail";
 import paypal from "paypal-rest-sdk"
+import { RedisCache } from "../config/redis-cache";
 paypal.configure({
     'mode': 'sandbox', //sandbox or live
     'client_id': 'ATStXMWKaLIbz91tuL_W6Zt4Mor9WbYytaisCdVdse-62sP3YYbzELeoGvlgO6Mrfx6gUF-Kkg5m5bwm',
@@ -150,7 +151,7 @@ export class OrderService {
 
                 await session.commitTransaction();
                 session.endSession();
-
+                await RedisCache.clearCache();
                 return {status: 201, message: "create Order success !", data:newOrder}
             }
             else{
