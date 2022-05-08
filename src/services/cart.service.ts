@@ -4,37 +4,30 @@ import {Cart} from "../models/cart";
 import { ProductDetailService } from "./product-detail.service";
 import { ProductService } from "./product.service";
 import {CartDetail} from "../models/cart-detail";
+import { RedisCache } from "../config/redis-cache";
 export class CartService {
-
-    static async getCartById(cartId: String){
-        try {
-            const cart = await Cart.findById(cartId)
-            if(cart){
-                return {status: 200,message: "found Cart success !", data: cart}
-            }
-            else
-                return {status: 404, message: "Not found Cart !"}
-        } catch (error) {
-            return {status: 500, message: "Something went wrong !", error: error};
-        }
-    }
 
     static async getCartByAccountId(accountId: String){
         try {
-            const tmpCart = await Cart.findOne({account: accountId})
+            const key = `getCartByAccountId(accountId:${accountId})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Cart success !", data: JSON.parse(dataCache)};
+            }
+            let cart = await Cart.findOne({account: accountId})
             
-            if(!tmpCart){
+            if(!cart){
                 return {status: 404, message: "Not found Cart !"}
             }
-            const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{ "$lookup": { "from": "CartDetail", "localField": "listCartDetail", "foreignField": "_id", "as": "listCartDetail" }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{$unwind:"$listCartDetail.productDetail.product"},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
-            // const cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.product"},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
-            console.log("cart", cart);
+            cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{ "$lookup": { "from": "CartDetail", "localField": "listCartDetail", "foreignField": "_id", "as": "listCartDetail" }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{$unwind:"$listCartDetail.productDetail.product"},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
             
             if(cart[0]){
+                await RedisCache.setCache(key, JSON.stringify(cart[0]), 60*5);
                 return {status: 200,message: "found Cart success !", data: cart[0]}
             }
             else
-                return {status: 200,message: "found Cart success !", data: tmpCart}
+                await RedisCache.setCache(key, JSON.stringify(cart), 60*5);
+                return {status: 200,message: "found Cart success !", data: cart}
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
         }
@@ -105,6 +98,8 @@ export class CartService {
                     await newCartDetail.save();
                     cart.listCartDetail.push(newCartDetail._id);
                     await cart.save();
+                    const key = `getCartByAccountId(accountId:${accountId})`;
+                    await RedisCache.delCache(key);
                     return {status: 204, message:"add product to cart success !"};
                 }
             }
@@ -129,6 +124,8 @@ export class CartService {
                 }
             }
             await cart.save()
+            const key = `getCartByAccountId(accountId:${accountId})`;
+            await RedisCache.delCache(key);
             return {status: 204, message:"remove product out cart success !"};
         } catch (error) {
             console.log(error);
@@ -149,6 +146,8 @@ export class CartService {
             }
             cartDetail.quantity+=1;
             await cartDetail.save();
+            const key = `getCartByAccountId(accountId:${accountId})`;
+            await RedisCache.delCache(key);
             return {status: 204, message:"update cart success !"};
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
@@ -165,6 +164,8 @@ export class CartService {
             else{
                 cartDetail.quantity-=1;
                 await cartDetail.save();
+                const key = `getCartByAccountId(accountId:${accountId})`;
+                await RedisCache.delCache(key);
                 return {status: 204, message:"update cart success !"};
             }
             
