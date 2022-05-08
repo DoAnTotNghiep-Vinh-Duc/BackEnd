@@ -348,23 +348,42 @@ export class ProductService {
 
             for(let i =0;i< productDetails.length;i++){
                 const color = await Color.findOne({_id:productDetails[i].color})
-                listResponse.forEach(async element => {
-                    if(color._id.toString()===element.idColor){
-                        let details = productDetails[i].details;
-                        for(let j=0;j<details.length;j++){
-                            const productDetail = {
-                                product: newProduct._id,
-                                image: element.url.toString(),
-                                color: color._id,
-                                size: details[j].size,
-                                quantity:Number.parseInt(details[j].quantity) 
-                            }
-                            const newProductDetail = new ProductDetail(productDetail)
-                            await newProductDetail.save();
-                            listObjectIdProductDetail.push(newProductDetail._id)
-                        }
+                let findImage = null;
+                for(let index =0; index< listResponse.length;index++){
+                    if(color._id.toString()===listResponse[index].idColor){
+                        findImage = listResponse[index];
                     }
-                });
+                }
+                if(findImage){
+                    let details = productDetails[i].listProductDetail;
+                    for(let j=0;j<details.length;j++){
+                        const productDetail = {
+                            product: newProduct._id,
+                            image: findImage.url.toString(),
+                            color: color._id,
+                            size: details[j].size,
+                            quantity:Number.parseInt(details[j].quantity) 
+                        }
+                        const newProductDetail = new ProductDetail(productDetail)
+                        await newProductDetail.save();
+                        listObjectIdProductDetail.push(newProductDetail._id)
+                    }
+                }
+                else{
+                    let details = productDetails[i].listProductDetail;
+                    for(let j=0;j<details.length;j++){
+                        const productDetail = {
+                            product: newProduct._id,
+                            image: "",
+                            color: color._id,
+                            size: details[j].size,
+                            quantity:Number.parseInt(details[j].quantity) 
+                        }
+                        const newProductDetail = new ProductDetail(productDetail)
+                        await newProductDetail.save();
+                        listObjectIdProductDetail.push(newProductDetail._id)
+                    }
+                }
                 
                 
             }
