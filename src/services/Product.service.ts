@@ -7,7 +7,6 @@ import { ObjectId } from "mongodb";
 import { Order } from "../models/order";
 import {Supplier} from "../models/supplier"
 import { Color } from "../models/color";
-import {createClient} from "redis"
 import { v4 as uuid } from "uuid";
 import AWS from "aws-sdk";
 import { Cart } from "../models/cart";
@@ -17,9 +16,7 @@ import { Favorite } from "../models/favorite";
 // const subscribe = createClient({
 //     url: `redis://127.0.0.1:6379`,
 // });
-// subscribe.pSubscribe("__keyevent@0__:expired", (message: any, channel: any) => {
-//     console.log(message, channel); // 'message', 'channel'
-// });
+// subscribe.pubSubChannels("__keyevent@0__:expired");
 // subscribe.on('pmessage', async (pattern: any, channel: any, message: any) => {
 //     if(message.toString().split('_')[0]==="discount"){
 //         console.log("discount "+ message.toString().split('_')[1]+ " expire");

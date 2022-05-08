@@ -13,6 +13,7 @@ import {ConnectDatabase} from "./config/database/database"
 import cookieSession from "cookie-session"; 
 
 import {RedisCache} from "./config/redis-cache";
+import {RedisSubcribe} from "./config/redis-subcribe"
 ConnectDatabase.connectDatabase();
 const app = express();
 app.use(
@@ -46,5 +47,7 @@ const server = http.createServer(app);
 
 server.listen(process.env.PORT,async () => {
     await RedisCache.connect();
+    await RedisSubcribe.connect();
+    await RedisSubcribe.pubsubchanel();
     console.log(`Listening on port ${process.env.PORT}`);
 });
