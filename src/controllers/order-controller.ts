@@ -2,6 +2,19 @@ import { OrderService } from "../services/order.service";
 import { Request, Response } from "express";
 
 export class OrderController {
+    static async getOrderByOrderId(req: Request, res: Response): Promise<any> {
+        try {
+            const {orderId} = req.params;
+            const data = await OrderService.getOrderByOrderId(orderId);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
+
     static async getAllOrderWithUser(req: Request, res: Response): Promise<any> {
         try {
             const data = await OrderService.getAllOrderWithUser();
