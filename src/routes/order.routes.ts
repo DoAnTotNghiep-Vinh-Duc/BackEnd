@@ -74,7 +74,7 @@ orderRoutes.get("/success",(req, res)=>{
         }
     });
 })
-orderRoutes.get("/sortOrder", OrderController.sortOrder);
+orderRoutes.get("/sortOrder", OrderController.sortOrder); 
 orderRoutes.get("/:orderId", OrderController.getOrderByOrderId);
 orderRoutes.get("/all-order-with-user", OrderController.getAllOrderWithUser);
 orderRoutes.post("/",AuthMiddleware.verifyAccessToken,CheckPhoneMiddleware.checkVerifyPhone, OrderController.createOrder);
