@@ -315,6 +315,59 @@ export class OrderService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
+    
+    static async sortOrder(typeSort: String, sort: String, typeOrderStatus:String){
+        try {
+            let orders: any = null;
+            let query: Array<any> = [];
+            if(typeSort==="NAME"){
+                if(sort === "ASC"){
+                    // 1 là tăng dần
+                    query.push({$sort:{name:1}})
+                }
+                else if(sort === "DESC"){
+                    query.push({$sort:{name:-1}})
+                }
+            }
+            else if(typeSort === "TOTALMONEY"){
+                if(sort === "ASC"){
+                    query.push({$sort:{total:1}})
+                }
+                else if(sort === "DESC"){
+                    query.push({$sort:{total:-1}})
+                }
+            }
+            else if(typeSort === "ORDERDATE"){
+                if(sort === "ASC"){
+                    query.push({$sort:{createdAt:1}})
+                }
+                else if(sort === "DESC"){
+                    query.push({$sort:{createdAt:-1}})
+                }
+            }
+            else{
+                if(sort === "ASC"){
+                    query.push({$sort:{_id:1}})
+                }
+                else if(sort === "DESC"){
+                    query.push({$sort:{_id:-1}})
+                }
+            }
+            if(typeOrderStatus === "HANDLING"||typeOrderStatus === "DELIVERING"||typeOrderStatus === "DONE"||typeOrderStatus === "CANCELED"){
+                query.push({$match:{status:typeOrderStatus}})
+            }
+            orders = await Order.aggregate(query)
+
+            if(orders){
+                return {status: 200,message: "found Order success !", data: orders}
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
     static async testTransaction(){
         const session = await mongoose.startSession();
         session.startTransaction();

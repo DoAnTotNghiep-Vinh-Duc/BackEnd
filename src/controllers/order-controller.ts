@@ -102,7 +102,20 @@ export class OrderController {
             });
         }
     }
-
+    static async sortOrder(req: Request, res: Response): Promise<any> {
+        try {
+            const typeSort: any = req.query.typeSort;// NAME or TOTALMONEY or ORDERDATE
+            const sort: any = req.query.sort; // ASC or DESC
+            const typeOrderStatus: any = req.query.typeOrderStatus; // HANDLING or DELIVERING or DONE or CANCELED or ALL
+            const data = await OrderService.sortOrder(typeSort, sort, typeOrderStatus);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
     static async paymentWithPayPal(req: Request, res: Response): Promise<any> {
         try {
             const data: any = await OrderService.paymentWithPayPal();
