@@ -116,6 +116,30 @@ export class OrderController {
             });
         }
     }
+    static async nextStatusOrder(req: Request, res: Response): Promise<any> {
+        try {
+            const {orderId} = req.params
+            const data = await OrderService.nextStatusOrder(orderId);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
+    static async cancelOrder(req: Request, res: Response): Promise<any> {
+        try {
+            const {orderId} = req.params
+            const data = await OrderService.cancelOrder(orderId);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
     static async paymentWithPayPal(req: Request, res: Response): Promise<any> {
         try {
             const data: any = await OrderService.paymentWithPayPal();

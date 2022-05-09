@@ -368,7 +368,38 @@ export class OrderService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
-
+    static async nextStatusOrder(orderId: String){
+        try {
+            let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
+            if(order){
+                if(order.status === "HANDLING"){
+                    await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DELIVERING"}})
+                }
+                if(order.status === "DELIVERING"){
+                    await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE"}})
+                }
+                return {status: 204,message: "change status Order success !"};
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+    static async cancelOrder(orderId: String){
+        try {
+            let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
+            if(order){
+                await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"CANCELED"}})
+                
+                return {status: 204,message: "cancel Order success !"};
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
     static async testTransaction(){
         const session = await mongoose.startSession();
         session.startTransaction();
