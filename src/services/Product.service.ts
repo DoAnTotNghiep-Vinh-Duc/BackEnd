@@ -21,7 +21,7 @@ export class ProductService {
             if(dataCache){
                 return {status: 200,message: "get all Product success !", data: JSON.parse(dataCache)};
             }
-            const products = await Product.aggregate([{$match:{status:"ACTIVE"}},{$sort:{"name":1}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$unwind:"$productDetail"},{$match:{"productDetail.status":"ACTIVE"}},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{"name":1}}])
+            const products = await Product.aggregate([{$sort:{"name":1}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$unwind:"$productDetail"},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{"name":1}}])
             await RedisCache.setCache(key, JSON.stringify(products), 60*5);
             return {status: 200,message: "get all Product success !", data: products};
         } catch (error) {
@@ -36,7 +36,7 @@ export class ProductService {
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
             }
-            const products = await Product.aggregate([{$match:{status:"ACTIVE"}},{$sort:{"name":1}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$skip:(page-1)*limit},{$limit:limit},{$unwind:"$productDetail"},{$match:{"productDetail.status":"ACTIVE"}},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{"name":1}}])
+            const products = await Product.aggregate([{$sort:{"name":1}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$skip:(page-1)*limit},{$limit:limit},{$unwind:"$productDetail"},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{"name":1}}])
             await RedisCache.setCache(key, JSON.stringify(products), 60*5);
             return {status: 200,message: "get all Product success !", data: products};
         } catch (error) {
@@ -67,7 +67,7 @@ export class ProductService {
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
             }
-            const products = await Product.aggregate([{$match:{$and:[{_id:new ObjectId(`${productId}`)},{status:"ACTIVE"}]}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
+            const products = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             await RedisCache.setCache(key, JSON.stringify(products[0]), 60*5);
             return {status: 200, message: "found Product success", data: products[0]}
         } catch (error) {
@@ -571,7 +571,7 @@ export class ProductService {
         }
     }
 
-    static async deleteProduct(productId: String){
+    static async stopSellingProduct(productId: String){
         try {
             await Product.updateOne({_id:new ObjectId(`${productId}`)},{$set:{status:"DELETE"}})
             let listProductDetail = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${productId}`)}}, {$project:{_id:1}}])
@@ -584,6 +584,18 @@ export class ProductService {
             // await RedisCache.clearCache();
             delKeyRedisWhenChangeProduct()
             return {status: 200, message:"Delete product success !"};
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async resaleProduct(productId: String){
+        try {
+            await Product.updateOne({_id:new ObjectId(`${productId}`)},{$set:{status:"ACTIVE"}})
+            await ProductDetail.updateMany({product:new ObjectId(`${productId}`)},{$set:{status:"ACTIVE"}})
+            const keysProduct = await RedisCache.getKeys(`ProductService*`);
+            await RedisCache.delKeys(keysProduct);
+            return {status: 200, message:"resale product success !"};
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
         }

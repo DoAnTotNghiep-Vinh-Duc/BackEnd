@@ -185,10 +185,23 @@ export class ProductController{
         }
     }
 
-    static async deleteProduct(req: Request, res: Response): Promise<any> {
+    static async stopSellingProduct(req: Request, res: Response): Promise<any> {
         try {
             const {productId } = req.params
-            const data = await ProductService.deleteProduct(productId);
+            const data = await ProductService.stopSellingProduct(productId);
+            res.status(data.status).send(data);
+         
+        } catch (error: any) {
+            console.log(error);
+            
+            return res.status(500).send({msg: error.message});
+        }
+    }
+
+    static async resaleProduct(req: Request, res: Response): Promise<any> {
+        try {
+            const {productId } = req.params
+            const data = await ProductService.resaleProduct(productId);
             res.status(data.status).send(data);
          
         } catch (error: any) {
