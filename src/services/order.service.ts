@@ -182,11 +182,11 @@ export class OrderService {
 
     static async getOrdersByDate(typeRequest: String, beginDate?: Date, endDate?: Date){
         try {
-            // const key = `getOrdersByDate(typeRequest:${typeRequest}, beginDate?:${beginDate}, endDate?:${endDate})`;
-            // const dataCache = await RedisCache.getCache(key);
-            // if(dataCache){
-            //     return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
-            // }
+            const key = `getOrdersByDate(typeRequest:${typeRequest}, beginDate?:${beginDate}, endDate?:${endDate})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
             let orders = null;
             console.log("typeRequest",typeRequest);
             
@@ -280,7 +280,7 @@ export class OrderService {
             }
 
             if(orders){
-                // await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
+                await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Orders success !", data: orders}
             }
             else
