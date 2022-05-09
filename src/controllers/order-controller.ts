@@ -5,7 +5,19 @@ export class OrderController {
     static async getOrderByOrderId(req: Request, res: Response): Promise<any> {
         try {
             const {orderId} = req.params;
-            const data = await OrderService.getOrderByOrderId(orderId);
+            const data = await OrderService.getOrderByOrderId(req.payload.userId,orderId);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
+
+    static async getOrderByAccountId(req: Request, res: Response): Promise<any> {
+        try {
+            const data = await OrderService.getOrderByAccountId(req.payload.userId);
             return res.status(data.status).json(data);
          
         } catch (error: any) {

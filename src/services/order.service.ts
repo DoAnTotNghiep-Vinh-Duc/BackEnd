@@ -9,14 +9,14 @@ import { Account } from "../models/account";
 import { Information } from "../models/information";
 export class OrderService {
 
-    static async getOrderByOrderId(orderId: String){
+    static async getOrderByOrderId(accountId: String,orderId: String){
         try {
-            const key = `OrderService_getOrderByOrderId(orderId:${orderId})`;
+            const key = `OrderService_getOrderByOrderId(accountId:${accountId},orderId:${orderId})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
             }
-            const order = await Order.aggregate([{$match:{_id:new ObjectId(`${orderId}`)}},{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}},{$unwind:"$listOrderDetail"},{$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listOrderDetail.productDetail.product", "foreignField": "_id", "as": "listOrderDetail.productDetail.product" }},{$unwind:"$listOrderDetail.productDetail.product"},{ "$lookup": { "from": "Color", "localField": "listOrderDetail.productDetail.color", "foreignField": "_id", "as": "listOrderDetail.productDetail.color" }},{$unwind:"$listOrderDetail.productDetail.color"},{$project:{"listOrderDetail.productDetail.product.listProductDetail":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"},status:{$first:"$status"},subTotal:{$first:"$subTotal"},feeShip:{$first:"$feeShip"},total:{$first:"$total"},typePayment:{$first:"$typePayment"},name:{$first:"$name"},city:{$first:"$city"},district:{$first:"$district"},ward:{$first:"$ward"},street:{$first:"$street"},phone:{$first:"$phone"},createdAt:{$first:"$createdAt"},updatedAt:{$first:"$updatedAt"}, "listOrderDetail": { "$push": "$listOrderDetail" } }}])
+            const order = await Order.aggregate([{$match:{$and:[{_id:new ObjectId(`${orderId}`)},{account:accountId}]}},{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}},{$unwind:"$listOrderDetail"},{$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listOrderDetail.productDetail.product", "foreignField": "_id", "as": "listOrderDetail.productDetail.product" }},{$unwind:"$listOrderDetail.productDetail.product"},{ "$lookup": { "from": "Color", "localField": "listOrderDetail.productDetail.color", "foreignField": "_id", "as": "listOrderDetail.productDetail.color" }},{$unwind:"$listOrderDetail.productDetail.color"},{$project:{"listOrderDetail.productDetail.product.listProductDetail":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"},status:{$first:"$status"},subTotal:{$first:"$subTotal"},feeShip:{$first:"$feeShip"},total:{$first:"$total"},typePayment:{$first:"$typePayment"},name:{$first:"$name"},city:{$first:"$city"},district:{$first:"$district"},ward:{$first:"$ward"},street:{$first:"$street"},phone:{$first:"$phone"},createdAt:{$first:"$createdAt"},updatedAt:{$first:"$updatedAt"}, "listOrderDetail": { "$push": "$listOrderDetail" } }}])
             if(order){
                 await RedisCache.setCache(key, JSON.stringify(order), 60*5);
                 return {status: 200,message: "found Order success !", data: order}
@@ -116,7 +116,7 @@ export class OrderService {
     }
     static async getOrderByAccountId(accountId: String){
         try {
-            const order = await Order.findOne({account: accountId})
+            const order = await Order.aggregate([{$match:{account:new ObjectId(`${accountId}`)}},{$project:{account:1,status:1,subTotal:1,feeShip:1,total:1,typePayment:1,name:1,city:1,district:1,ward:1,street:1,phone:1,createdAt:1,updatedAt:1,quantity:{$sum:"$listOrderDetail.quantity"}}}])
             if(order){
                 return {status: 200,message: "found Order success !", data: order}
             }
