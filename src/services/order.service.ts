@@ -182,18 +182,23 @@ export class OrderService {
 
     static async getOrdersByDate(typeRequest: String, beginDate?: Date, endDate?: Date){
         try {
-            const key = `getOrdersByDate(typeRequest:${typeRequest}, beginDate?:${beginDate}, endDate?:${endDate})`;
-            const dataCache = await RedisCache.getCache(key);
-            if(dataCache){
-                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
-            }
+            // const key = `getOrdersByDate(typeRequest:${typeRequest}, beginDate?:${beginDate}, endDate?:${endDate})`;
+            // const dataCache = await RedisCache.getCache(key);
+            // if(dataCache){
+            //     return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            // }
             let orders = null;
+            console.log("typeRequest",typeRequest);
+            
             if(typeRequest==="TODAY"){
                 let start = new Date();
                 start.setHours(0,0,0,0);
-
+                
                 let end = new Date();
                 end.setHours(23,59,59,999);
+                start.setHours(start.getHours()+7);
+                end.setHours(end.getHours()+7);
+                
                 orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
             }
 
@@ -202,6 +207,8 @@ export class OrderService {
                 yesterdayStart.setHours(0,0,0,0);
                 let yesterdayEnd = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
                 yesterdayEnd.setHours(23,59,59,999);
+                yesterdayStart.setHours(yesterdayStart.getHours()+7);
+                yesterdayEnd.setHours(yesterdayEnd.getHours()+7);
                 orders = await Order.aggregate([{$match:{createdAt: { $gte: yesterdayStart, $lte: yesterdayEnd}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
             }
 
@@ -273,7 +280,7 @@ export class OrderService {
             }
 
             if(orders){
-                await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
+                // await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Orders success !", data: orders}
             }
             else
