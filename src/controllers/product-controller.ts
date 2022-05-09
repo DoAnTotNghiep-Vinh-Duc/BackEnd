@@ -101,18 +101,6 @@ export class ProductController{
         }
     }
 
-    static async getProductLowQuantity (req: Request, res: Response): Promise<any> {
-        try {
-            const data = await ProductService.getProductLowQuantity();
-            return res.status(data.status).json(data);
-         
-        } catch (error: any) {
-            return res.status(500).json({
-              msg: error.message,
-            });
-        }
-    }
-
     static async getProductWithNameFind (req: Request, res: Response): Promise<any> {
         try {
             const {nameFind} = req.params
@@ -154,60 +142,6 @@ export class ProductController{
             return res.status(500).json({
               msg: error.message,
             });
-        }
-    }
-    
-    static async updateProductById (req: Request, res: Response): Promise<any> {
-        try {
-            const {product,productDetails } = req.body
-            const uploadFile = req.files;
-            const data = await ProductService.updateProductById(uploadFile,JSON.parse(product),JSON.parse(productDetails));
-            res.status(data.status).send(data);
-         
-        } catch (error: any) {
-            return res.status(500).send({
-              msg: error.message,
-            });
-        }
-    }
-
-    static async createProduct(req: Request, res: Response): Promise<any> {
-        try {
-            const {product,productDetails } = req.body
-            const uploadFile = req.files;
-            const data = await ProductService.createProduct(uploadFile,JSON.parse(product) , JSON.parse(productDetails));
-            res.status(data.status).send(data);
-         
-        } catch (error: any) {
-            console.log(error);
-            
-            return res.status(500).send({msg: error.message});
-        }
-    }
-
-    static async stopSellingProduct(req: Request, res: Response): Promise<any> {
-        try {
-            const {productId } = req.params
-            const data = await ProductService.stopSellingProduct(productId);
-            res.status(data.status).send(data);
-         
-        } catch (error: any) {
-            console.log(error);
-            
-            return res.status(500).send({msg: error.message});
-        }
-    }
-
-    static async resaleProduct(req: Request, res: Response): Promise<any> {
-        try {
-            const {productId } = req.params
-            const data = await ProductService.resaleProduct(productId);
-            res.status(data.status).send(data);
-         
-        } catch (error: any) {
-            console.log(error);
-            
-            return res.status(500).send({msg: error.message});
         }
     }
 }

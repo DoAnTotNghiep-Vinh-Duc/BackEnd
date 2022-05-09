@@ -24,7 +24,7 @@ const ProductDetailSchema = new Schema({
     },
     status:{
         type: String,
-        enum : ['ACTIVE','DELETE'],
+        enum : ['ACTIVE','STOPSELLING','DELETE'],
         default: 'ACTIVE'
     }
 },{timestamps:true, collection:"ProductDetail"});

@@ -28,7 +28,7 @@ const ProductSchema = new Schema({
     },
     status:{
         type: String,
-        enum : ['ACTIVE','DELETE'],
+        enum : ['ACTIVE','STOPSELLING'],
         default: 'ACTIVE'
     },
     voted: {
