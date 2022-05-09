@@ -84,4 +84,4 @@ orderRoutes.get("/top-customer/:page/:limit", OrderController.getTopCustomerLimi
 orderRoutes.get("/top-sell-product/:page/:limit", OrderController.getTopSellProductLimitPage);
 orderRoutes.get("/get-order-by-id/:orderId", OrderController.getOrderByOrderId);
 orderRoutes.put("/next-status-order/:orderId", OrderController.nextStatusOrder);
-orderRoutes.put("cancel-order/:orderId", OrderController.cancelOrder);
+orderRoutes.put("/cancel-order/:orderId", OrderController.cancelOrder);
