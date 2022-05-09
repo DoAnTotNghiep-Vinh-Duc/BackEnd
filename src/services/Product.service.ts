@@ -13,34 +13,16 @@ import { Cart } from "../models/cart";
 import { CartDetail } from "../models/cart-detail";
 import util from "util";
 import { Favorite } from "../models/favorite";
-// const subscribe = createClient({
-//     url: `redis://127.0.0.1:6379`,
-// });
-// subscribe.pubSubChannels("__keyevent@0__:expired");
-// subscribe.on('pmessage', async (pattern: any, channel: any, message: any) => {
-//     if(message.toString().split('_')[0]==="discount"){
-//         console.log("discount "+ message.toString().split('_')[1]+ " expire");
-//         const discountId = message.toString().split('_')[1];
-//         const products = await Product.find({'discount': new ObjectId(`${discountId}`)});
-//         for (let index = 0; index < products.length; index++) {
-//             let productDetails = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${products[index]._id}`)}},{$match:{status:"ACTIVE"}},{$project:{_id:1}}])
-//             let productDetailsConvert = productDetails.map(function(id) {
-//                 return id;
-//             });
-//             await CartDetail.updateMany({productDetail:{$in:productDetailsConvert}},{$set:{priceDiscount:products[index].price}});
-//         }
-//         await Product.updateMany({'discount': new ObjectId(`${discountId}`)},{$set:{'discount':new ObjectId('62599849f8f6be052f0a901d')}})
-//     }
-// });
 export class ProductService {
     static async getAllProduct() {
         try {
-            const dataCache = await RedisCache.getCache("getAllProduct");
+            const key = `ProductService_getAllProduct`;
+            const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get all Product success !", data: JSON.parse(dataCache)};
             }
             const products = await Product.aggregate([{$match:{status:"ACTIVE"}},{$sort:{"name":1}}, {$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}},{$unwind:"$productDetail"},{$match:{"productDetail.status":"ACTIVE"}},{"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }},{ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } },{$project:{"productDetail":0}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{"name":1}}])
-            await RedisCache.setCache("getAllProduct", JSON.stringify(products), 60*5);
+            await RedisCache.setCache(key, JSON.stringify(products), 60*5);
             return {status: 200,message: "get all Product success !", data: products};
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
@@ -49,7 +31,7 @@ export class ProductService {
 
     static async getAllProductLimitPage(page: number, limit: number) {
         try {
-            const key = `getAllProductLimitPage(page:${page},limit:${limit})`;
+            const key = `ProductService_getAllProductLimitPage(page:${page},limit:${limit})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
@@ -64,7 +46,7 @@ export class ProductService {
 
     static async getProductLowQuantity() {
         try {
-            const key = `getProductLowQuantity`;
+            const key = `ProductService_getProductLowQuantity`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
@@ -80,7 +62,7 @@ export class ProductService {
 
     static async getProductById(productId: String){
         try {
-            const key = `getProductById(productId:${productId})`;
+            const key = `ProductService_getProductById(productId:${productId})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
@@ -95,7 +77,7 @@ export class ProductService {
 
     static async getNewProduct(){
         try {
-            const key: String = `getNewProduct`
+            const key: String = `ProductService_getNewProduct`
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Product success !", data: JSON.parse(dataCache)}
@@ -111,7 +93,7 @@ export class ProductService {
     static async getProductWithNameType(listType: Array<String>){
         try {
             
-            const key: String = `getProductWithNameType(listType:${listType})`
+            const key: String = `ProductService_getProductWithNameType(listType:${listType})`
             const data = await RedisCache.getCache(key);
             if(data){
                 return {status: 200,message: "found Product success !", data: JSON.parse(data)}
@@ -135,7 +117,7 @@ export class ProductService {
     static async getProductWithNameTypeLimitPage(listType: Array<String>, page: number, limit: number){
         try {
             
-            const key: String = `getProductWithNameTypeLimitPage(listType:${listType},page:${page},limit:${limit})`
+            const key: String = `ProductService_getProductWithNameTypeLimitPage(listType:${listType},page:${page},limit:${limit})`
             const data = await RedisCache.getCache(key);
             if(data){
                 return {status: 200,message: "found Product success !", data: JSON.parse(data)}
@@ -158,7 +140,7 @@ export class ProductService {
 
     static async getProductAndDetailById(productId: String){
         try {
-            const key: String = `getProductAndDetailById(${productId})`
+            const key: String = `ProductService_getProductAndDetailById(${productId})`
             const data = await RedisCache.getCache(key);
             if(data){
                 return {status: 200,message: "found Product success !", data: JSON.parse(data)}
@@ -192,7 +174,7 @@ export class ProductService {
     }
     static async getTopSellProduct(){
         try {
-            const key = `getTopSellProduct`;
+            const key = `ProductService_getTopSellProduct`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
@@ -211,7 +193,7 @@ export class ProductService {
 
     static async getProductOnSale(){
         try {
-            const key = `getProductOnSale`;
+            const key = `ProductService_getProductOnSale`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
@@ -230,7 +212,7 @@ export class ProductService {
 
     static async getProductWithSortPoint(){
         try {
-            const key = `getProductWithSortPoint`;
+            const key = `ProductService_getProductWithSortPoint`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
@@ -249,7 +231,7 @@ export class ProductService {
 
     static async getProductWithNameFind(nameFind: String){
         try {
-            const key = `getProductWithNameFind(nameFind:${nameFind})`;
+            const key = `ProductService_getProductWithNameFind(nameFind:${nameFind})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
@@ -277,7 +259,7 @@ export class ProductService {
 
     static async filterProduct(optionSort: String, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
         try {
-            const key = `filterProduct(optionSort:${optionSort},optionPrice?:${optionPrice},optionSizes?:${optionSizes},optionColors?:${optionColors}, optionRates?:${optionRates})`;
+            const key = `ProductService_filterProduct(optionSort:${optionSort},optionPrice?:${optionPrice},optionSizes?:${optionSizes},optionColors?:${optionColors}, optionRates?:${optionRates})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
@@ -443,7 +425,9 @@ export class ProductService {
                 
                 
             }
-            await RedisCache.clearCache();
+            // await RedisCache.clearCache();
+            const keysProduct = await RedisCache.getKeys(`ProductService*`);
+            await RedisCache.delKeys(keysProduct);
             await Product.findOneAndUpdate({_id: newProduct._id},{listProductDetail: listObjectIdProductDetail},{new: true});
             return {status:201,message: "create Product success !", data: newProduct};
            
@@ -574,7 +558,7 @@ export class ProductService {
                         }
                     }
                 }
-                await RedisCache.clearCache();
+                delKeyRedisWhenChangeProduct();
                 await productNeedUpdate.save();
                 return {status: 204,message: "update Product success !"};
             }
@@ -597,7 +581,8 @@ export class ProductService {
             });
             await CartDetail.deleteMany({productDetail:{$in:productDetailsConvert}, status:"ACTIVE"})
             await Favorite.updateMany({},{$pull:{"listProduct":new ObjectId(`${productId}`)}})
-            await RedisCache.clearCache();
+            // await RedisCache.clearCache();
+            delKeyRedisWhenChangeProduct()
             return {status: 200, message:"Delete product success !"};
         } catch (error) {
             return {status: 500, message: "Something went wrong !", error: error};
@@ -606,7 +591,14 @@ export class ProductService {
 }
 
 
-
+async function delKeyRedisWhenChangeProduct() {
+    const keysCart = await RedisCache.getKeys(`CartService*`);
+    await RedisCache.delKeys(keysCart);
+    const keysProduct = await RedisCache.getKeys(`ProductService*`);
+    await RedisCache.delKeys(keysProduct);
+    const keysFavorite = await RedisCache.getKeys(`FavoriteService*`);
+    await RedisCache.delKeys(keysFavorite);
+}
 
 function checkCanCreateProduct(productDetails: any[]) {
     let result: Boolean = true;

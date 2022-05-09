@@ -54,7 +54,7 @@ export class OrderService {
 
     static async getOrderByOrderId(orderId: String){
         try {
-            const key = `getOrderByOrderId(orderId:${orderId})`;
+            const key = `OrderService_getOrderByOrderId(orderId:${orderId})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
@@ -73,7 +73,7 @@ export class OrderService {
 
     static async getAllOrderWithUser(){
         try {
-            const key = `getAllOrderWithUser`;
+            const key = `OrderService_getAllOrderWithUser`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
@@ -81,6 +81,8 @@ export class OrderService {
             const order = await Order.aggregate([{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}}])
             if(order){
                 await RedisCache.setCache(key, JSON.stringify(order), 60*5);
+                
+                
                 return {status: 200,message: "found Order success !", data: order}
             }
             else
@@ -163,7 +165,8 @@ export class OrderService {
 
                 await session.commitTransaction();
                 session.endSession();
-                await RedisCache.clearCache();
+                // await RedisCache.clearCache();
+                delKeyRedisWhenChangeOrder();
                 return {status: 201, message: "create Order success !", data:newOrder}
             }
             else{
@@ -182,7 +185,7 @@ export class OrderService {
 
     static async getOrdersByDate(typeRequest: String, beginDate?: Date, endDate?: Date){
         try {
-            const key = `getOrdersByDate(typeRequest:${typeRequest}, beginDate?:${beginDate}, endDate?:${endDate})`;
+            const key = `OrderService_getOrdersByDate(typeRequest:${typeRequest}, beginDate?:${beginDate}, endDate?:${endDate})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
@@ -292,7 +295,7 @@ export class OrderService {
 
     static async getTopCustomer(){
         try {
-            const key = `getTopCustomer`;
+            const key = `OrderService_getTopCustomer`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
@@ -311,7 +314,7 @@ export class OrderService {
 
     static async getTopCustomerLimitPage(page: number, limit: number){
         try {
-            const key = `getTopCustomer(page:${page},limit:${limit})`;
+            const key = `OrderService_getTopCustomer(page:${page},limit:${limit})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
@@ -330,7 +333,7 @@ export class OrderService {
    
     static async getTopSellProduct(){
         try {
-            const key = `getTopSellProduct`;
+            const key = `OrderService_getTopSellProduct`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
@@ -349,7 +352,7 @@ export class OrderService {
 
     static async getTopSellProductLimitPage(page: number, limit: number){
         try {
-            const key = `getTopSellProductLimitPage(page:${page},limit:${limit})`;
+            const key = `OrderService_getTopSellProductLimitPage(page:${page},limit:${limit})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
@@ -368,7 +371,7 @@ export class OrderService {
     
     static async sortOrder(typeSort: String, sort: String, typeOrderStatus:String){
         try {
-            const key = `sortOrder(typeSort:${typeSort},sort:${sort},typeOrderStatus:${typeOrderStatus})`;
+            const key = `OrderService_sortOrder(typeSort:${typeSort},sort:${sort},typeOrderStatus:${typeOrderStatus})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
@@ -433,7 +436,8 @@ export class OrderService {
                 if(order.status === "DELIVERING"){
                     await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE"}})
                 }
-                await RedisCache.clearCache();
+                // await RedisCache.clearCache();
+                delKeyRedisWhenChangeOrder();
                 return {status: 204,message: "change status Order success !"};
             }
             else
@@ -447,7 +451,8 @@ export class OrderService {
             let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
             if(order){
                 await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"CANCELED"}})
-                await RedisCache.clearCache();
+                // await RedisCache.clearCache();
+                delKeyRedisWhenChangeOrder();
                 return {status: 204,message: "cancel Order success !"};
             }
             else
@@ -504,4 +509,13 @@ export class OrderService {
             }
         });
     }
+}
+
+async function delKeyRedisWhenChangeOrder() {
+    const keysOrder = await RedisCache.getKeys(`OrderService*`);
+    await RedisCache.delKeys(keysOrder);
+    const keysCart = await RedisCache.getKeys(`CartService*`);
+    await RedisCache.delKeys(keysCart);
+    const keysProduct = await RedisCache.getKeys(`ProductService*`);
+    await RedisCache.delKeys(keysProduct);
 }

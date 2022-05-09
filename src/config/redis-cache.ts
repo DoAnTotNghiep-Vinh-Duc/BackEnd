@@ -14,7 +14,18 @@ async function del(key: any) {
 }
 
 async function clearCache(){
-    return client.flushDb();
+    return await client.flushDb();
+}
+
+async function getKeys(key: any) {
+    return client.keys(key);
+}
+
+async function delKeys(key:any) {
+    for (let index = 0; index < key.length; index++) {
+        await del(key[index]);        
+    }
+    return true;
 }
 
 
@@ -38,6 +49,14 @@ export class RedisCache {
 
     static async clearCache(){
         return await clearCache();
+    }
+
+    static async getKeys(key: any){
+        return await getKeys(key);
+    }
+
+    static async delKeys(key: any){
+        return await delKeys(key);
     }
 }
 

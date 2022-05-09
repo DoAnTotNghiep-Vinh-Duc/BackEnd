@@ -9,7 +9,7 @@ export class CartService {
 
     static async getCartByAccountId(accountId: String){
         try {
-            const key = `getCartByAccountId(accountId:${accountId})`;
+            const key = `CartService_getCartByAccountId(accountId:${accountId})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found Cart success !", data: JSON.parse(dataCache)};
