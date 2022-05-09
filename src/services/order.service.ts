@@ -54,8 +54,14 @@ export class OrderService {
 
     static async getOrderByOrderId(orderId: String){
         try {
+            const key = `getOrderByOrderId(orderId:${orderId})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
             const order = await Order.aggregate([{$match:{_id:new ObjectId(`${orderId}`)}},{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}},{$unwind:"$listOrderDetail"},{$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listOrderDetail.productDetail.product", "foreignField": "_id", "as": "listOrderDetail.productDetail.product" }},{$unwind:"$listOrderDetail.productDetail.product"},{ "$lookup": { "from": "Color", "localField": "listOrderDetail.productDetail.color", "foreignField": "_id", "as": "listOrderDetail.productDetail.color" }},{$unwind:"$listOrderDetail.productDetail.color"},{$project:{"listOrderDetail.productDetail.product.listProductDetail":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listOrderDetail": { "$push": "$listOrderDetail" } }}])
             if(order){
+                await RedisCache.setCache(key, JSON.stringify(order), 60*5);
                 return {status: 200,message: "found Order success !", data: order}
             }
             else
@@ -67,8 +73,14 @@ export class OrderService {
 
     static async getAllOrderWithUser(){
         try {
+            const key = `getAllOrderWithUser`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
             const order = await Order.aggregate([{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}}])
             if(order){
+                await RedisCache.setCache(key, JSON.stringify(order), 60*5);
                 return {status: 200,message: "found Order success !", data: order}
             }
             else
@@ -170,6 +182,11 @@ export class OrderService {
 
     static async getOrdersByDate(typeRequest: String, beginDate?: Date, endDate?: Date){
         try {
+            const key = `getOrdersByDate(typeRequest:${typeRequest}, beginDate?:${beginDate}, endDate?:${endDate})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
             let orders = null;
             if(typeRequest==="TODAY"){
                 let start = new Date();
@@ -256,6 +273,7 @@ export class OrderService {
             }
 
             if(orders){
+                await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Orders success !", data: orders}
             }
             else
@@ -267,8 +285,14 @@ export class OrderService {
 
     static async getTopCustomer(){
         try {
+            const key = `getTopCustomer`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
             const orders = await Order.aggregate([{$match:{}},{$group:{"_id":"$account",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:-1}},{$lookup:{from:"Account", localField:"_id",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"account.information":1, totalQuantity:1, totalPrice:1}},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"information":"$account", totalQuantity:1, totalPrice:1}}])
             if(orders){
+                await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}
             }
             else
@@ -280,8 +304,14 @@ export class OrderService {
 
     static async getTopCustomerLimitPage(page: number, limit: number){
         try {
+            const key = `getTopCustomer(page:${page},limit:${limit})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
             const orders = await Order.aggregate([{$match:{}},{$group:{"_id":"$account",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:-1}},{$lookup:{from:"Account", localField:"_id",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"account.information":1, totalQuantity:1, totalPrice:1}},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"information":"$account", totalQuantity:1, totalPrice:1}},{$skip:(page-1)*limit},{$limit:limit}])
             if(orders){
+                await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}
             }
             else
@@ -293,8 +323,14 @@ export class OrderService {
    
     static async getTopSellProduct(){
         try {
+            const key = `getTopSellProduct`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
             const orders = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}}])
             if(orders){
+                await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}
             }
             else
@@ -306,8 +342,14 @@ export class OrderService {
 
     static async getTopSellProductLimitPage(page: number, limit: number){
         try {
+            const key = `getTopSellProductLimitPage(page:${page},limit:${limit})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
             const orders = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$skip:(page-1)*limit},{$limit:limit}])
             if(orders){
+                await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}
             }
             else
@@ -319,6 +361,11 @@ export class OrderService {
     
     static async sortOrder(typeSort: String, sort: String, typeOrderStatus:String){
         try {
+            const key = `sortOrder(typeSort:${typeSort},sort:${sort},typeOrderStatus:${typeOrderStatus})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
             let orders: any = null;
             let query: Array<any> = [];
             if(typeSort==="NAME"){
@@ -360,6 +407,7 @@ export class OrderService {
             orders = await Order.aggregate(query)
 
             if(orders){
+                await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}
             }
             else
@@ -378,6 +426,7 @@ export class OrderService {
                 if(order.status === "DELIVERING"){
                     await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE"}})
                 }
+                await RedisCache.clearCache();
                 return {status: 204,message: "change status Order success !"};
             }
             else
@@ -391,7 +440,7 @@ export class OrderService {
             let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
             if(order){
                 await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"CANCELED"}})
-                
+                await RedisCache.clearCache();
                 return {status: 204,message: "cancel Order success !"};
             }
             else
