@@ -1,5 +1,5 @@
-import {Account} from "../models/account";
-import { RedisCache } from "../config/redis-cache";
+import {Account} from "../../models/account";
+import { RedisCache } from "../../config/redis-cache";
 export class AccountService {
     static async getAllAccountWithOrderQuantity() {
         try {

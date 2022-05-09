@@ -1,4 +1,4 @@
-import { AccountService } from "../services/account.service";
+import { AccountService } from "../../services/admin/account.service";
 import { Request, Response } from "express";
 
 export class AccountController {
