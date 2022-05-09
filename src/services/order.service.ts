@@ -12,6 +12,8 @@ import mongoose from "mongoose";
 import { CartDetail } from "../models/cart-detail";
 import paypal from "paypal-rest-sdk"
 import { RedisCache } from "../config/redis-cache";
+import { Account } from "../models/account";
+import { Information } from "../models/information";
 paypal.configure({
     'mode': 'sandbox', //sandbox or live
     'client_id': 'ATStXMWKaLIbz91tuL_W6Zt4Mor9WbYytaisCdVdse-62sP3YYbzELeoGvlgO6Mrfx6gUF-Kkg5m5bwm',
@@ -111,6 +113,15 @@ export class OrderService {
         const opts = {session,returnOriginal: false}
         try {
             const cart = await Cart.findOne({account: order.account})
+            const account = await Account.findOne({_id: order.account});
+            const info = await Information.findOne({_id:account.information});
+            if(info.city===""||info.district===""||info.ward===""||info.street===""){
+                info.city= order.city,
+                info.district= order.district, 
+                info.ward= order.ward, 
+                info.street= order.street,
+                await info.save(opts);
+            }
             const cartDetail = await CartDetail.find({$and:[{cartId:cart._id}, {status:"ACTIVE"}]});
             let totalOrderPrice = 0;
             let listOrderDetail = [];

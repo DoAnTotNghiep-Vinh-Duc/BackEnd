@@ -94,7 +94,7 @@ export class AuthService{
         const account = await Account.findOne({ idGoogle: profile.id });
         if(!account){
           const newInformation = new Information({
-            name: "",
+            name: profile.displayName,
             email: "",
             phone: ""
           })
@@ -132,7 +132,7 @@ export class AuthService{
         const user = await Account.findOne({ email: account.email });
         if(!user){
           const newInformation = new Information({
-            name: "",
+            name: account.name,
             email: account.email,
             phone: ""
           })
