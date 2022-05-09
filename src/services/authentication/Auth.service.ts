@@ -8,6 +8,7 @@ import { CartService } from "../cart.service";
 import { AuthMiddleware } from "../../middleware/auth-middleware";
 import {FavoriteService} from "../favorites.service";
 import { SendMailService } from "../send-mail.service";
+import axios from "axios";
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -129,58 +130,69 @@ export class AuthService{
     static async registerWebAccount(account: any): Promise<any>{
       // account: name, email, password
       try {
-        const user = await Account.findOne({ email: account.email });
-        if(!user){
-          const newInformation = new Information({
-            name: account.name,
-            email: account.email,
-            phone: ""
-          })
-          await newInformation.save();
-          // Generate a salt
-          const salt = await bcrypt.genSalt(10);
-          // Generate a password hash (salt + hash)
-          const passwordHashed = await bcrypt.hash(account.password, salt);
-          // Re-assign password hashed
-          const newAccount = new Account({
-            email: account.email,
-            password: passwordHashed,
-            nameDisplay: account.name,
-            isVerifyPhone: false,
-            avatar: "",
-            information: newInformation._id,
-            isVerifyAccountWeb:false
-          })
-          await newAccount.save();
-
-          const cart = {
-            account: newAccount._id,
-          }
-          const newCart = await CartService.createCart(cart);
-          const favorite = {
-            account: newAccount._id
-          }
-          const newFavorite = await FavoriteService.createFavorite(favorite)
-          const verifyCode = await bcrypt.hash(account.email+account.password, salt);
-          await RedisCache.setCache(`${verifyCode}`,account.email);
-          await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
-          return {status: 201, message: "create account success, please check your email for verify !"} ;
+        if(!account.token){
+          return {status:400, message:"token is missing"}
         }
-        else if(!user.isVerifyAccountWeb){
-          // Generate a salt
-          const salt = await bcrypt.genSalt(10);
-          // Generate a password hash (salt + hash)
-          const passwordHashed = await bcrypt.hash(account.password, salt);
-          user.password = passwordHashed;
-          user.nameDisplay = account.name;
-          await user.save();
-          const verifyCode = await bcrypt.hash(account.email+account.password, salt);
-          await RedisCache.setCache(`${verifyCode}`,account.email);
-          await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
-          return {status: 201, message: "create account success, please check your email for verify !"} ;
+        const googleVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.reCaptchaSecret}&response=${account.token}`;
+        const response = await axios.post(googleVerifyUrl);
+        const { success } = response.data;
+        if(success){
+          const user = await Account.findOne({ email: account.email });
+          if(!user){
+            const newInformation = new Information({
+              name: account.name,
+              email: account.email,
+              phone: ""
+            })
+            await newInformation.save();
+            // Generate a salt
+            const salt = await bcrypt.genSalt(10);
+            // Generate a password hash (salt + hash)
+            const passwordHashed = await bcrypt.hash(account.password, salt);
+            // Re-assign password hashed
+            const newAccount = new Account({
+              email: account.email,
+              password: passwordHashed,
+              nameDisplay: account.name,
+              isVerifyPhone: false,
+              avatar: "",
+              information: newInformation._id,
+              isVerifyAccountWeb:false
+            })
+            await newAccount.save();
+  
+            const cart = {
+              account: newAccount._id,
+            }
+            const newCart = await CartService.createCart(cart);
+            const favorite = {
+              account: newAccount._id
+            }
+            const newFavorite = await FavoriteService.createFavorite(favorite)
+            const verifyCode = await bcrypt.hash(account.email+account.password, salt);
+            await RedisCache.setCache(`${verifyCode}`,account.email);
+            await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
+            return {status: 201, message: "create account success, please check your email for verify !"} ;
+          }
+          else if(!user.isVerifyAccountWeb){
+            // Generate a salt
+            const salt = await bcrypt.genSalt(10);
+            // Generate a password hash (salt + hash)
+            const passwordHashed = await bcrypt.hash(account.password, salt);
+            user.password = passwordHashed;
+            user.nameDisplay = account.name;
+            await user.save();
+            const verifyCode = await bcrypt.hash(account.email+account.password, salt);
+            await RedisCache.setCache(`${verifyCode}`,account.email);
+            await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
+            return {status: 201, message: "create account success, please check your email for verify !"} ;
+          }
+          else{
+            return {status: 409, message:"account is already exist !"};
+          }
         }
         else{
-          return {status: 409, message:"account is already exist !"};
+          return {status: 400, message:"Invalid Captcha. Try again !"};
         }
       } catch (error) {
         return {status: 500,message:"Something error when register account ! Please try again !", error: error} ;
