@@ -4,8 +4,14 @@ export class DiscountService {
 
     static async getAllDiscount(){
         try {
+            const key = `getAllDiscount`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found discount success !", data: JSON.parse(dataCache)};
+            }
             const discount = await Discount.find()
             if(discount){
+                await RedisCache.setCache(key, JSON.stringify(discount), 60*5);
                 return {status: 200,message: "found Discount success !", data: discount}
             }
             else
@@ -22,6 +28,7 @@ export class DiscountService {
             const key = "discount_"+newDiscount._id.toString();
             const times = (discount.startDate.getTime() - discount.endDate.getTime()) / 1000;
             await RedisCache.setCache(key, newDiscount._id, times);
+            await RedisCache.delCache("getAllColor")
             return {status: 201, message: "create Discount success !", data: newDiscount}
            
         } catch (error) {
