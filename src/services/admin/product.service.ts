@@ -36,8 +36,6 @@ export class ProductService {
             }
             const products = await Product.aggregate([{$match:{_id:new ObjectId(`${productId}`)}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"}])
             const product = products[0]
-            console.log("PRODUCT: ", product);
-            
             let listProductDetail: any = await ProductDetail.aggregate([{$match:{$and:[{product:new ObjectId(`${productId}`)},{status:{$ne:"DELETE"}}]}},{$lookup:{from:"Color",localField:"color",foreignField:"_id",as:"color"}},{$unwind:"$color"}])
             if(product){
                 const groupByCategory = listProductDetail.reduce((group: any, product: any) => {
@@ -300,7 +298,6 @@ export class ProductService {
 
     static async updateProductByIdAdmin(uploadFile: any, product: any, productDetails: Array<any>){
         try {
-            console.log("PRODUCT DETAILS",util.inspect(productDetails, {showHidden: false, depth: null}))
             if(!checkCanCreateProduct(productDetails)){
                 return {status:400,message: "can not update product !"};
             }

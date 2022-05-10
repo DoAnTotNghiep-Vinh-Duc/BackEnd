@@ -342,10 +342,20 @@ export class OrderService {
             let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
             if(order){
                 if(order.status === "HANDLING"){
-                    await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DELIVERING"}})
+                    const timezone = "Asia/Ho_Chi_Minh";
+                    let date = zonedTimeToUtc(new Date(), timezone);
+
+                    let start = startOfMonth(date);
+                    start.setHours(start.getHours()+7);
+                    await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DELIVERING", deliveryDay: start}})
                 }
                 if(order.status === "DELIVERING"){
-                    await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE"}})
+                    const timezone = "Asia/Ho_Chi_Minh";
+                    let date = zonedTimeToUtc(new Date(), timezone);
+
+                    let start = startOfMonth(date);
+                    start.setHours(start.getHours()+7);
+                    await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE", receiveDay: start}})
                 }
                 // await RedisCache.clearCache();
                 delKeyRedisWhenChangeOrder();

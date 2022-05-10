@@ -17,7 +17,9 @@ export class AuthController{
       if(req.user){
         const user: any = req.user;
         const id = user._id;
-        console.log(req.user)
+        console.log("user:", user);
+        
+        console.log("id", id)
         // const accountGoogle = await GoogleAccount.findOne({googleId});
         const accessToken = await AuthService.signAccessToken(id);
         const refreshToken = await AuthService.signRefreshToken(id);

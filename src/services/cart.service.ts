@@ -98,7 +98,7 @@ export class CartService {
                     await newCartDetail.save();
                     cart.listCartDetail.push(newCartDetail._id);
                     await cart.save();
-                    const key = `getCartByAccountId(accountId:${accountId})`;
+                    const key = `CartService_getCartByAccountId(accountId:${accountId})`;
                     await RedisCache.delCache(key);
                     return {status: 204, message:"add product to cart success !"};
                 }
@@ -124,7 +124,7 @@ export class CartService {
                 }
             }
             await cart.save()
-            const key = `getCartByAccountId(accountId:${accountId})`;
+            const key = `CartService_getCartByAccountId(accountId:${accountId})`;
             await RedisCache.delCache(key);
             return {status: 204, message:"remove product out cart success !"};
         } catch (error) {
@@ -146,7 +146,7 @@ export class CartService {
             }
             cartDetail.quantity+=1;
             await cartDetail.save();
-            const key = `getCartByAccountId(accountId:${accountId})`;
+            const key = `CartService_getCartByAccountId(accountId:${accountId})`;
             await RedisCache.delCache(key);
             return {status: 204, message:"update cart success !"};
         } catch (error) {
@@ -164,7 +164,7 @@ export class CartService {
             else{
                 cartDetail.quantity-=1;
                 await cartDetail.save();
-                const key = `getCartByAccountId(accountId:${accountId})`;
+                const key = `CartService_getCartByAccountId(accountId:${accountId})`;
                 await RedisCache.delCache(key);
                 return {status: 204, message:"update cart success !"};
             }

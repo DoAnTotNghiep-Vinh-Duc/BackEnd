@@ -117,10 +117,10 @@ export class AuthService{
           }
           const newFavorite = await FavoriteService.createFavorite(favorite)
 
-          return {status: 201, message:"create account google success !", data:{nameDisplay: newAccount.nameDisplay, avatar: newAccount.avatar}} ;
+          return {status: 201, message:"create account google success !", data:{nameDisplay: newAccount.nameDisplay, avatar: newAccount.avatar},_id: newAccount._id} ;
         }
         else{
-          return {status: 200, message:"create account google success !", data:{nameDisplay: account.nameDisplay, avatar: account.avatar}} ;
+          return {status: 200, message:"get account google success !", data:{nameDisplay: account.nameDisplay, avatar: account.avatar},_id:account._id} ;
         }
       } catch (error) {
         return {status: 500,message:"Something error when login with google ! Please try again !", error:error} ;
