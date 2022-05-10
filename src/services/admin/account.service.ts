@@ -26,4 +26,14 @@ export class AccountService {
             return{status: 500, message: "Something went wrong !", error: error};
         }
     }
+
+    static async activeAccount(accountId: String){
+        try {
+            await Account.updateOne({_id:new ObjectId(`${accountId}`)},{$set:{status:"ACTIVE"}})
+            await RedisCache.delCache(`${accountId}`);
+            return {status: 200, message: "active account success !"};
+        } catch (error) {
+            return{status: 500, message: "Something went wrong !", error: error};
+        }
+    }
 }
