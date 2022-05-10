@@ -340,7 +340,12 @@ export class ProductService {
             product.discount = discount._id
             
             let productNeedUpdate = await Product.findOne({_id: new ObjectId(`${product._id}`)})
-            
+            if(productNeedUpdate.price !== product.price){
+
+            }
+            if(productNeedUpdate.discount.toString() !== product.discount.toString()){
+                
+            }
             if(productNeedUpdate){
                 productNeedUpdate.name = product.name;
                 productNeedUpdate.description = product.description;
@@ -366,6 +371,8 @@ export class ProductService {
                                         // Nếu product detail bị xóa
                                         if(productDetails[i].listProductDetail[index].status==="DELETE"){
                                             await ProductDetail.findOneAndUpdate({_id:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)},{$set:{status:"DELETE"}})
+                                            // xóa tất cả chi tiết sản phẩm khỏi giỏ hàng
+                                            await CartDetail.deleteMany({productDetail:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)});
                                         }
                                         else{
                                             await ProductDetail.findOneAndUpdate({_id:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)},{$set:{size:productDetails[i].listProductDetail[index].size, quantity:productDetails[i].listProductDetail[index].quantity, image:element.url}})
@@ -395,6 +402,8 @@ export class ProductService {
                                 // Nếu product detail bị xóa
                                 if(productDetails[i].listProductDetail[index].status==="DELETE"){
                                     await ProductDetail.findOneAndUpdate({_id:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)},{$set:{status:"DELETE"}})
+                                    // xóa tất cả chi tiết sản phẩm khỏi giỏ hàng
+                                    await CartDetail.deleteMany({productDetail:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)});
                                 }
                                 else{
                                     await ProductDetail.findOneAndUpdate({_id:new ObjectId(`${productDetails[i].listProductDetail[index]._id}`)},{$set:{size:productDetails[i].listProductDetail[index].size, quantity:productDetails[i].listProductDetail[index].quantity}})

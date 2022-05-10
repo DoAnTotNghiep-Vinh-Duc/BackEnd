@@ -7,8 +7,8 @@ Note: Cần phải tạo 1 middleware check xác thực điện thoại chưa (X
 Note: Chưa có transaction (đã có trong order)
 Note: chưa có cache (mới cache getProductbyId)
 Note: chưa có pub sub để cập nhật khuyến mãi trong giỏ hàng (gần xong)
-Note: Chưa có phân quyền admin trong order router
-Note: Chưa phân quyền admin trong discount router
+Note: Chưa có phân quyền admin trong order router (xong)
+Note: Chưa phân quyền admin trong discount router 
 Note: Cần xử lý lại cái discount (có nên thêm 1 bảng discountDetail không) hoặc bỏ thẳng discount vào product luôn (xong)
 Note: Cần xử lý cái ngày bắt đầu của discount, phải đưa vào redis để nó start
 Note: đăng ký bằng email chưa xong (xong)

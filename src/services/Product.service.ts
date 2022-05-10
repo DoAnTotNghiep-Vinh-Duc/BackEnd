@@ -82,7 +82,7 @@ export class ProductService {
             if(data){
                 return {status: 200,message: "found Product success !", data: JSON.parse(data)}
             }
-            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$match:{status:"ACTIVE"}},{$project:{_id:1}}])
+            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$project:{_id:1}}])
             if(listType.length!==listTypeProduct.length){
                 return {status: 404,message: "Not found product !", data: []};
             }
