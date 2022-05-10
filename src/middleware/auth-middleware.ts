@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken'
 import { Request, Response, NextFunction } from 'express'
 import {client} from "../config/redis";
+import { Account } from '../models/account';
+import { ObjectId } from 'mongodb';
 
 export class AuthMiddleware {
 
@@ -46,5 +48,16 @@ export class AuthMiddleware {
       }
     });
   };
+
+  static async checkAccountIsActive (req: Request, res: Response, next: any): Promise<any>  {
+    const {userId} = req.payload;
+    const account = await Account.findOne({_id: new ObjectId(`${userId}`)});
+    if(account.status==="ACTIVE"){
+      next();
+    }
+    else{
+      return res.status(403).json({ error: { message: "your account has been closed !" } });
+    }
+  }; 
 }
   

@@ -1,5 +1,6 @@
 import {Account} from "../../models/account";
 import { RedisCache } from "../../config/redis-cache";
+import { ObjectId } from "mongodb";
 export class AccountService {
     static async getAllAccountWithOrderQuantity() {
         try {
@@ -16,4 +17,13 @@ export class AccountService {
         }
     }
 
+    static async closeAccount(accountId: String){
+        try {
+            await Account.updateOne({_id:new ObjectId(`${accountId}`)},{$set:{status:"CLOSED"}})
+            await RedisCache.delCache(`${accountId}`);
+            return {status: 200, message: "close account success !"};
+        } catch (error) {
+            return{status: 500, message: "Something went wrong !", error: error};
+        }
+    }
 }

@@ -5,14 +5,14 @@ Note: tạm thời truyền page và limit ở product bằng body, cần chuy�
 Note: chưa có xác thực số điện thoại, phải xác thực số điện thoại mới được đặt hàng (Xong)
 Note: Cần phải tạo 1 middleware check xác thực điện thoại chưa (Xong)
 Note: Chưa có transaction (đã có trong order)
-Note: chưa có cache (mới cache getProductbyId)
+Note: chưa có cache (xong)
 Note: chưa có pub sub để cập nhật khuyến mãi trong giỏ hàng (gần xong)
 Note: Chưa có phân quyền admin trong order router (xong)
 Note: Chưa phân quyền admin trong discount router 
 Note: Cần xử lý lại cái discount (có nên thêm 1 bảng discountDetail không) hoặc bỏ thẳng discount vào product luôn (xong)
 Note: Cần xử lý cái ngày bắt đầu của discount, phải đưa vào redis để nó start
 Note: đăng ký bằng email chưa xong (xong)
-Note: chưa cập nhật giỏ hàng khi update product
+Note: chưa cập nhật giỏ hàng khi update product (xong)
 productDetails:[
     {
             // Cái này là không xóa màu, muốn xóa màu thì chuyển status của tất cả detals sang DELETE

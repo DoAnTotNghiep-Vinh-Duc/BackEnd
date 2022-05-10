@@ -47,6 +47,11 @@ const AccountSchema = new Schema({
     information:{
         type: Schema.Types.ObjectId,
         ref: "Information",
+    },
+    status:{
+        type: String,
+        enum:['ACTIVE','CLOSED'],
+        default:'ACTIVE'
     }
     
 },{timestamps: true, collection:"Account"});

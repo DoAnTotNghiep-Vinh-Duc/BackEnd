@@ -241,6 +241,9 @@ export class AuthService{
       if(!foundAccount.isVerifyAccountWeb){
         return {status:403, message:"Tài khoản chưa được xác thực. "}
       }
+      if(foundAccount.status==="CLOSED"){
+        return {status:403, message:"Tài khoản đã bị khóa. "}
+      }
       else{
         const accessToken = await AuthService.signAccessToken(foundAccount._id);
         const refreshToken = await AuthService.signRefreshToken(foundAccount._id);
