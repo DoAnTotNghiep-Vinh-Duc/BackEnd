@@ -341,7 +341,11 @@ export class ProductService {
             
             let productNeedUpdate = await Product.findOne({_id: new ObjectId(`${product._id}`)})
             if(productNeedUpdate.price !== product.price){
-
+                let productDetails = await ProductDetail.aggregate([{$match:{product:productNeedUpdate._id}},{$match:{status:"ACTIVE"}},{$project:{_id:1}}])
+                let productDetailsConvert = productDetails.map(function(id) {
+                    return id;
+                });
+                await CartDetail.updateMany({productDetail:{$in:productDetailsConvert}},{$set:{price:product.price}});
             }
             if(productNeedUpdate.discount.toString() !== product.discount.toString()){
                 
