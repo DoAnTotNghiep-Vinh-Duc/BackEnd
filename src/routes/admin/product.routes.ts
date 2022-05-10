@@ -1,5 +1,7 @@
 import express from 'express';
 import { ProductController } from '../../controllers/admin/product.controller';
+import { AuthMiddleware } from '../../middleware/auth-middleware';
+import { CheckAdminMiddleware } from '../../middleware/check-admin-middleware';
 export const productRoutes = express.Router();
 let multer = require("multer"); //the library
 let storage = multer.memoryStorage({
@@ -12,16 +14,16 @@ let storage = multer.memoryStorage({
 });//Configure the place you will upload your file
 let upload = multer({ storage: storage });
 
-productRoutes.get("/", ProductController.getAllProductAdmin);
-productRoutes.get("/get-all/:page/:limit", ProductController.getAllProductLimitPageAdmin);
-productRoutes.get("/new-product", ProductController.getNewProductAdmin);
-productRoutes.get("/types", ProductController.getProductWithNameTypeAdmin);
-productRoutes.get("/types-with-limit-page/:page/:limit", ProductController.getProductWithNameTypeLimitPageAdmin);
-productRoutes.get("/top-sell", ProductController.getTopSellProductAdmin);
-productRoutes.get("/sort-point", ProductController.getProductWithSortPointAdmin);
-productRoutes.get("/low-quantity", ProductController.getProductLowQuantityAdmin);
-productRoutes.put("/stop-selling-product/:productId", ProductController.stopSellingProduct);
-productRoutes.put("/resale-product/:productId", ProductController.resaleProduct);
-productRoutes.get("/:product_id", ProductController.getProductAndDetailByIdAdmin);
-productRoutes.put("/:product_id",upload.any(), ProductController.updateProductById);
-productRoutes.post("/",upload.any(), ProductController.createProduct);
+productRoutes.get("/",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getAllProductAdmin);
+productRoutes.get("/get-all/:page/:limit",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getAllProductLimitPageAdmin);
+productRoutes.get("/new-product",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getNewProductAdmin);
+productRoutes.get("/types",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getProductWithNameTypeAdmin);
+productRoutes.get("/types-with-limit-page/:page/:limit",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getProductWithNameTypeLimitPageAdmin);
+productRoutes.get("/top-sell",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getTopSellProductAdmin);
+productRoutes.get("/sort-point",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getProductWithSortPointAdmin);
+productRoutes.get("/low-quantity",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getProductLowQuantityAdmin);
+productRoutes.put("/stop-selling-product/:productId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.stopSellingProduct);
+productRoutes.put("/resale-product/:productId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.resaleProduct);
+productRoutes.get("/:product_id",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getProductAndDetailByIdAdmin);
+productRoutes.put("/:product_id",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, upload.any(), ProductController.updateProductById);
+productRoutes.post("/", AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, upload.any(), ProductController.createProduct);

@@ -1,7 +1,7 @@
 import express from 'express';
 import { OrderController } from '../../controllers/admin/order.controller';
-import { CheckPhoneMiddleware } from '../../middleware/check-phone-middleware';
 import { AuthMiddleware } from '../../middleware/auth-middleware';
+import { CheckAdminMiddleware } from '../../middleware/check-admin-middleware';
 import paypal from "paypal-rest-sdk"
 export const orderRoutes = express.Router();
 paypal.configure({
@@ -74,13 +74,13 @@ orderRoutes.get("/success",(req, res)=>{
         }
     });
 })
-orderRoutes.get("/sortOrder", OrderController.sortOrder); 
-orderRoutes.get("/all-order-with-user", OrderController.getAllOrderWithUser);
-orderRoutes.post("/by-date", OrderController.getOrdersByDate);
-orderRoutes.get("/all-top-customer", OrderController.getTopCustomer);
-orderRoutes.get("/all-top-sell-product", OrderController.getTopSellProduct);
-orderRoutes.get("/top-customer/:page/:limit", OrderController.getTopCustomerLimitPage);
-orderRoutes.get("/top-sell-product/:page/:limit", OrderController.getTopSellProductLimitPage);
-orderRoutes.get("/get-order-by-id/:orderId", OrderController.getOrderByOrderIdAdmin);
-orderRoutes.put("/next-status-order/:orderId", OrderController.nextStatusOrder);
-orderRoutes.put("/cancel-order/:orderId", OrderController.cancelOrder);
+orderRoutes.get("/sortOrder",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin , OrderController.sortOrder); 
+orderRoutes.get("/all-order-with-user",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin , OrderController.getAllOrderWithUser);
+orderRoutes.post("/by-date",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin,  OrderController.getOrdersByDate);
+orderRoutes.get("/all-top-customer",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopCustomer);
+orderRoutes.get("/all-top-sell-product",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopSellProduct);
+orderRoutes.get("/top-customer/:page/:limit",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopCustomerLimitPage);
+orderRoutes.get("/top-sell-product/:page/:limit",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopSellProductLimitPage);
+orderRoutes.get("/get-order-by-id/:orderId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getOrderByOrderIdAdmin);
+orderRoutes.put("/next-status-order/:orderId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.nextStatusOrder);
+orderRoutes.put("/cancel-order/:orderId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.cancelOrder);
