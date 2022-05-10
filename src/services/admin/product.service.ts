@@ -348,7 +348,12 @@ export class ProductService {
                 await CartDetail.updateMany({productDetail:{$in:productDetailsConvert}},{$set:{price:product.price}});
             }
             if(productNeedUpdate.discount.toString() !== product.discount.toString()){
-                
+                let productDetails = await ProductDetail.aggregate([{$match:{product:productNeedUpdate._id}},{$match:{status:"ACTIVE"}},{$project:{_id:1}}])
+                let productDetailsConvert = productDetails.map(function(id) {
+                    return id;
+                });
+                let priceDiscount = product.price*(1-discount.percentDiscount);
+                await CartDetail.updateMany({productDetail:{$in:productDetailsConvert}},{$set:{priceDiscount:priceDiscount}});
             }
             if(productNeedUpdate){
                 productNeedUpdate.name = product.name;
