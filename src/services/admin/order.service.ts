@@ -325,6 +325,11 @@ export class OrderService {
             if(typeOrderStatus === "HANDLING"||typeOrderStatus === "DELIVERING"||typeOrderStatus === "DONE"||typeOrderStatus === "CANCELED"){
                 query.push({$match:{status:typeOrderStatus}})
             }
+            query.push({$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}})
+            query.push({$unwind:"$account"})
+            query.push({$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}});
+            query.push({$unwind:"$account.information"});
+            query.push({$project:{"account.password":0}});
             orders = await Order.aggregate(query)
 
             if(orders){
