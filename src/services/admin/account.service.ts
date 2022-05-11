@@ -21,6 +21,7 @@ export class AccountService {
         try {
             await Account.updateOne({_id:new ObjectId(`${accountId}`)},{$set:{status:"CLOSED"}})
             await RedisCache.delCache(`${accountId}`);
+            await RedisCache.delCache(`getAllAccountWithOrderQuantity`);
             return {status: 200, message: "close account success !"};
         } catch (error) {
             return{status: 500, message: "Something went wrong !", error: error};
@@ -31,6 +32,7 @@ export class AccountService {
         try {
             await Account.updateOne({_id:new ObjectId(`${accountId}`)},{$set:{status:"ACTIVE"}})
             await RedisCache.delCache(`${accountId}`);
+            await RedisCache.delCache(`getAllAccountWithOrderQuantity`);
             return {status: 200, message: "active account success !"};
         } catch (error) {
             return{status: 500, message: "Something went wrong !", error: error};
