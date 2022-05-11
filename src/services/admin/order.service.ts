@@ -331,7 +331,32 @@ export class OrderService {
             query.push({$unwind:"$account.information"});
             query.push({$project:{"account.password":0}});
             orders = await Order.aggregate(query)
-
+            if(typeSort==="NAME"){
+                orders.sort(compare)
+                console.log(orders);
+                
+            }
+            function compare( a: any, b: any ) {
+                if(sort === "ASC"){
+                    if ( a.account.information.name < b.account.information.name ){
+                        return -1;
+                      }
+                      if ( a.account.information.name > b.account.information.name ){
+                        return 1;
+                      }
+                      return 0;
+                }
+                else if(sort === "DESC"){
+                    if ( a.account.information.name > b.account.information.name ){
+                        return -1;
+                      }
+                      if ( a.account.information.name < b.account.information.name ){
+                        return 1;
+                      }
+                      return 0;
+                }
+                
+            }
             if(orders){
                 await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}

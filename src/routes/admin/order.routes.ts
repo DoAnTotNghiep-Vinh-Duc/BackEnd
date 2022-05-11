@@ -74,7 +74,7 @@ orderRoutes.get("/success",(req, res)=>{
         }
     });
 })
-orderRoutes.get("/sortOrder",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.sortOrder); 
+orderRoutes.get("/sortOrder", OrderController.sortOrder); 
 orderRoutes.get("/all-order-with-user",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getAllOrderWithUser);
 orderRoutes.post("/by-date",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin,  OrderController.getOrdersByDate);
 orderRoutes.get("/all-top-customer",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopCustomer);
