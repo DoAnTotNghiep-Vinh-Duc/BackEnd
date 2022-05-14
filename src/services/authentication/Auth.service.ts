@@ -279,4 +279,23 @@ export class AuthService{
         return {status:500, message:"something went wrong !"};
       }
     }
+
+    static async sendMailforForgotPassword(email: String, captchaToken: any):Promise<any>{
+      try {
+        if(!captchaToken){
+          return {status:400, message:"token is missing"}
+        }
+        const googleVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.reCaptchaSecret}&response=${captchaToken}`;
+        const response = await axios.post(googleVerifyUrl);
+        const { success } = response.data;
+        if(success){
+          await SendMailService.sendMailForgotPassword(email, "I create account", (data: any)=>{});
+        }
+        else{
+          return {status: 400, message:"Invalid Captcha. Try again !"};
+        }
+      } catch (error) {
+        
+      }
+    }
 }

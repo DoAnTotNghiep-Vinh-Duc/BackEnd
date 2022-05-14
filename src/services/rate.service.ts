@@ -44,7 +44,7 @@ export class RateService {
     static async getAllRateProduct(productId: String) {
         try {
             const rates = await Rate.aggregate([{$match:{product:new ObjectId(`${productId}`)}},{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"}])
-            const rateAndCount = await Rate.aggregate([ {"$group" : {_id:"$point", count:{$sum:1}}}, {$sort:{_id:-1}} ])
+            const rateAndCount = await Rate.aggregate([{$match:{product:new ObjectId(`${productId}`)}}, {"$group" : {_id:"$point", count:{$sum:1}}}, {$sort:{_id:-1}} ])
             const numberVoteAndtotalRate = await Product.findOne({_id:new ObjectId(`${productId}`)},{voted:1, point:1, _id:0})
             let ratePercent: Array<any> = [];
             for (let index = 0; index < rateAndCount.length; index++) {
