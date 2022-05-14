@@ -5,6 +5,7 @@ import { facebookStrategy } from "../config/facebook-strategy";
 export const authRoutes = express.Router();
 
 import passport from "passport";
+import { AuthMiddleware } from '../middleware/auth-middleware';
 
 passport.use(googleStrategy)
 passport.use(facebookStrategy)
@@ -48,3 +49,4 @@ authRoutes.post("/signin",AuthController.signInWithWebAccount);
 authRoutes.post("/verify-account-web", AuthController.verifyAccountWeb);
 
 authRoutes.post("/verify-refresh-token", AuthController.verifyRefreshToken)
+authRoutes.put("/change-password",AuthMiddleware.verifyAccessToken ,AuthController.changePassword)

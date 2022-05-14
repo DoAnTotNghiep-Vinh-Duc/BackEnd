@@ -120,6 +120,16 @@ export class AuthController{
         return res.status(500).send({message:"Something went wrong"});
       }
     }
+    static async changePassword(req: Request, res: Response, next: NextFunction) : Promise<any> {
+      try {
+        const {password, newPassword, reEnterPassword} = req.body;
+        const {userId} = req.payload
+        const data = await AuthService.changePassword(userId, password, newPassword, reEnterPassword);
+        return res.status(data.status).json(data);
+      } catch (error) {
+        return res.status(500).send({message:"Something went wrong"});
+      }
+    }
     //   static async signUp (req: IGetPayloadAuthInfoRequest, res: Response, next: NextFunction) : Promise<any>{
     //     try {
     //       const { name, phone, password } = req.value.body;

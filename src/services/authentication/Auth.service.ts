@@ -9,6 +9,7 @@ import { AuthMiddleware } from "../../middleware/auth-middleware";
 import {FavoriteService} from "../favorites.service";
 import { SendMailService } from "../send-mail.service";
 import axios from "axios";
+import { ObjectId } from "mongodb";
 export class AuthService{
     static async signAccessToken (userId: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -249,6 +250,33 @@ export class AuthService{
         const refreshToken = await AuthService.signRefreshToken(foundAccount._id);
         
         return{status: 200, message:{account: {email:foundAccount.email,nameDisplay:foundAccount.nameDisplay, role: foundAccount.roleAccount}, accessToken, refreshToken}}
+      }
+    }
+    static async changePassword(userId: any, password: String, newPassword: any, reEnterPassword:String): Promise<any>{
+      try {
+        const foundAccount = await Account.findOne({ _id: new ObjectId(`${userId}`) });
+        if (!foundAccount)
+          return {status:403, message:"You must login !"};
+        //Check password co ton tai khong
+        const isValid = await foundAccount.isValidPassword(password);
+        if (!isValid) {
+          return {status:403,message:"Sai mật khẩu !"}
+        }
+        //Check password co giong khong
+        if (newPassword !== reEnterPassword) {
+          return {status:403,message:"Password nhập lại sai !"}
+        }
+        
+        // Generate a salt
+        const salt = await bcrypt.genSalt(10);
+        // Generate a password hash (salt + hash)
+        const passwordHashed = await bcrypt.hash(newPassword, salt);
+        //Change Password
+        foundAccount.password = passwordHashed;
+        await foundAccount.save();
+        return {status:204, message:"change password success !"};
+      } catch (error) {
+        return {status:500, message:"something went wrong !"};
       }
     }
 }
