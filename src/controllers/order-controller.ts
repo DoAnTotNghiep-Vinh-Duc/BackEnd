@@ -40,5 +40,23 @@ export class OrderController {
             });
         }
     }
+
+    static async paymentWithPayPal(req: Request, res: Response): Promise<any> {
+        
+    }
+    static async paymentPayPalCancel(req: Request, res: Response): Promise<any> {
+        try {
+            console.log("Cancel");
+            return res.redirect("localhost:3000/order/cancel");
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
+    static async paymentPayPalSuccess(req: Request, res: Response): Promise<any> {
+        
+    }
 }
 

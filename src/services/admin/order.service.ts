@@ -10,48 +10,10 @@ import { zonedTimeToUtc,utcToZonedTime } from 'date-fns-tz';
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 import { CartDetail } from "../../models/cart-detail";
-import paypal from "paypal-rest-sdk"
 import { RedisCache } from "../../config/redis-cache";
 import { Account } from "../../models/account";
 import { Information } from "../../models/information";
-paypal.configure({
-    'mode': 'sandbox', //sandbox or live
-    'client_id': 'ATStXMWKaLIbz91tuL_W6Zt4Mor9WbYytaisCdVdse-62sP3YYbzELeoGvlgO6Mrfx6gUF-Kkg5m5bwm',
-    'client_secret': 'ENeq_uLxVXKoLb37jwFQkUQdRzIsi7jNoQh--DtN-30F26iChl4OV7qRysYF8KLY8l9CgAl8-gvDiDnz'
-});
-const items=   [{
-    "name": "Red Sox Hat",
-    "sku": "001",
-    "price": "1.0",
-    "currency": "USD",
-    "quantity": 15
-},
-{
-  "name": "Blue Sox Hat",
-  "sku": "002",
-  "price": "1.5",
-  "currency": "USD",
-  "quantity": 1
-},
-{
-    "name": "Blue Sox Hat",
-    "sku": "003",
-    "price": "1.5",
-    "currency": "USD",
-    "quantity": 1
-  },
-  {
-    "name": "Blue Sox Hat",
-    "sku": "004",
-    "price": "1.5",
-    "currency": "USD",
-    "quantity": 1
-  }];
-var total =0;
-for(let i = 0;i<items.length;i++)
-{
-    total+=parseFloat(items[i].price)*items[i].quantity;
-}
+
 export class OrderService {
 
     static async getOrderByOrderIdAdmin(orderId: String){
@@ -425,11 +387,6 @@ export class OrderService {
             session.endSession();
             return {status: 500, message: "Something went wrong !", error: error};
         }
-    }
-
-    static async paymentWithPayPal(){
-        
-        
     }
 }
 
