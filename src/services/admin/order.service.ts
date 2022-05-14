@@ -428,37 +428,8 @@ export class OrderService {
     }
 
     static async paymentWithPayPal(){
-        const create_payment_json = {
-            "intent": "sale",
-            "payer": {
-                "payment_method": "paypal"
-            },
-            "redirect_urls": {
-                "return_url": "http://localhost:5000/order/success",
-                "cancel_url": "http://localhost:5000/order/cancel"
-            },
-            "transactions": [{
-                "item_list": {
-                    "items": items
-                },
-                "amount": {
-                    "currency": "USD",
-                    "total": total.toString()
-                },
-                "description": "Hat for the best team ever"
-            }]
-        }
-        paypal.payment.create(create_payment_json, function (error: any, payment: any) {
-            if (error) {
-              return {status: 400, message:"cancel"}
-            } else {
-                for(let i = 0;i < payment.links.length;i++){
-                  if(payment.links[i].rel === 'approval_url'){
-                    return {status: 200, message:"payment", link: payment.links[i].href}
-                  }
-                }
-            }
-        });
+        
+        
     }
 }
 

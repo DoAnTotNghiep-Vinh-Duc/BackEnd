@@ -129,6 +129,8 @@ export class OrderController {
     static async paymentWithPayPal(req: Request, res: Response): Promise<any> {
         try {
             const data: any = await OrderService.paymentWithPayPal();
+            console.log(data);
+            
             if(data.status===400){
                 res.redirect("localhost:3000/order/cancel")
             }

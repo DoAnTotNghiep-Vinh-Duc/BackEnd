@@ -42,7 +42,45 @@ for(let i = 0;i<items.length;i++)
 {
     total+=parseFloat(items[i].price)*items[i].quantity;
 }
-orderRoutes.get("/payment-paypal",OrderController.paymentWithPayPal)
+orderRoutes.get("/payment-paypal",(req, res)=>{
+    try {
+        const create_payment_json = {
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": "http://localhost:5000/order/success",
+                "cancel_url": "http://localhost:5000/order/cancel"
+            },
+            "transactions": [{
+                "item_list": {
+                    "items": items
+                },
+                "amount": {
+                    "currency": "USD",
+                    "total": total.toString()
+                },
+                "description": "Hat for the best team ever"
+            }]
+        }
+        paypal.payment.create(create_payment_json, function (error: any, payment: any) {
+            if (error) {
+                return { status: 400, message: "cancel" };
+            } else {
+                for (let i = 0; i < payment.links.length; i++) {
+                    if (payment.links[i].rel === 'approval_url') {
+                        return { status: 200, message: "payment", link: payment.links[i].href };
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return {status:500, message:"something went wrong !"};
+        
+    }
+})
 
 orderRoutes.get("/cancel",(req, res)=>{
     console.log("Cancel");
@@ -74,7 +112,7 @@ orderRoutes.get("/success",(req, res)=>{
         }
     });
 })
-orderRoutes.get("/sortOrder", OrderController.sortOrder); 
+orderRoutes.get("/sortOrder",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.sortOrder); 
 orderRoutes.get("/all-order-with-user",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getAllOrderWithUser);
 orderRoutes.post("/by-date",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin,  OrderController.getOrdersByDate);
 orderRoutes.get("/all-top-customer",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopCustomer);
