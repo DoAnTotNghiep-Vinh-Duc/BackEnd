@@ -118,8 +118,8 @@ export class ProductController{
 
     static async filterProduct (req: Request, res: Response): Promise<any> {
         try {
-            const {optionSort, optionPrice, optionSizes, optionColors, optionRates} = req.body;
-            const data: any = await ProductService.filterProduct(optionSort, optionPrice, optionSizes, optionColors, optionRates);
+            const {optionSort,listType, optionPrice, optionSizes, optionColors, optionRates} = req.body;
+            const data: any = await ProductService.filterProduct(optionSort,listType, optionPrice, optionSizes, optionColors, optionRates);
             return res.status(data.status).json(data);
          
         } catch (error: any) {

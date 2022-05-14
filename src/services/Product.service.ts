@@ -239,7 +239,7 @@ export class ProductService {
         }
     }
 
-    static async filterProduct(optionSort: String, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
+    static async filterProduct(optionSort: String, listType: Array<String>, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
         try {
             const key = `ProductService_filterProduct(optionSort:${optionSort},optionPrice?:${optionPrice},optionSizes?:${optionSizes},optionColors?:${optionColors}, optionRates?:${optionRates})`;
             const dataCache = await RedisCache.getCache(key);
@@ -287,20 +287,33 @@ export class ProductService {
                 return obj._id;
             });
             console.log(finalArray);
-            
+
+            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$project:{_id:1}}])
+            if(listType.length!==listTypeProduct.length){
+                return {status: 404,message: "Not found type !", data: []};
+            }
+            let convertListType: Array<any> = [];
+            for (let index = 0; index < listTypeProduct.length; index++) {
+                convertListType.push(listTypeProduct[index]._id);
+            }
+            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}])
+            let convertListProduct: Array<any> =[];
+            for (let index = 0; index < products.length; index++) {
+                convertListProduct.push(products[index]._id);
+            }
             // Tìm mấy cái ở trên, rồi phía dưới thì dùng $in, sau đó sort nhé
             let data: any = null;
             if(optionSort==="price-asc"){
-                data = await Product.aggregate([{$match:{"_id":{$in:finalArray}}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$project:{name: 1,description:1,status:1,typeProducts:1,images:1,supplier:1,discount:1,price:1,voted:1,point:1,created_at:1,updated_at:1,discountPrice:{$multiply:["$price",{$subtract:[1,"$discount.percentDiscount"]}]}}},{$sort:{discountPrice:1}},{$project:{discountPrice:0}}])
+                data = await Product.aggregate([{$match:{$and:[{"_id":{$in:finalArray}},{"_id":{$in:convertListProduct}}]}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$project:{name: 1,description:1,status:1,typeProducts:1,images:1,supplier:1,discount:1,price:1,voted:1,point:1,created_at:1,updated_at:1,discountPrice:{$multiply:["$price",{$subtract:[1,"$discount.percentDiscount"]}]}}},{$sort:{discountPrice:1}},{$project:{discountPrice:0}}])
             }
             else if(optionSort==="price-desc"){
-                data = await Product.aggregate([{$match:{"_id":{$in:finalArray}}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$project:{name: 1,description:1,status:1,typeProducts:1,images:1,supplier:1,discount:1,price:1,voted:1,point:1,created_at:1,updated_at:1,discountPrice:{$multiply:["$price",{$subtract:[1,"$discount.percentDiscount"]}]}}},{$sort:{discountPrice:-1}},{$project:{discountPrice:0}}])
+                data = await Product.aggregate([{$match:{$and:[{"_id":{$in:finalArray}},{"_id":{$in:convertListProduct}}]}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$project:{name: 1,description:1,status:1,typeProducts:1,images:1,supplier:1,discount:1,price:1,voted:1,point:1,created_at:1,updated_at:1,discountPrice:{$multiply:["$price",{$subtract:[1,"$discount.percentDiscount"]}]}}},{$sort:{discountPrice:-1}},{$project:{discountPrice:0}}])
             }
             else if(optionSort==="best-selling"){
-                data = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$unwind:"$product"},{$project:{"_id":0,"totalQuantity":0}}, { "$replaceRoot": { "newRoot": "$product" }  },{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$match:{"_id":{$in:finalArray}}}]);
+                data = await Order.aggregate([{$match:{$and:[{"_id":{$in:finalArray}},{"_id":{$in:convertListProduct}}]}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$unwind:"$product"},{$project:{"_id":0,"totalQuantity":0}}, { "$replaceRoot": { "newRoot": "$product" }  },{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$match:{"_id":{$in:finalArray}}}]);
             }
             else if(optionSort === "new-product"){
-                data =await Product.aggregate([{$match:{"_id":{$in:finalArray}}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}]);
+                data =await Product.aggregate([{$match:{$and:[{"_id":{$in:finalArray}},{"_id":{$in:convertListProduct}}]}},{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}]);
             }
             else{
                 return {status: 400,message: "error !"}
