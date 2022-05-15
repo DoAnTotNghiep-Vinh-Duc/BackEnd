@@ -88,18 +88,15 @@ export class RateService {
                 for (let index = 0; index < productNeedRate.length; index++) {
                     convertProductNeedRate.push(productNeedRate[index]._id);
                 }
-                console.log("convertProductNeedRate",convertProductNeedRate);
-                
                 const productRated = await Rate.aggregate([{$match:{$and:[{product:{$in:convertProductNeedRate}},{account:new ObjectId(`${accountId}`)}]}},{$project:{_id:1}}]);
                 let convertProductRated: any[] = []
                 for (let index = 0; index < productRated.length; index++) {
                     convertProductRated.push(productRated[index]._id);
                 }
-                console.log("convertProductRated",convertProductRated);
-                
                 let productCanRate = convertProductNeedRate.filter(function(obj: any) { return convertProductRated.indexOf(obj) == -1; });
                 console.log("productCanRate",productCanRate);
-                return {status: 200, message:"Get product can rate success", data: productCanRate}
+                const objProductCanRate = await Product.aggregate([{$match:{_id:{$in:productCanRate}}}])
+                return {status: 200, message:"Get product can rate success", data: objProductCanRate}
             }
             else{
                 return {status:403, message:"order need to be done !"};
