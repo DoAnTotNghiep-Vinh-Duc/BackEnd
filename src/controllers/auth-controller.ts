@@ -130,6 +130,16 @@ export class AuthController{
         return res.status(500).send({message:"Something went wrong"});
       }
     }
+
+    static async sendMailforForgotPassword(req: Request, res: Response, next: NextFunction) : Promise<any> {
+      try {
+        const {email} = req.body;
+        const data = await AuthService.sendMailforForgotPassword(email, "abc");
+        return res.status(data.status).json(data);
+      } catch (error) {
+        return res.status(500).send({message:"Something went wrong"});
+      }
+    }
     //   static async signUp (req: IGetPayloadAuthInfoRequest, res: Response, next: NextFunction) : Promise<any>{
     //     try {
     //       const { name, phone, password } = req.value.body;
