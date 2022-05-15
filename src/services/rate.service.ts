@@ -6,6 +6,7 @@ import multer from "multer";
 import multerS3 from 'multer-s3';
 import fs from "fs";
 import { v4 as uuid } from "uuid";
+import { Order } from "../models/order";
 
 export class RateService {
     static async uploadImage(uploadFile: any){
@@ -77,7 +78,38 @@ export class RateService {
             return{status: 500, message: "Something went wrong !", error: error};
         }
     }
-
+    static async getProductForRateInOrder(accountId: String, orderId: String) {
+        try {
+            const order = await Order.findOne({_id:new ObjectId(`${orderId}`)})
+            if(order.status==="DONE"){
+                const productNeedRate = await Order.aggregate([{$match:{$and:[{_id:new ObjectId(`${orderId}`)},{account:new ObjectId(`${accountId}`)}]}},{$unwind:"$listOrderDetail"},{$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product"}}])
+                // Lấy product đã được đánh giá
+                let convertProductNeedRate = []
+                for (let index = 0; index < productNeedRate.length; index++) {
+                    convertProductNeedRate.push(productNeedRate[index]._id);
+                }
+                console.log("convertProductNeedRate",convertProductNeedRate);
+                
+                const productRated = await Rate.aggregate([{$match:{$and:[{product:{$in:convertProductNeedRate}},{account:new ObjectId(`${accountId}`)}]}},{$project:{_id:1}}]);
+                let convertProductRated: any[] = []
+                for (let index = 0; index < productRated.length; index++) {
+                    convertProductRated.push(productRated[index]._id);
+                }
+                console.log("convertProductRated",convertProductRated);
+                
+                let productCanRate = convertProductNeedRate.filter(function(obj: any) { return convertProductRated.indexOf(obj) == -1; });
+                console.log("productCanRate",productCanRate);
+                return {status: 200, message:"Get product can rate success", data: productCanRate}
+            }
+            else{
+                return {status:403, message:"order need to be done !"};
+            }
+        } catch (error) {
+            console.log(error);
+            
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
     static async getRateByAccountAndProduct(accountId: String,productId: String){
         try {
 

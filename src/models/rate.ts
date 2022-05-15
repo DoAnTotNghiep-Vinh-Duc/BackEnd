@@ -19,8 +19,8 @@ const RateSchema = new Schema({
         required: false
     },
     image:{
-        type: String,
-        required: false
+        type: Array,
+        default:[]
     }
 },{timestamps: true, collection:"Rate"});
 

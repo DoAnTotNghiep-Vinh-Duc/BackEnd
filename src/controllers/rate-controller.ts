@@ -46,6 +46,20 @@ export class RateController {
             });
         }
     }
+
+    static async getProductForRateInOrder(req: Request, res: Response): Promise<any> {
+        try {
+            const {orderId} = req.params
+            const {userId} = req.payload
+            const data = await RateService.getProductForRateInOrder(userId,orderId);
+            return res.status(data.status).json(data)
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              message: error.message,
+            });
+        }
+    }
     
     static async createRate(req: Request, res: Response): Promise<any> {
         try {
