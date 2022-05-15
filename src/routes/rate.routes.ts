@@ -16,6 +16,6 @@ let upload = multer({ storage: storage });
 rateRoutes.get("/all/:productId", RateController.getAllRateProduct);
 rateRoutes.get("/get-product-for-rate/:orderId", AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive, RateController.getProductForRateInOrder )
 rateRoutes.get("/:productId",AuthMiddleware.verifyAccessToken ,AuthMiddleware.checkAccountIsActive,RateController.getRateByAccountAndProduct);
-rateRoutes.post("/",AuthMiddleware.verifyAccessToken, AuthMiddleware.checkAccountIsActive,RateController.createRate);
+rateRoutes.post("/",AuthMiddleware.verifyAccessToken, AuthMiddleware.checkAccountIsActive,upload.any(), RateController.createRate);
 rateRoutes.put("/",AuthMiddleware.verifyAccessToken, AuthMiddleware.checkAccountIsActive,RateController.updateRateProduct);
 rateRoutes.post("/upload-image",upload.any(), RateController.uploadImage);

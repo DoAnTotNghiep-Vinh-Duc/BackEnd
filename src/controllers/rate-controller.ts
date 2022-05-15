@@ -63,12 +63,20 @@ export class RateController {
     
     static async createRate(req: Request, res: Response): Promise<any> {
         try {
-            const {productId, point, content, image} = req.body
+            const {rateInfo} = req.body
+            console.log("rateInfo",rateInfo);
+            
+            //rateInfo: {productId, point, content}
             const {userId} = req.payload
-            const data = await RateService.createRate(userId, productId, {point, content, image});
+            const uploadFile = req.files;
+            console.log("uploadFile",uploadFile);
+            
+            const data = await RateService.createRate(userId, uploadFile, JSON.parse(rateInfo) );
             return res.status(data.status).json(data);
          
         } catch (error: any) {
+            console.log("Controller",error);
+            
             return res.status(500).send({
               message: error.message,
             });

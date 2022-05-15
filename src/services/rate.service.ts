@@ -124,26 +124,67 @@ export class RateService {
         }
     }
 
-    static async createRate(accountId: String, productId: String,rate: any){
+    static async createRate(accountId: String,uploadFile:any, rateInfo: any){
         try {
+            const rate = await Rate.findOne({account:new ObjectId(`${accountId}`), product:new ObjectId(`${rateInfo.productId}`)})
+            if(rate){
+                return {status: 400, message:"This product has been rated"}
+            }
+            const s3 = new AWS.S3({
+                accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+                secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+                region:"us-east-1"
+            });
+            let listResponse = [];
+            for(let i = 0; i< uploadFile.length; i++){
+                let ul = uploadFile[i].originalname.split(".");
+                let filesTypes = ul[ul.length - 1];
+                let filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
+                console.log("filePath", filePath);
+                
+                let params: any = {
+                    Body: uploadFile[i].buffer,
+                    Bucket: `${process.env.AWS_BUCKET_NAME}`,
+                    Key: `${filePath}`,
+                    ACL: "public-read",
+                    ContentType: uploadFile[i].mimetype,
+                };
+                let s3Response = await s3.upload(params).promise();
+                console.log("s3Response",s3Response);
+                
+                listResponse.push({
+                    idColor: uploadFile[i].fieldname,
+                    url: s3Response.Location
+                })
+            }
+            let listImageUrl = [];
+            for (let index = 0; index < listResponse.length; index++) {
+                listImageUrl.push(listResponse[index].url);
+                console.log(listResponse[index].url);
+                
+            }
+            console.log("listImageUrl",listImageUrl);
+
             const tmpRate = {
                 account:new ObjectId(`${accountId}`),
-                product: new ObjectId(`${productId}`),
-                point: rate.point,
-                content: rate?.content,
-                image: rate?.image
+                product: new ObjectId(`${rateInfo.productId}`),
+                point: rateInfo.point,
+                content: rateInfo?.content,
+                image: listImageUrl
             }
             const newRate = new Rate(tmpRate);
             await newRate.save();
-            const product = await Product.findOne({_id: new ObjectId(`${productId}`)})
+            const product = await Product.findOne({_id: new ObjectId(`${rateInfo.productId}`)})
             const currentPoint = product.point;
             const currentVoted = product.voted;
-            product.point = (Math.round(currentPoint*currentVoted)+rate.point)/(currentVoted+1)
+            product.point = (Math.round(currentPoint*currentVoted)+rateInfo.point)/(currentVoted+1)
             product.voted+=1;
             await product.save();
             return {status: 201, message: "create Rate success !", data: newRate}
            
         } catch (error) {
+            console.log(error);
+            
             return{status:500,message: "Something went wrong !", error: error};
         }
     }
