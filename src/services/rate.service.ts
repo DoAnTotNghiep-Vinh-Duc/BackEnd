@@ -88,12 +88,30 @@ export class RateService {
                 for (let index = 0; index < productNeedRate.length; index++) {
                     convertProductNeedRate.push(productNeedRate[index]._id);
                 }
-                const productRated = await Rate.aggregate([{$match:{$and:[{product:{$in:convertProductNeedRate}},{account:new ObjectId(`${accountId}`)}]}},{$project:{_id:1}}]);
+                console.log("convertProductNeedRate",convertProductNeedRate);
+                
+                const productRated = await Rate.aggregate([{$match:{$and:[{product:{$in:convertProductNeedRate}},{account:new ObjectId(`${accountId}`)}]}},{$project:{product:1}}]);
                 let convertProductRated: any[] = []
                 for (let index = 0; index < productRated.length; index++) {
-                    convertProductRated.push(productRated[index]._id);
+                    convertProductRated.push(productRated[index].product);
                 }
-                let productCanRate = convertProductNeedRate.filter(function(obj: any) { return convertProductRated.indexOf(obj) == -1; });
+                console.log("convertProductRated",convertProductRated);
+                
+                // let productCanRate = convertProductNeedRate.filter(function(obj: any) { return convertProductRated.indexOf(obj) == -1; });
+                let productCanRate: any[] = [];
+                for(let i = 0; i < convertProductNeedRate.length; i++){
+                    let found = false;
+
+                    for(let j = 0; j < convertProductRated.length; j++){ // j < is missed;
+                        if(convertProductNeedRate[i].toString() === convertProductRated[j].toString()){
+                        found = true;
+                        break; 
+                    }
+                    }
+                    if(found == false){
+                        productCanRate.push(convertProductNeedRate[i]);
+                    }
+                }
                 console.log("productCanRate",productCanRate);
                 const objProductCanRate = await Product.aggregate([{$match:{_id:{$in:productCanRate}}}])
                 return {status: 200, message:"Get product can rate success", data: objProductCanRate}
