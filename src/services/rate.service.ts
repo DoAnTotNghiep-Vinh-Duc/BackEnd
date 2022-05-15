@@ -45,6 +45,23 @@ export class RateService {
         try {
             const rates = await Rate.aggregate([{$match:{product:new ObjectId(`${productId}`)}},{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"}])
             const rateAndCount = await Rate.aggregate([{$match:{product:new ObjectId(`${productId}`)}}, {"$group" : {_id:"$point", count:{$sum:1}}}, {$sort:{_id:-1}} ])
+            console.log("rateAndCount",rateAndCount);
+            
+            for (let index = 5; index >0; index--) {
+                console.log(index,rateAndCount[5-index]);
+                
+                if(!rateAndCount[5-index]||index.toString()!==rateAndCount[5-index]._id.toString()){
+                    rateAndCount.splice(5-index,0,{
+                        _id:index.toString(),
+                        count:0
+                    })
+                    // rateAndCount.push({
+                    //     _id:index.toString(),
+                    //     count:0
+                    // })
+                }
+                
+            }
             const numberVoteAndtotalRate = await Product.findOne({_id:new ObjectId(`${productId}`)},{voted:1, point:1, _id:0})
             let ratePercent: Array<any> = [];
             for (let index = 0; index < rateAndCount.length; index++) {
@@ -55,6 +72,8 @@ export class RateService {
             }
             return {status: 200, message: "get all rates product success !", data: {rates, rateAndCount, ratePercent}};
         } catch (error) {
+            console.log(error);
+            
             return{status: 500, message: "Something went wrong !", error: error};
         }
     }
