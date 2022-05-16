@@ -5,5 +5,5 @@ import { AuthMiddleware } from '../../middleware/auth-middleware';
 export const discountRoutes = express.Router();
 
 discountRoutes.get("/", AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, DiscountController.getAllDiscount);
-discountRoutes.post("/",  DiscountController.createDiscount);
+discountRoutes.post("/", AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, DiscountController.createDiscount);
 discountRoutes.put("/", AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, DiscountController.updateDiscount)
