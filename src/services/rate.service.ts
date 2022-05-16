@@ -172,22 +172,20 @@ export class RateService {
                     url: s3Response.Location
                 })
             }
-            let listImageUrl = [];
-            for (let index = 0; index < listResponse.length; index++) {
-                listImageUrl.push(listResponse[index].url);
-                console.log(listResponse[index].url);
-                
-            }
-            console.log("listImageUrl",listImageUrl);
+            
 
             const tmpRate = {
                 account:new ObjectId(`${accountId}`),
                 product: new ObjectId(`${rateInfo.productId}`),
                 point: rateInfo.point,
-                content: rateInfo?.content,
-                image: listImageUrl
+                content: rateInfo?.content
             }
             const newRate = new Rate(tmpRate);
+            for (let index = 0; index < listResponse.length; index++) {
+                newRate.image.push(listResponse[index].url);
+            }
+            console.log(newRate);
+            
             await newRate.save();
             const product = await Product.findOne({_id: new ObjectId(`${rateInfo.productId}`)})
             const currentPoint = product.point;
