@@ -16,6 +16,8 @@ Note: chưa cập nhật giỏ hàng khi update product (xong)
 Note: vụ người ta chưa xác thực liền, mà để mấy ngày, hoặc k nhận được mail sau khi đăng ký thì làm cái resend mail nhé
 Note: cái sửa sản phẩm, việc xóa product detail rồi thêm lại, phải check để chuyển trạng thái delete -> active chứ k có tạo cái mới
 Note: quên mật khẩu
+Note: chưa cache trong rate service
+Note: cập nhật discount
 productDetails:[
     {
             // Cái này là không xóa màu, muốn xóa màu thì chuyển status của tất cả detals sang DELETE

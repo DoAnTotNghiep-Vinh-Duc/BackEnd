@@ -1,5 +1,6 @@
-import {Discount} from "../models/discount";
-import { RedisCache } from "../config/redis-cache";
+import {Discount} from "../../models/discount";
+import { RedisCache } from "../../config/redis-cache";
+import { ObjectId } from "mongodb";
 export class DiscountService {
 
     static async getAllDiscount(){
@@ -28,8 +29,28 @@ export class DiscountService {
             const key = "discount_"+newDiscount._id.toString();
             const times = (discount.startDate.getTime() - discount.endDate.getTime()) / 1000;
             await RedisCache.setCache(key, newDiscount._id, times);
-            await RedisCache.delCache("getAllColor")
             return {status: 201, message: "create Discount success !", data: newDiscount}
+           
+        } catch (error) {
+            return{status:500,message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async updateDiscount(discount: any){
+        try {
+            const objDiscount = await Discount.findOne({_id: new ObjectId(`${discount._id}`)});
+            if(!objDiscount){
+                return {status: 404, message: "Not found discount !"};
+            }
+            objDiscount.nameDiscount = discount.nameDiscount;
+            objDiscount.startDate = discount.startDate;
+            objDiscount.endDate = discount.endDate;
+            objDiscount.percentDiscount = discount.percentDiscount;
+            await objDiscount.save();
+            // const key = "discount_"+objDiscount._id.toString();
+            // const times = (discount.startDate.getTime() - discount.endDate.getTime()) / 1000;
+            // await RedisCache.setCache(key, objDiscount._id, times);
+            return {status: 204, message: "update discount success !"}
            
         } catch (error) {
             return{status:500,message: "Something went wrong !", error: error};

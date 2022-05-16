@@ -7,7 +7,6 @@ import { orderRoutes } from './order.routes';
 import { informationRoutes } from './information.routes';
 import { rateRoutes } from './rate.routes';
 import { favoriteRoutes } from './favorite.routes';
-import { discountRoutes } from './discount.routes';
 
 export const Routes = express.Router();
 Routes.use('/auth', authRoutes);
@@ -18,4 +17,3 @@ Routes.use('/order', orderRoutes);
 Routes.use('/information', informationRoutes);
 Routes.use('/rate', rateRoutes);
 Routes.use('/favorite', favoriteRoutes);
-Routes.use('/discount', discountRoutes);

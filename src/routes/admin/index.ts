@@ -5,6 +5,7 @@ import { colorRoutes } from './color.routes';
 import {productRoutes} from './product.routes';
 import {orderRoutes} from './order.routes'
 import {accountRoutes} from './account.routes';
+import {discountRoutes} from "./discount.routes";
 export const adminRoutes = express.Router();
 adminRoutes.use('/', supplierRoutes);
 adminRoutes.use('/', typeProductRoutes);
@@ -12,3 +13,4 @@ adminRoutes.use('/', colorRoutes);
 adminRoutes.use('/product', productRoutes);
 adminRoutes.use('/order',orderRoutes);
 adminRoutes.use('/account', accountRoutes);
+adminRoutes.use('/discount', discountRoutes);
