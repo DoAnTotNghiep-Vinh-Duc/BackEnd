@@ -16,8 +16,11 @@ export class DiscountController {
     
     static async createDiscount(req: Request, res: Response): Promise<any> {
         try {
-            const {nameDiscount, description, startDate, endDate, percentDiscount} = req.body
-            const data = await DiscountService.createDiscount({nameDiscount, description, startDate, endDate, percentDiscount} );
+            const {nameDiscount, startDate, endDate, percentDiscount} = req.body
+            
+            const startDateConvert = new Date(startDate)
+            const endDateConvert = new Date(endDate)
+            const data = await DiscountService.createDiscount({nameDiscount, startDate:startDateConvert, endDate:endDateConvert, percentDiscount} );
             return res.status(data.status).json(data)
          
         } catch (error: any) {
@@ -30,7 +33,7 @@ export class DiscountController {
     static async updateDiscount(req: Request, res: Response): Promise<any> {
         try {
             const {_id, nameDiscount, startDate, endDate, percentDiscount} = req.body
-            const data = await DiscountService.createDiscount({_id, nameDiscount, startDate, endDate, percentDiscount} );
+            const data = await DiscountService.updateDiscount({_id, nameDiscount, startDate, endDate, percentDiscount} );
             return res.status(data.status).json(data)
          
         } catch (error: any) {
