@@ -69,8 +69,6 @@ export class DiscountService {
             const timeNow = new Date();
             console.log("timeNow",timeNow);
             timeNow.setHours(timeNow.getHours()+7);
-            discount.startDate.setHours(discount.startDate.getHours()+7);
-            discount.endDate.setHours(discount.endDate.getHours()+7);
             const timeStart = (discount.startDate.getTime()- timeNow.getTime())/1000;
             const timeEnd = (discount.endDate.getTime() -timeNow.getTime()) / 1000;
             console.log(timeStart);
@@ -82,6 +80,10 @@ export class DiscountService {
                 return {status: 400, message:"start date must be before end date"}
             }
             if(objDiscount.startDate.getTime()<timeNow.getTime()){
+                console.log("objDiscount.startDate.getTime()",objDiscount.startDate);
+                console.log("discount.startDate",discount.startDate);
+                
+                
                 if(objDiscount.startDate.getTime()!==discount.startDate.getTime()){
                     return {status: 400, message:"you can not edit start date"}
                 }
