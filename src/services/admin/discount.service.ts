@@ -5,7 +5,7 @@ export class DiscountService {
 
     static async getAllDiscount(){
         try {
-            const key = `getAllDiscount`;
+            const key = `getAllDiscount()`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "found discount success !", data: JSON.parse(dataCache)};
@@ -46,9 +46,8 @@ export class DiscountService {
             console.log(newDiscount);
             
             await newDiscount.save();
-            // const key = "discount_"+newDiscount._id.toString();
-            
-            // await RedisCache.setCache(key, newDiscount._id, times);
+            const key = `getAllDiscount()`;
+            await RedisCache.delCache(key);
             return {status: 201, message: "create Discount success !", data: newDiscount}
            
         } catch (error) {
@@ -74,23 +73,19 @@ export class DiscountService {
             console.log(timeStart);
             console.log(timeEnd);
             if(discount.percentDiscount<0||discount.percentDiscount>1){
-                return {status: 400, message:"percent discount must >=0 and <=1"}
+                return {status: 400, message:"phần trăm giảm giá phải từ 0->1"}
             }
             if(discount.endDate.getTime()-discount.startDate.getTime()<0){
-                return {status: 400, message:"start date must be before end date"}
+                return {status: 400, message:"ngày bắt đầu phải trước ngày kết thúc"}
             }
             if(objDiscount.startDate.getTime()<timeNow.getTime()){
-                console.log("objDiscount.startDate.getTime()",objDiscount.startDate);
-                console.log("discount.startDate",discount.startDate);
-                
-                
                 if(objDiscount.startDate.getTime()!==discount.startDate.getTime()){
-                    return {status: 400, message:"you can not edit start date"}
+                    return {status: 400, message:"discount này đã bắt đầu, bạn không thể sửa ngày bắt đầu !"}
                 }
             }
             if(objDiscount.startDate.getTime()> timeNow.getTime()){
                 if(discount.startDate.getTime()- timeNow.getTime()<0){
-                    return {status: 400, message:"start date cannot be after current date"}
+                    return {status: 400, message:"ngày bắt đầu không được trước ngày hiện tại"}
                 }
             }
 
@@ -99,9 +94,8 @@ export class DiscountService {
             objDiscount.endDate = discount.endDate;
             objDiscount.percentDiscount = discount.percentDiscount;
             await objDiscount.save();
-            // const key = "discount_"+objDiscount._id.toString();
-            // const times = (discount.endDate.getTime() - discount.startDate.getTime()) / 1000;
-            // await RedisCache.setCache(key, objDiscount._id, times);
+            const key = `getAllDiscount()`;
+            await RedisCache.delCache(key);
             return {status: 204, message: "update discount success !"}
            
         } catch (error) {
