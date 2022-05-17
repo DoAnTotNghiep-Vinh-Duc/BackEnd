@@ -233,7 +233,7 @@ export class ProductService {
 
     static async filterProduct(optionSort: String, listType: Array<String>, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
         try {
-            const key = `ProductService_filterProduct(optionSort:${optionSort},optionPrice?:${optionPrice},optionSizes?:${optionSizes},optionColors?:${optionColors}, optionRates?:${optionRates})`;
+            const key = `ProductService_filterProduct(optionSort:${optionSort},listType:${listType},optionPrice?:${optionPrice},optionSizes?:${optionSizes},optionColors?:${optionColors}, optionRates?:${optionRates})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
