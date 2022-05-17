@@ -30,8 +30,6 @@ export class DiscountService {
             const timeNow = new Date();
             console.log("timeNow",timeNow);
             timeNow.setHours(timeNow.getHours()+7);
-            discount.startDate.setHours(discount.startDate.getHours()+7);
-            discount.endDate.setHours(discount.endDate.getHours()+7);
             const timeStart = (discount.startDate.getTime()- timeNow.getTime())/1000;
             const timeEnd = (discount.endDate.getTime() -timeNow.getTime()) / 1000;
             console.log(timeStart);
