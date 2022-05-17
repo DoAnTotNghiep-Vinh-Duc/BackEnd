@@ -359,8 +359,15 @@ export class ProductService {
                 let productDetailsConvert = productDetails.map(function(id) {
                     return id;
                 });
-                let priceDiscount = product.price*(1-discount.percentDiscount);
-                await CartDetail.updateMany({productDetail:{$in:productDetailsConvert}},{$set:{priceDiscount:priceDiscount}});
+                let now = new Date();
+                now.setHours(now.getHours()+7);
+                if(discount.startDate.getTime()<now.getTime()&&discount.endDate.getTime()>now.getTime()){
+                    product.priceDiscount = product.price*(1-discount.percentDiscount);
+                }
+                else{
+                    product.priceDiscount = product.price;
+                }
+                await CartDetail.updateMany({productDetail:{$in:productDetailsConvert}},{$set:{priceDiscount:product.priceDiscount}});
             }
             if(productNeedUpdate){
                 productNeedUpdate.name = product.name;
@@ -371,6 +378,7 @@ export class ProductService {
                 productNeedUpdate.suplier = product.suplier;
                 productNeedUpdate.discount = product.discount;
                 productNeedUpdate.price = product.price;
+                productNeedUpdate.priceDiscount = product.priceDiscount;
                 while (productNeedUpdate.images.length>0) {
                     productNeedUpdate.images.pop();
                 }
@@ -396,6 +404,7 @@ export class ProductService {
                                     }
                                     // Nếu đây là product detail mới được thêm vào (Mới thêm thì sẽ không có id)
                                     else{
+                                        // Phải check coi nó có được tạo trước đó chưa, nếu có thì chuyển status sang ACTIVE
                                         let newProductDetail = new ProductDetail({
                                             size:productDetails[i].listProductDetail[index].size,
                                             quantity: productDetails[i].listProductDetail[index].quantity,

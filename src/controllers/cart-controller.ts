@@ -20,7 +20,7 @@ export class CartController {
             const {productDetailId, quantity} = req.body
             
             const data = await CartService.addToCart(req.payload.userId, productDetailId,quantity);
-            return res.status(data.status).json(data.message)
+            return res.status(data.status).json(data)
         } catch (error: any) {
             return res.status(500).json({
                 message: error.message,
@@ -32,7 +32,7 @@ export class CartController {
         try {
             const {productDetailId} = req.body
             const data = await CartService.removeProductOutCart(req.payload.userId, productDetailId);
-            return res.status(data.status).json(data.message)
+            return res.status(data.status).json(data)
         } catch (error: any) {
             return res.status(500).send({
                 message: error.message,
@@ -44,7 +44,7 @@ export class CartController {
         try {
             const { productDetailId} = req.body
             const data = await CartService.increaseQuantity(req.payload.userId, productDetailId);
-            return res.status(data.status).json(data.message)
+            return res.status(data.status).json(data)
         } catch (error: any) {
             return res.status(500).send({
                 message: error.message,
@@ -56,7 +56,7 @@ export class CartController {
         try {
             const {productDetailId} = req.body
             const data = await CartService.decreaseQuantity(req.payload.userId, productDetailId);
-            return res.status(data.status).json(data.message)
+            return res.status(data.status).json(data)
         } catch (error: any) {
             return res.status(500).send({
                 message: error.message,
