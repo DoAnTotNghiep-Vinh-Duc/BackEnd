@@ -231,9 +231,9 @@ export class ProductService {
         }
     }
 
-    static async filterProduct(optionSort: String, listType: Array<String>, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
+    static async filterProduct(optionSort: String, listType: Array<String>,keySearch?:String, optionPrice?: Array<Number>, optionSizes?: Array<String>, optionColors?: Array<String>, optionRates?: number){
         try {
-            const key = `ProductService_filterProduct(optionSort:${optionSort},listType:${listType},optionPrice?:${optionPrice},optionSizes?:${optionSizes},optionColors?:${optionColors}, optionRates?:${optionRates})`;
+            const key = `ProductService_filterProduct(optionSort:${optionSort},listType:${listType},keySearch:${keySearch},optionPrice?:${optionPrice},optionSizes?:${optionSizes},optionColors?:${optionColors}, optionRates?:${optionRates})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get Product success !", data: JSON.parse(dataCache)};
@@ -269,6 +269,19 @@ export class ProductService {
                 let queryOptionRate1 = {$match:{point:{$gte:optionRates}}};
                 query.push(queryOptionRate1);
             }
+            if(keySearch){
+                let arr = keySearch.split(" ");
+                let keySearchs = [];
+                for(let i =0;i<arr.length;i++){
+                    if(arr[i]!==" "){
+                        keySearchs.push({"name":{"$regex":arr[i].toLowerCase()}});
+                    }
+                }
+                console.log(keySearchs);
+                let queryKeySearch1 = {$match:{$or:keySearchs}};
+                query.push(queryKeySearch1);
+            }
+
             let queryGroup = {$group:{"_id":"$_id"}}
             query.push(queryGroup)
 
@@ -278,19 +291,27 @@ export class ProductService {
             });
             console.log(finalArray);
 
-            const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$project:{_id:1}}])
-            if(listType.length!==listTypeProduct.length){
-                return {status: 404,message: "Not found type !", data: []};
+            let products: any = null;
+            if(listType.length>0){
+                const listTypeProduct = await TypeProduct.aggregate([{$match:{name:{$in:listType}}},{$project:{_id:1}}])
+                if(listType.length!==listTypeProduct.length){
+                    return {status: 404,message: "Not found type !", data: []};
+                }
+                let convertListType: Array<any> = [];
+                for (let index = 0; index < listTypeProduct.length; index++) {
+                    convertListType.push(listTypeProduct[index]._id);
+                }
+                products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}])
             }
-            let convertListType: Array<any> = [];
-            for (let index = 0; index < listTypeProduct.length; index++) {
-                convertListType.push(listTypeProduct[index]._id);
+            else{
+                products = await Product.find();
             }
-            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}])
+            
             let convertListProduct: Array<any> =[];
             for (let index = 0; index < products.length; index++) {
                 convertListProduct.push(products[index]._id);
             }
+
             // Tìm mấy cái ở trên, rồi phía dưới thì dùng $in, sau đó sort nhé
             let data: any = null;
             if(optionSort==="price-asc"){

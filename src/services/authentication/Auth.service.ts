@@ -252,7 +252,7 @@ export class AuthService{
         return{status: 200, message:{account: {email:foundAccount.email,nameDisplay:foundAccount.nameDisplay, role: foundAccount.roleAccount}, accessToken, refreshToken}}
       }
     }
-    static async changePassword(userId: any, password: String, newPassword: any, reEnterPassword:String): Promise<any>{
+    static async changePassword(userId: any, password: String, newPassword: String, reEnterPassword:String): Promise<any>{
       try {
         const foundAccount = await Account.findOne({ _id: new ObjectId(`${userId}`) });
         if (!foundAccount)
