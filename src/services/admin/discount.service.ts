@@ -112,6 +112,8 @@ export class DiscountService {
             const discount = await Discount.findOne({_id:discountId});
             // const products = await Product.find({discount: new ObjectId(`${discountId}`)})
             await Discount.deleteOne({_id: new ObjectId(`${discountId}`)});
+            const key = `getAllDiscount()`;
+            await RedisCache.delCache(key);
             return {status: 200, message:"delete discount success !"};
         } catch (error) {
             return{status:500,message: "Something went wrong !", error: error};
