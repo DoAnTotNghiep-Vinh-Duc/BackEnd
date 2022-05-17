@@ -204,7 +204,7 @@ export class MaiTemplateService {
                           cursor: pointer;
                           text-decoration: none;
                         "
-                        href="http://localhost:3000/verifyAccount/${encodeURIComponent(data.verifyCode)}"
+                        href="http://localhost:3000/verifyPassword/${encodeURIComponent(data.verifyCode)}"
                         target="_blank"
                       >
                         Xác thực để nhận mật khẩu mới

@@ -133,8 +133,8 @@ export class AuthController{
 
     static async sendMailforForgotPassword(req: Request, res: Response, next: NextFunction) : Promise<any> {
       try {
-        const {email} = req.body;
-        const data = await AuthService.sendMailforForgotPassword(email, "abc");
+        const {email, token} = req.body;
+        const data = await AuthService.sendMailforForgotPassword(email, token);
         return res.status(data.status).json(data);
       } catch (error) {
         return res.status(500).send({message:"Something went wrong"});
