@@ -283,7 +283,7 @@ export class AuthService{
     static async sendMailforForgotPassword(email: String, captchaToken: any):Promise<any>{
       try {
         if(!captchaToken){
-          return {status:400, message:"token is missing"}
+          return {status:400, message:"chưa xác thực captcha"}
         }
         const googleVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.reCaptchaSecret}&response=${captchaToken}`;
         const response = await axios.post(googleVerifyUrl);
@@ -291,10 +291,10 @@ export class AuthService{
         if(success){
           const account = await Account.findOne({email:email});
           if(!account){
-            return {status:404, message:"Not found account !"};
+            return {status:404, message:"Không tìm thấy tài khoản !"};
           }
           if(account.isVerifyAccountWeb===false){
-            return {status:403, message:"Because you have not verified your email, you cannot perform this function !"};
+            return {status:403, message:"Tài khoản của bạn chưa được xác thực, không thể thực hiện quên mật khẩu !"};
           }
           var pass = '';
           var str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz0123456789@#$';
@@ -307,16 +307,43 @@ export class AuthService{
           
           const salt = await bcrypt.genSalt(10);
           const verifyCode = await bcrypt.hash(email+pass.toString(), salt);
-          await RedisCache.setCache(`${verifyCode}`,email, Number.parseInt(`${process.env.TTL_FORGOTPASS}`));
-          await SendMailService.sendMailForgotPassword(email,verifyCode, (data: any)=>{});
-          return {status:200, message:"Send mail success !"};
+          await RedisCache.setCache(`${verifyCode}`,email+'_'+pass, Number.parseInt(`${process.env.TTL_FORGOTPASS}`));
+          await SendMailService.sendMailForgotPassword(email,verifyCode,pass, (data: any)=>{});
+          return {status:200, message:"Gửi mail thành công !"};
         }
         else{
-          return {status: 400, message:"Invalid Captcha. Try again !"};
+          return {status: 400, message:"sai captcha !"};
         }
           
       } catch (error) {
-        return {status:500, message:"Something went wrong !"};
+        return {status:500, message:"Đã có lỗi sảy ra !"};
+      }
+    }
+
+    static async verifyForgotPassword(veriyCode: String){
+      try {
+        const emailNeedVerify = await RedisCache.getCache(`${veriyCode}`);
+        console.log(veriyCode);
+        
+        if(emailNeedVerify?.split("_")[0]){
+          const email = emailNeedVerify.split("_")[0];
+          const newPassword = emailNeedVerify.split("_")[1];
+          console.log(emailNeedVerify);
+          // Generate a salt
+          const salt = await bcrypt.genSalt(10);
+          // Generate a password hash (salt + hash)
+          const passwordHashed = await bcrypt.hash(newPassword, salt);
+          const account = await Account.updateOne({email:email},{password:passwordHashed});
+          console.log(account);
+          
+          await RedisCache.delCache(`${veriyCode}`)
+          return {status:200, message:"Xác thực thành công, mật khẩu của bạn đã được thay đổi !"};
+        }
+        else{
+          return {status: 400, message:"wrong code verify !"};
+        }
+      } catch (error) {
+        return {status:500, message:"Đã có lỗi sảy ra !"};
       }
     }
 }

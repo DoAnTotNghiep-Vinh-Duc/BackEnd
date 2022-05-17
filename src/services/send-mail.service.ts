@@ -31,7 +31,7 @@ export class SendMailService {
 
     }
 
-    static async sendMailForgotPassword(email: any,code: any, callback: any){
+    static async sendMailForgotPassword(email: any,code: any,pass:any, callback: any){
         const client: any = new SMTPClient({
             user: process.env.MAIL,
             password: process.env.MAIL_PASSWORD,
@@ -39,7 +39,7 @@ export class SendMailService {
             ssl: true,
         });
         try {
-            await MaiTemplateService.getMailTemplateForgotPassword({email,code},'en',async (data: any)=>{
+            await MaiTemplateService.getMailTemplateForgotPassword({email,code, pass},'en',async (data: any)=>{
                 const nameCompany = `Lemon <${process.env.COMPANYMAIL}>`
                 await client.sendAsync({
                     text: data.forgotPassword.content,

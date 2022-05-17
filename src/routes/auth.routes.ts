@@ -51,3 +51,4 @@ authRoutes.post("/verify-account-web", AuthController.verifyAccountWeb);
 authRoutes.post("/verify-refresh-token", AuthController.verifyRefreshToken)
 authRoutes.put("/change-password",AuthMiddleware.verifyAccessToken ,AuthController.changePassword)
 authRoutes.post("/send-mail-forgot-password", AuthController.sendMailforForgotPassword);
+authRoutes.post("/verify-forgot-password", AuthController.verifyForgotPassword);
