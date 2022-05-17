@@ -405,15 +405,23 @@ export class ProductService {
                                     // Nếu đây là product detail mới được thêm vào (Mới thêm thì sẽ không có id)
                                     else{
                                         // Phải check coi nó có được tạo trước đó chưa, nếu có thì chuyển status sang ACTIVE
-                                        let newProductDetail = new ProductDetail({
-                                            size:productDetails[i].listProductDetail[index].size,
-                                            quantity: productDetails[i].listProductDetail[index].quantity,
-                                            image:element.url,
-                                            product:productNeedUpdate._id,
-                                            color:color._id
-                                        });
-        
-                                        await newProductDetail.save();
+                                        const oldProductDetail = await ProductDetail.findOne({product:productNeedUpdate._id, color:color._id, size:productDetails[i].listProductDetail[index].size})
+                                        if(oldProductDetail){
+                                            oldProductDetail.status = "ACTIVE";
+                                            oldProductDetail.quantity = productDetails[i].listProductDetail[index].quantity;
+                                            await oldProductDetail.save();
+                                        }
+                                        else{
+                                            let newProductDetail = new ProductDetail({
+                                                size:productDetails[i].listProductDetail[index].size,
+                                                quantity: productDetails[i].listProductDetail[index].quantity,
+                                                image:element.url,
+                                                product:productNeedUpdate._id,
+                                                color:color._id
+                                            });
+            
+                                            await newProductDetail.save();
+                                        }
                                     }
                                 }
                             }
@@ -422,7 +430,6 @@ export class ProductService {
                     else{
                         for (let index = 0; index < productDetails[i].listProductDetail.length; index++) {
                             // Nếu đây là product detail đã tồn tại
-                            productNeedUpdate.images.push(productDetails[i].image)
                             if(productDetails[i].listProductDetail[index]._id){
                                 // Nếu product detail bị xóa
                                 if(productDetails[i].listProductDetail[index].status==="DELETE"){
@@ -436,15 +443,25 @@ export class ProductService {
                             }
                             // Nếu đây là product detail mới được thêm vào (Mới thêm thì sẽ không có id)
                             else{
-                                let newProductDetail = new ProductDetail({
-                                    size:productDetails[i].listProductDetail[index].size,
-                                    quantity: productDetails[i].listProductDetail[index].quantity,
-                                    image:productDetails[i].image,
-                                    product:productNeedUpdate._id,
-                                    color:color._id
-                                });
-
-                                await newProductDetail.save();
+                                // Phải check coi nó có được tạo trước đó chưa, nếu có thì chuyển status sang ACTIVE
+                                const oldProductDetail = await ProductDetail.findOne({product:productNeedUpdate._id, color:color._id, size:productDetails[i].listProductDetail[index].size})
+                                if(oldProductDetail){
+                                    oldProductDetail.status = "ACTIVE";
+                                    oldProductDetail.quantity = productDetails[i].listProductDetail[index].quantity;
+                                    await oldProductDetail.save();
+                                }
+                                else{
+                                    let newProductDetail = new ProductDetail({
+                                        size:productDetails[i].listProductDetail[index].size,
+                                        quantity: productDetails[i].listProductDetail[index].quantity,
+                                        image:productDetails[i].image,
+                                        product:productNeedUpdate._id,
+                                        color:color._id
+                                    });
+    
+                                    await newProductDetail.save();
+                                }
+                                
                             }
                         }
                     }
@@ -464,13 +481,17 @@ export class ProductService {
 
     static async stopSellingProductAdmin(productId: String){
         try {
-            await Product.updateOne({_id:new ObjectId(`${productId}`)},{$set:{status:"STOPPSELLING"}})
+            const product = await Product.findOne({_id:new ObjectId(`${productId}`)});
+            product.status = "STOPSELLING";
+            product.discount = new ObjectId("62599849f8f6be052f0a901d");
+            product.priceDiscount = product.price;
+            await product.save();
             let listProductDetail = await ProductDetail.aggregate([{$match:{product:new ObjectId(`${productId}`)}}, {$project:{_id:1}}])
             await ProductDetail.updateMany({product:new ObjectId(`${productId}`)},{$set:{status:"STOPSELLING"}})
             let productDetailsConvert = listProductDetail.map(function(id) {
                 return id;
             });
-            await CartDetail.deleteMany({productDetail:{$in:productDetailsConvert}, status:"DELETE"})
+            await CartDetail.deleteMany({productDetail:{$in:productDetailsConvert}})
             await Favorite.updateMany({},{$pull:{"listProduct":new ObjectId(`${productId}`)}})
             // await RedisCache.clearCache();
             delKeyRedisWhenChangeProduct()

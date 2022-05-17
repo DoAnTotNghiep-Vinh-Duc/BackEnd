@@ -6,4 +6,5 @@ export const discountRoutes = express.Router();
 
 discountRoutes.get("/", AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, DiscountController.getAllDiscount);
 discountRoutes.post("/", AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, DiscountController.createDiscount);
-discountRoutes.put("/", AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, DiscountController.updateDiscount)
+discountRoutes.put("/", AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, DiscountController.updateDiscount);
+discountRoutes.delete("/:discountId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, DiscountController.deleteDiscount);

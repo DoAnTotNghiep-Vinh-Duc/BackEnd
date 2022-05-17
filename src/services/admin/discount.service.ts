@@ -1,6 +1,7 @@
 import {Discount} from "../../models/discount";
 import { RedisCache } from "../../config/redis-cache";
 import { ObjectId } from "mongodb";
+import { Product } from "../../models/product";
 export class DiscountService {
 
     static async getAllDiscount(){
@@ -101,6 +102,18 @@ export class DiscountService {
         } catch (error) {
             console.log(error);
             
+            return{status:500,message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async deleteDiscount(discountId: String){
+        try {
+            
+            const discount = await Discount.findOne({_id:discountId});
+            // const products = await Product.find({discount: new ObjectId(`${discountId}`)})
+            await Discount.deleteOne({_id: new ObjectId(`${discountId}`)});
+            return {status: 200, message:"delete discount success !"};
+        } catch (error) {
             return{status:500,message: "Something went wrong !", error: error};
         }
     }

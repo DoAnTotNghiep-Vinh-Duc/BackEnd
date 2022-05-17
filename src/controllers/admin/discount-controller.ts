@@ -44,5 +44,18 @@ export class DiscountController {
             });
         }
     }
+
+    static async deleteDiscount(req: Request, res: Response): Promise<any> {
+        try {
+            const {discountId} = req.params
+            const data = await DiscountService.deleteDiscount(discountId);
+            return res.status(data.status).json(data)
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              message: error.message,
+            });
+        }
+    }
 }
 
