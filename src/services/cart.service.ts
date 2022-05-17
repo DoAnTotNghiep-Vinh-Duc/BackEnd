@@ -19,7 +19,7 @@ export class CartService {
             if(!cart){
                 return {status: 404, message: "Not found Cart !"}
             }
-            cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{ "$lookup": { "from": "CartDetail", "localField": "listCartDetail", "foreignField": "_id", "as": "listCartDetail" }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{$unwind:"$listCartDetail.productDetail.product"},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
+            cart = await Cart.aggregate([{ $match: { account: new ObjectId(`${accountId}`) }},{ "$lookup": { "from": "CartDetail", "localField": "listCartDetail", "foreignField": "_id", "as": "listCartDetail" }},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{$unwind:"$listCartDetail.productDetail.product"},{ "$lookup": { "from": "Color", "localField": "listCartDetail.productDetail.color", "foreignField": "_id", "as": "listCartDetail.productDetail.color" }},{$unwind:"$listCartDetail.productDetail.color"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.createdAt":0,"listCartDetail.productDetail.product.updatedAt":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, "listCartDetail": { "$push": "$listCartDetail" } }}])
             
             if(cart[0]){
                 await RedisCache.setCache(key, JSON.stringify(cart[0]), 60*5);
@@ -44,29 +44,6 @@ export class CartService {
         }
     }
 
-    // static async updateCartAfterChangePriceProduct(productId: String){
-    //     try {
-    //         const carts: any = Cart.aggregate([{ $match: {}},{$unwind:"$listCartDetail"},{ "$lookup": { "from": "ProductDetail", "localField": "listCartDetail.productDetail", "foreignField": "_id", "as": "listCartDetail.productDetail" }},{$unwind:"$listCartDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listCartDetail.productDetail.product", "foreignField": "_id", "as": "listCartDetail.productDetail.product" }},{$unwind:"$listCartDetail.productDetail.product"},{$project:{"listCartDetail.productDetail.product.description":0,"listCartDetail.productDetail.product.typeProducts":0,"listCartDetail.productDetail.product.listProductDetail":0,"listCartDetail.productDetail.product.images":0,"listCartDetail.productDetail.product.created_at":0,"listCartDetail.productDetail.product.updated_at":0,"listCartDetail.productDetail.product.supplier":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"}, total:{$first:"$total"}, "listCartDetail": { "$push": "$listCartDetail" } }},{$match:{"listCartDetail":{$elemMatch:{"productDetail.product._id":new ObjectId(`${productId}`)}}}}])
-
-    //         const product = await Product.findById(productId)
-
-    //         for (let i = 0; i < carts.length; i++) {
-    //             for (let j = 0; j < carts[i].listCartDetail.length; j++) {
-    //                 const element = carts[i].listCartDetail[j];
-    //                 if(carts[i].listCartDetail[j].productDetail.product._id===new ObjectId(`${productId}`)){
-    //                     carts[i].listCartDetail[j].price = carts[i].listCartDetail[j].productDetail.product.price;
-    //                     carts[i].total+=carts[i].listCartDetail[j].quantity*carts[i].listCartDetail[j].productDetail.product.price - carts[i].listCartDetail[j].total; // Tổng tiền giỏ hàng sẽ cộng cho tổng số tiền mới từng món - tổng số tiền cũ của từng món
-    //                     carts[i].listCartDetail[j].total = carts[i].listCartDetail[j].quantity*carts[i].listCartDetail[j].productDetail.product.price;
-    //                 }
-    //             }
-                
-    //         }
-    //         return {status: 204, message: "update Cart success !"}
-    //     } catch (error) {
-    //         return {status: 500,message: "Something went wrong !", error: error};
-    //     }
-    // }
-
     static async addToCart (accountId: String, productDetailId: String, quantity: number){
         try {
             const cart: any = await Cart.findOne({account: accountId});
@@ -81,6 +58,8 @@ export class CartService {
                     if(quantity+cartDetail.quantity<= productDetail.data.quantity){
                         cartDetail.quantity+=quantity;
                         await cartDetail.save();
+                        const key = `CartService_getCartByAccountId(accountId:${accountId})`;
+                        await RedisCache.delCache(key);     
                         return {status: 204, message:"add product to cart success !"};
                     }
                     else{
@@ -93,7 +72,7 @@ export class CartService {
                         productDetail: productDetailId,
                         quantity: quantity,
                         price: product.price,
-                        priceDiscount: product.price*(1-product.discount.percentDiscount)
+                        priceDiscount: product.priceDiscount
                     }) 
                     await newCartDetail.save();
                     cart.listCartDetail.push(newCartDetail._id);

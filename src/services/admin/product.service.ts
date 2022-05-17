@@ -80,7 +80,7 @@ export class ProductService {
             if(dataCache){
                 return {status: 200,message: "found Product success !", data: JSON.parse(dataCache)}
             }
-            const products = await Product.aggregate([{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}]);
+            const products = await Product.aggregate([{$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{createdAt:1}}]);
             await RedisCache.setCache(key,JSON.stringify(products),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
@@ -104,7 +104,7 @@ export class ProductService {
             for (let index = 0; index < listTypeProduct.length; index++) {
                 convertListType.push(listTypeProduct[index]._id);
             }
-            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}},{$match:{status:{$ne:"DELETE"}}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}}])
+            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}},{$match:{status:{$ne:"DELETE"}}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{createdAt:-1}}])
             await RedisCache.setCache(key,JSON.stringify(products),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
@@ -127,7 +127,7 @@ export class ProductService {
             for (let index = 0; index < listTypeProduct.length; index++) {
                 convertListType.push(listTypeProduct[index]._id);
             }
-            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{created_at:-1}},{$skip:(page-1)*limit},{$limit:limit}])
+            const products = await Product.aggregate([{$match:{typeProducts:{$all:convertListType}}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{createdAt:-1}},{$skip:(page-1)*limit},{$limit:limit}])
             await RedisCache.setCache(key,JSON.stringify(products),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
@@ -236,7 +236,14 @@ export class ProductService {
             product.typeProducts = finalTypeProducts;
             const discount = await Discount.findOne({_id: product.discount});
             product.discount = discount._id
-            
+            let now = new Date();
+            now.setHours(now.getHours()+7);
+            if(discount.startDate.getTime()<now.getTime()&&discount.endDate.getTime()>now.getTime()){
+                product.priceDiscount = product.price*(1-discount.percentDiscount);
+            }
+            else{
+                product.priceDiscount = product.price;
+            }
             product.images = listImageUrl;
             const newProduct = new Product(product);
             await newProduct.save();

@@ -14,12 +14,13 @@ import cookieSession from "cookie-session";
 
 import {RedisCache} from "./config/redis-cache";
 import {RedisSubcribe} from "./config/redis-subcribe"
+import discountSchedule from "./config/cron-job";
 ConnectDatabase.connectDatabase();
 const app = express();
 app.use(
   cookieSession({ name: "session", keys: ["vinhlenguyenthanh"], maxAge: 24 * 60 * 60 * 100 })
-);
-app.use(passport.initialize());
+  );
+  app.use(passport.initialize());
 app.use(passport.session());
 app.use(morgan("dev"));
 app.use(
@@ -28,22 +29,23 @@ app.use(
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
-);
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.all('/', function (req: Request, res: Response, next:NextFunction) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "*");
-  next()
-});
-
-
-app.use("/", Routes);
-
-
-const server = http.createServer(app);
+  );
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
+  app.use(bodyParser.urlencoded({ extended: false }));
+  app.use(bodyParser.json());
+  app.all('/', function (req: Request, res: Response, next:NextFunction) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "*");
+    next()
+  });
+  
+  
+  app.use("/", Routes);
+  discountSchedule.start();
+  
+  
+  const server = http.createServer(app);
 
 server.listen(process.env.PORT,async () => {
     await RedisCache.connect();
