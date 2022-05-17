@@ -156,7 +156,7 @@ export class AuthService{
               password: passwordHashed,
               nameDisplay: account.name,
               isVerifyPhone: false,
-              avatar: "",
+              avatar: "https://cdn-icons-png.flaticon.com/512/147/147142.png",
               information: newInformation._id,
               isVerifyAccountWeb:false
             })

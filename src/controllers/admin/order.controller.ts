@@ -27,6 +27,20 @@ export class OrderController {
         }
     }
 
+    static async getUserOrderAdmin(req: Request, res: Response): Promise<any> {
+        try {
+            const accountId: any = req.query.accountId; // status order: 'HANDLING','DELIVERING','DONE','CANCELED', 'ALL'
+            const statusOrder: any = req.query.statusOrder;
+            const data = await OrderService.getUserOrderAdmin(accountId, statusOrder);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
+
     static async getOrdersByDate(req: Request, res: Response): Promise<any> {
         try {
             const {beginDate, endDate} = req.body;

@@ -56,6 +56,25 @@ export class OrderService {
         }
     }
 
+    static async getUserOrderAdmin(accountId: any, statusOrder:any){
+        try {
+            let query: Array<any> = [];
+            query.push({$match:{account:new ObjectId(`${accountId}`)}});
+            if(statusOrder==='HANDLING'||statusOrder==='DELIVERING'||statusOrder==='DONE'||statusOrder==='CANCELED'){
+                query.push({$match:{status:statusOrder}})
+            }
+            query.push({$project:{account:1,status:1,subTotal:1,feeShip:1,total:1,typePayment:1,name:1,city:1,district:1,ward:1,street:1,phone:1,createdAt:1,updatedAt:1,quantity:{$sum:"$listOrderDetail.quantity"}}})
+            const order = await Order.aggregate(query)
+            if(order){
+                return {status: 200,message: "found Order success !", data: order}
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
     static async getOrdersByDate(typeRequest: String, beginDate?: Date, endDate?: Date){
         try {
             const key = `OrderService_getOrdersByDate(typeRequest:${typeRequest}, beginDate?:${beginDate}, endDate?:${endDate})`;
