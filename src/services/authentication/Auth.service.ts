@@ -171,7 +171,7 @@ export class AuthService{
             }
             const newFavorite = await FavoriteService.createFavorite(favorite)
             const verifyCode = await bcrypt.hash(account.email+account.password, salt);
-            await RedisCache.setCache(`${verifyCode}`,account.email);
+            await RedisCache.setCache(`${verifyCode}`,account.email, Number.parseInt(`${process.env.TTL_REGISTER}`));
             await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
             return {status: 201, message: "create account success, please check your email for verify !"} ;
           }
@@ -184,7 +184,7 @@ export class AuthService{
             user.nameDisplay = account.name;
             await user.save();
             const verifyCode = await bcrypt.hash(account.email+account.password, salt);
-            await RedisCache.setCache(`${verifyCode}`,account.email);
+            await RedisCache.setCache(`${verifyCode}`,account.email, Number.parseInt(`${process.env.TTL_REGISTER}`));
             await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
             return {status: 201, message: "create account success, please check your email for verify !"} ;
           }
@@ -252,7 +252,7 @@ export class AuthService{
         return{status: 200, message:{account: {email:foundAccount.email,nameDisplay:foundAccount.nameDisplay, role: foundAccount.roleAccount}, accessToken, refreshToken}}
       }
     }
-    static async changePassword(userId: any, password: String, newPassword: String, reEnterPassword:String): Promise<any>{
+    static async changePassword(userId: any, password: String, newPassword: any, reEnterPassword:any): Promise<any>{
       try {
         const foundAccount = await Account.findOne({ _id: new ObjectId(`${userId}`) });
         if (!foundAccount)
@@ -282,13 +282,13 @@ export class AuthService{
 
     static async sendMailforForgotPassword(email: String, captchaToken: any):Promise<any>{
       try {
-        // if(!captchaToken){
-        //   return {status:400, message:"token is missing"}
-        // }
-        // const googleVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.reCaptchaSecret}&response=${captchaToken}`;
-        // const response = await axios.post(googleVerifyUrl);
-        // const { success } = response.data;
-        // if(success){
+        if(!captchaToken){
+          return {status:400, message:"token is missing"}
+        }
+        const googleVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.reCaptchaSecret}&response=${captchaToken}`;
+        const response = await axios.post(googleVerifyUrl);
+        const { success } = response.data;
+        if(success){
           const account = await Account.findOne({email:email});
           if(!account){
             return {status:404, message:"Not found account !"};
@@ -296,17 +296,27 @@ export class AuthService{
           if(account.isVerifyAccountWeb===false){
             return {status:403, message:"Because you have not verified your email, you cannot perform this function !"};
           }
-          const codeForForgot = Math.floor(100000 + Math.random() * 900000);
-          // await SendMailService.sendMailForgotPassword(email, "I forgot pasword", (data: any)=>{});
-        // }
-        // else{
-        //   return {status: 400, message:"Invalid Captcha. Try again !"};
-        // }
+          var pass = '';
+          var str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz0123456789@#$';
+              
+          for (let i = 1; i <= 8; i++) {
+            var char = Math.floor(Math.random()* str.length + 1);     
+            pass += str.charAt(char)
+          }
+          console.log("pass", pass);
+          
           const salt = await bcrypt.genSalt(10);
-          const verifyCode = await bcrypt.hash(email+codeForForgot.toString(), salt);
-          return {status:200, message:"Send mail success !", verifyCode};
+          const verifyCode = await bcrypt.hash(email+pass.toString(), salt);
+          await RedisCache.setCache(`${verifyCode}`,email, Number.parseInt(`${process.env.TTL_FORGOTPASS}`));
+          await SendMailService.sendMailForgotPassword(email,verifyCode, (data: any)=>{});
+          return {status:200, message:"Send mail success !"};
+        }
+        else{
+          return {status: 400, message:"Invalid Captcha. Try again !"};
+        }
+          
       } catch (error) {
-        
+        return {status:500, message:"Something went wrong !"};
       }
     }
 }

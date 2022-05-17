@@ -193,8 +193,22 @@ export class MaiTemplateService {
                     <div style="text-align: left; width: 100%; color: #0d0e43">
                     </div>
                     <div style="color: #0d0e43; margin-top: 10px; margin-bottom: 10px">
-                      Đây là mã 6 số để đổi mật khẩu
-                      <h2> ${data.code} </h2> bên dưới!
+                      </div>
+                      <a
+                        style="
+                          margin-left: 200px;
+                          padding: 10px 20px;
+                          background-color: #fb2e86;
+                          color: white;
+                          border-radius: 5px;
+                          cursor: pointer;
+                          text-decoration: none;
+                        "
+                        href="http://localhost:3000/verifyAccount/${encodeURIComponent(data.verifyCode)}"
+                        target="_blank"
+                      >
+                        Xác thực để nhận mật khẩu mới
+                      </a>
                     </div>
             
                     <div style="margin-top: 10px; color: #0d0e43">
