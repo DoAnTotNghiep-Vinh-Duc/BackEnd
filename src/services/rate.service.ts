@@ -2,11 +2,9 @@ import { ObjectId } from "mongodb";
 import { Product } from "../models/product";
 import {Rate} from "../models/rate";
 import AWS from "aws-sdk";
-import multer from "multer";
-import multerS3 from 'multer-s3';
-import fs from "fs";
 import { v4 as uuid } from "uuid";
 import { Order } from "../models/order";
+import { RedisCache } from "../config/redis-cache";
 
 export class RateService {
     static async uploadImage(uploadFile: any){
@@ -44,6 +42,11 @@ export class RateService {
 
     static async getAllRateProduct(productId: String) {
         try {
+            const key = `RateService_getAllRateProduct(productId:${productId})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Rate success !", data: JSON.parse(dataCache)};
+            }
             const rates = await Rate.aggregate([{$match:{product:new ObjectId(`${productId}`)}},{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"}])
             const rateAndCount = await Rate.aggregate([{$match:{product:new ObjectId(`${productId}`)}}, {"$group" : {_id:"$point", count:{$sum:1}}}, {$sort:{_id:-1}} ])
             console.log("rateAndCount",rateAndCount);
@@ -71,6 +74,7 @@ export class RateService {
                     "percent":rateAndCount[index].count/numberVoteAndtotalRate.voted*100
                 })
             }
+            await RedisCache.setCache(key, JSON.stringify({rates, rateAndCount, ratePercent}), 60*5);
             return {status: 200, message: "get all rates product success !", data: {rates, rateAndCount, ratePercent}};
         } catch (error) {
             console.log(error);
@@ -80,6 +84,11 @@ export class RateService {
     }
     static async getProductForRateInOrder(accountId: String, orderId: String) {
         try {
+            const key = `RateService_getProductForRateInOrder(accountId:${accountId},orderId:${orderId})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Rate success !", data: JSON.parse(dataCache)};
+            }
             const order = await Order.findOne({_id:new ObjectId(`${orderId}`)})
             if(order.status==="DONE"){
                 const productNeedRate = await Order.aggregate([{$match:{$and:[{_id:new ObjectId(`${orderId}`)},{account:new ObjectId(`${accountId}`)}]}},{$unwind:"$listOrderDetail"},{$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product"}}])
@@ -114,6 +123,7 @@ export class RateService {
                 }
                 console.log("productCanRate",productCanRate);
                 const objProductCanRate = await Product.aggregate([{$match:{_id:{$in:productCanRate}}}])
+                await RedisCache.setCache(key, JSON.stringify(objProductCanRate), 60*5);
                 return {status: 200, message:"Get product can rate success", data: objProductCanRate}
             }
             else{
@@ -193,6 +203,8 @@ export class RateService {
             product.point = (Math.round(currentPoint*currentVoted)+rateInfo.point)/(currentVoted+1)
             product.voted+=1;
             await product.save();
+            const keysRate = await RedisCache.getKeys(`RateService*`);
+            await RedisCache.delKeys(keysRate);
             return {status: 201, message: "create Rate success !", data: newRate}
            
         } catch (error) {
@@ -214,6 +226,8 @@ export class RateService {
                 rate.content = newRate?.content,
                 rate.image = newRate?.image
                 await rate.save()
+                const keysRate = await RedisCache.getKeys(`RateService*`);
+                await RedisCache.delKeys(keysRate);
                 return {status: 204, message: "update Rate success !", data: rate}
             }
             else

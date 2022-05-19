@@ -83,6 +83,11 @@ export class DiscountService {
                 if(objDiscount.startDate.getTime()!==discount.startDate.getTime()){
                     return {status: 400, message:"discount này đã bắt đầu, bạn không thể sửa ngày bắt đầu !"}
                 }
+                if(objDiscount.endDate.getTime()>timeNow.getTime()){
+                    if(discount.percentDiscount!==discount.percentDiscount){
+                        return {status: 400, message:"discount này đang thực hiện, bạn không thể sửa sửa giảm giá !"}
+                    }
+                }
             }
             if(objDiscount.startDate.getTime()> timeNow.getTime()){
                 if(discount.startDate.getTime()- timeNow.getTime()<0){

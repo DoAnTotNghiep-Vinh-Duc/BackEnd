@@ -68,15 +68,10 @@ export class FavoriteService {
 
     static async removeProductFromFavorite(accountId: String, productId: String){
         try {
-            let favorite = await Favorite.findOne({ account:new ObjectId(`${accountId}`)});
-            if(favorite){
-                favorite.listProduct.pull(new ObjectId(`${productId}`))
-                await favorite.save()
-                await RedisCache.delCache(`getFavoriteByAccountId(accountId:${accountId})`)
-                return {status: 204, message: "update Favorite success !", data: favorite}
-            }
-            else
-                return {status: 404, message: "Not found account !"}
+            const favorite = await Favorite.findOneAndUpdate({ account:new ObjectId(`${accountId}`)},{ $pull: { 'listProduct': new ObjectId(`${productId}`) } })
+            await RedisCache.delCache(`getFavoriteByAccountId(accountId:${accountId})`)
+            return {status: 204, message: "update Favorite success !", data: favorite}
+            
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
         }
