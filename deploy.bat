@@ -1,1 +1,0 @@
-ssh -i E:\DoAnTotNghiep\do-an-tot-nghiep.pem ubuntu@13.213.63.210 "cd /var/www/do-an-tot-nghiep_api && sudo mv ~/do-an-tot-nghiep_api.zip /var/www/do-an-tot-nghiep_api && sudo unzip -o do-an-tot-nghiep_api.zip && sudo chown -R ubuntu:ubuntu * && sudo rm -rf do-an-tot-nghiep_api.zip && pm2 delete all && pm2 start dist/src/index.js && pm2 save"
