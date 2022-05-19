@@ -10,7 +10,7 @@
 .env.test.local
 .env.production.local
 
+deploy.bat
 # typescript
 dist/
-deploy.bat
 package-lock.json
