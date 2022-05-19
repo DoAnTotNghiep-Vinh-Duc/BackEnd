@@ -21,6 +21,10 @@ const InformationSchema = new Schema({
     },
     email: String,
     phone: String,
+    avatar: {
+        type: String,
+        required: false
+    },
 },{timestamps: true, collection:"Information"});
 
 export const Information = mongoose.model("Information", InformationSchema);

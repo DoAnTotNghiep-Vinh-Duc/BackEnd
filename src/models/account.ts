@@ -28,10 +28,6 @@ const AccountSchema = new Schema({
         type: Boolean,
         required: false  
     },
-    avatar: {
-        type: String,
-        required: false
-    },
     typeAccount: {
         type: String,
         enum: ['WebAccount', 'FacebookAccount', 'GoogleAccount'],
