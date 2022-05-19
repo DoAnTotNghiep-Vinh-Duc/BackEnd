@@ -17,7 +17,8 @@ export class OrderController {
 
     static async getOrderByAccountId(req: Request, res: Response): Promise<any> {
         try {
-            const data = await OrderService.getOrderByAccountId(req.payload.userId);
+            const statusOrder: any = req.query.statusOrder;// status order: 'HANDLING','DELIVERING','DONE','CANCELED', 'ALL'
+            const data = await OrderService.getOrderByAccountId(req.payload.userId, statusOrder);
             return res.status(data.status).json(data);
          
         } catch (error: any) {
