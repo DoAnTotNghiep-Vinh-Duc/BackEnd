@@ -17,6 +17,7 @@
     "@types/mongoose": "^5.11.97",
     "@types/passport-facebook": "^2.1.11",
     "@types/passport-google-oauth20": "^2.0.11",
+    "@types/socket.io": "^3.0.2",
     "aws-sdk": "^2.1120.0",
     "bcryptjs": "^2.4.3",
     "cookie-session": "^2.0.0",
@@ -44,6 +45,7 @@
     "passport-google-token": "^0.1.2",
     "paypal-rest-sdk": "^1.8.1",
     "redis": "^4.1.0",
+    "socket.io": "^4.5.1",
     "ts-node": "^10.5.0",
     "twilio": "^3.76.1",
     "util": "^0.12.4"
