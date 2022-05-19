@@ -12,5 +12,5 @@
 
 # typescript
 dist/
-
+deploy.bat
 package-lock.json
