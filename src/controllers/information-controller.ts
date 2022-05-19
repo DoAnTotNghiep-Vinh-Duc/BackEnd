@@ -45,9 +45,10 @@ export class InformationController {
 
     static async updateInformation(req: Request, res: Response): Promise<any> {
         try {
-            const accountId = req.payload.userId
-            const newInformation = req.body
-            const data = await InformationService.updateInformation(accountId,newInformation);
+            const accountId = req.payload.userId;
+            const {newInformation} = req.body;
+            const uploadFile = req.files;
+            const data = await InformationService.updateInformation(accountId,JSON.parse(newInformation), uploadFile);
             return res.status(data.status).json(data)
          
         } catch (error: any) {

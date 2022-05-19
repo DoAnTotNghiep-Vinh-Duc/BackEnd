@@ -2,6 +2,8 @@ import {Information} from "../models/information";
 import {Account} from "../models/account"
 import {Twilio} from "twilio"
 import { ObjectId } from "mongodb";
+import AWS from "aws-sdk";
+import { v4 as uuid } from "uuid";
 export class InformationService {
 
     static async createInformation(information: any){
@@ -25,12 +27,52 @@ export class InformationService {
         }
     }
 
-    static async updateInformation(accountId: String, newInformation: any){
+    static async updateInformation(accountId: String, newInformation: any, uploadFile: any){
         try {
-            const account = await Account.findOne({_id: accountId})
-            const result = await Information.findByIdAndUpdate(account.information, newInformation);
-            return {status: 204,message: "update Information success !", data: result}
+            console.log("newInformation",newInformation);
+            console.log("uploadFile",uploadFile);
+            
+            
+            if(uploadFile.length>0){
+                const s3 = new AWS.S3({
+                    accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+                    secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+                    region:"us-east-1"
+                });
+                let ul = uploadFile[0].originalname.split(".");
+                let filesTypes = ul[ul.length - 1];
+                let filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
+                console.log("filePath", filePath);
+                
+                let params: any = {
+                    Body: uploadFile[0].buffer,
+                    Bucket: `${process.env.AWS_BUCKET_NAME}`,
+                    Key: `${filePath}`,
+                    ACL: "public-read",
+                    ContentType: uploadFile[0].mimetype,
+                };
+                let s3Response = await s3.upload(params).promise();
+                console.log("s3Response",s3Response);
+                
+                newInformation.avatar = s3Response.Location;
+                
+            }
+            console.log(newInformation.avatar);
+            const account = await Account.findOne({_id: new ObjectId(`${accountId}`)})
+            await Information.findOneAndUpdate({_id:account.information}, 
+                {$set:{
+                    name:newInformation.name,
+                    city:newInformation.city,
+                    district:newInformation.district,
+                    ward:newInformation.ward,
+                    street:newInformation.street,
+                    avatar:newInformation.avatar
+            }},{new: true});
+            
+            return {status: 204,message: "update Information success !"}
         } catch (error) {
+            console.log(error);
+            
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }

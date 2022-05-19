@@ -61,14 +61,14 @@ export class AuthService{
           const newInformation = {
             name: "",
             email: "",
-            phone: ""
+            phone: "",
+            avatar: profile.photos[0].value,
           }
           const data = await InformationService.createInformation(newInformation);
           const newAccount: any = new Account({
             idFacebook: profile.id,
             nameDisplay: profile.displayName,
             isVerifyPhone: false,
-            avatar: profile.photos[0].value,
             typeAccount: "FacebookAccount",
             information: data.data._id,
           });
@@ -83,9 +83,9 @@ export class AuthService{
           const newFavorite = await FavoriteService.createFavorite(favorite)
           return {status: 201, 
                   message:"create account facebook success !", 
-                  data:{nameDisplay: newAccount.nameDisplay, avatar: newAccount.avatar}} ;
+                  data:{nameDisplay: newAccount.nameDisplay, avatar: newInformation.avatar}} ;
         }
-        return {status: 200, message:"login with facebook success !", data:{nameDisplay: account.nameDisplay, avatar: account.avatar}} ;
+        return {status: 200, message:"login with facebook success !", data:{nameDisplay: account.nameDisplay}} ;
       } catch (error) {
         return {status: 500, message:"Something error when login with facebook ! Please try again !", error: error} ;
       }
@@ -98,14 +98,14 @@ export class AuthService{
           const newInformation = new Information({
             name: profile.displayName,
             email: "",
-            phone: ""
+            phone: "",
+            avatar: profile.photos[0].value,
           })
           await newInformation.save();
           const newAccount = new Account({
             idGoogle: profile.id,
             nameDisplay: profile.displayName,
             typeAccount: "GoogleAccount",
-            avatar: profile.photos[0].value,
             information: newInformation._id,
           });
           await newAccount.save();
@@ -118,10 +118,10 @@ export class AuthService{
           }
           const newFavorite = await FavoriteService.createFavorite(favorite)
 
-          return {status: 201, message:"create account google success !", data:{nameDisplay: newAccount.nameDisplay, avatar: newAccount.avatar},_id: newAccount._id} ;
+          return {status: 201, message:"create account google success !", data:{nameDisplay: newAccount.nameDisplay, avatar: newInformation.avatar},_id: newAccount._id} ;
         }
         else{
-          return {status: 200, message:"get account google success !", data:{nameDisplay: account.nameDisplay, avatar: account.avatar},_id:account._id} ;
+          return {status: 200, message:"get account google success !", data:{nameDisplay: account.nameDisplay},_id:account._id} ;
         }
       } catch (error) {
         return {status: 500,message:"Something error when login with google ! Please try again !", error:error} ;
@@ -143,7 +143,8 @@ export class AuthService{
             const newInformation = new Information({
               name: account.name,
               email: account.email,
-              phone: ""
+              phone: "",
+              avatar: "https://cdn-icons-png.flaticon.com/512/147/147142.png"
             })
             await newInformation.save();
             // Generate a salt
@@ -156,7 +157,6 @@ export class AuthService{
               password: passwordHashed,
               nameDisplay: account.name,
               isVerifyPhone: false,
-              avatar: "https://cdn-icons-png.flaticon.com/512/147/147142.png",
               information: newInformation._id,
               isVerifyAccountWeb:false
             })
@@ -248,15 +248,15 @@ export class AuthService{
       else{
         const accessToken = await AuthService.signAccessToken(foundAccount._id);
         const refreshToken = await AuthService.signRefreshToken(foundAccount._id);
-        
-        return{status: 200, message:{account: {email:foundAccount.email,nameDisplay:foundAccount.nameDisplay, role: foundAccount.roleAccount}, accessToken, refreshToken}}
+        const information = await Information.findOne({_id:foundAccount.information})
+        return{status: 200, message:{account: {email:foundAccount.email,nameDisplay:foundAccount.nameDisplay, role: foundAccount.roleAccount, avatar:information.avatar}, accessToken, refreshToken}}
       }
     }
     static async changePassword(userId: any, password: String, newPassword: any, reEnterPassword:any): Promise<any>{
       try {
         const foundAccount = await Account.findOne({ _id: new ObjectId(`${userId}`) });
         if (!foundAccount)
-          return {status:403, message:"You must login !"};
+          return {status:403, message:"Bạn cần đăng nhập !"};
         //Check password co ton tai khong
         const isValid = await foundAccount.isValidPassword(password);
         if (!isValid) {
@@ -274,7 +274,7 @@ export class AuthService{
         //Change Password
         foundAccount.password = passwordHashed;
         await foundAccount.save();
-        return {status:204, message:"change password success !"};
+        return {status:204, message:"Đổi mật khẩu thành công !"};
       } catch (error) {
         return {status:500, message:"something went wrong !"};
       }
