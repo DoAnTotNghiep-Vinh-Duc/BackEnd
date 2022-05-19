@@ -9,6 +9,7 @@ import { Routes } from "./routes/index";
 import * as http from "http";
 import passport from "passport";
 import {ConnectDatabase} from "./config/database/database"
+import * as socketio from "socket.io";
 
 import cookieSession from "cookie-session"; 
 
@@ -17,10 +18,19 @@ import {RedisCache} from "./config/redis-cache";
 import discountSchedule from "./config/cron-job";
 ConnectDatabase.connectDatabase();
 const app = express();
+const server = http.createServer(app);
+let io = require("socket.io")(server);
+app.use((req, res, next) => {
+  io.req = req;
+  req.io = io;
+  next();
+});
+require("./config/socket")(io);
 app.use(
   cookieSession({ name: "session", keys: ["vinhlenguyenthanh"], maxAge: 24 * 60 * 60 * 100 })
-  );
-  app.use(passport.initialize());
+);
+app.use(passport.initialize());
+  
 app.use(passport.session());
 app.use(morgan("dev"));
 app.use(
@@ -34,6 +44,7 @@ app.use(
   app.use(express.json());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
+
   app.all('/', function (req: Request, res: Response, next:NextFunction) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "*");
@@ -41,11 +52,8 @@ app.use(
   });
   
   
-  app.use("/", Routes);
-  discountSchedule.start();
-  
-  
-  const server = http.createServer(app);
+app.use("/", Routes);
+discountSchedule.start();
 
 server.listen(process.env.PORT,async () => {
     await RedisCache.connect();
