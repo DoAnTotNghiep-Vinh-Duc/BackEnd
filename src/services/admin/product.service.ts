@@ -428,6 +428,7 @@ export class ProductService {
                         })
                     }
                     else{
+                        productNeedUpdate.images.push(productDetails[i].image);
                         for (let index = 0; index < productDetails[i].listProductDetail.length; index++) {
                             // Nếu đây là product detail đã tồn tại
                             if(productDetails[i].listProductDetail[index]._id){
