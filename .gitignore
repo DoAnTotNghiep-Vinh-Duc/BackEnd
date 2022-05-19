@@ -9,8 +9,8 @@
 .env.development.local
 .env.test.local
 .env.production.local
-
 deploy.bat
 # typescript
 dist/
 package-lock.json
+.gitignore
