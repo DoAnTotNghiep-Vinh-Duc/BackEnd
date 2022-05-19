@@ -114,15 +114,39 @@ export class OrderService {
             return{status:500,message: "Something went wrong !", error: error};
         }
     }
-    static async getOrderByAccountId(accountId: String){
+    static async getOrderByAccountId(accountId: String,statusOrder: String){
         try {
-            const order = await Order.aggregate([{$match:{account:new ObjectId(`${accountId}`)}},{$project:{account:1,status:1,subTotal:1,feeShip:1,total:1,typePayment:1,name:1,city:1,district:1,ward:1,street:1,phone:1,createdAt:1,updatedAt:1,quantity:{$sum:"$listOrderDetail.quantity"}}}])
+            const key = `OrderService_getOrderByAccountId(accountId:${accountId},statusOrder:${statusOrder})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
+            let query: Array<any> = [];
+            query.push({$match:{account:new ObjectId(`${accountId}`)}});
+            if(statusOrder==='HANDLING'||statusOrder==='DELIVERING'||statusOrder==='DONE'||statusOrder==='CANCELED'){
+                query.push({$match:{status:statusOrder}})
+            }
+            query.push({$project:{account:1,listOrderDetail:1,status:1,subTotal:1,feeShip:1,total:1,typePayment:1,name:1,city:1,district:1,ward:1,street:1,phone:1,createdAt:1,updatedAt:1,quantity:{$sum:"$listOrderDetail.quantity"}}})
+
+            query.push({$unwind:"$listOrderDetail"});
+            query.push({$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}});
+            query.push({$unwind:"$listOrderDetail.productDetail"});
+            query.push({ "$lookup": { "from": "Product", "localField": "listOrderDetail.productDetail.product", "foreignField": "_id", "as": "listOrderDetail.productDetail.product" }});
+            query.push({$unwind:"$listOrderDetail.productDetail.product"});
+            query.push({ "$lookup": { "from": "Color", "localField": "listOrderDetail.productDetail.color", "foreignField": "_id", "as": "listOrderDetail.productDetail.color" }});
+            query.push({$unwind:"$listOrderDetail.productDetail.color"});
+            query.push({$project:{"listOrderDetail.productDetail.product.listProductDetail":0}});
+            query.push({ "$group": { "_id": "$_id",account:{$first:"$account"},status:{$first:"$status"},subTotal:{$first:"$subTotal"},feeShip:{$first:"$feeShip"},total:{$first:"$total"},typePayment:{$first:"$typePayment"},name:{$first:"$name"},city:{$first:"$city"},district:{$first:"$district"},ward:{$first:"$ward"},street:{$first:"$street"},phone:{$first:"$phone"},createdAt:{$first:"$createdAt"},updatedAt:{$first:"$updatedAt"}, "listOrderDetail": { "$push": "$listOrderDetail" } }});
+            const order = await Order.aggregate(query)
             if(order){
+                await RedisCache.setCache(key, JSON.stringify(order), 60*5);
                 return {status: 200,message: "found Order success !", data: order}
             }
             else
                 return {status: 404, message: "Not found Order !"}
         } catch (error) {
+            console.log(error);
+            
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
