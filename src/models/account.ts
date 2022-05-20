@@ -46,6 +46,10 @@ const AccountSchema = new Schema({
         type: String,
         enum:['ACTIVE','CLOSED'],
         default:'ACTIVE'
+    },
+    socketId:{
+        type:String,
+        default:""
     }
     
 },{timestamps: true, collection:"Account"});

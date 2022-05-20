@@ -9,7 +9,7 @@ import { Routes } from "./routes/index";
 import * as http from "http";
 import passport from "passport";
 import {ConnectDatabase} from "./config/database/database"
-import * as socketio from "socket.io";
+import {AuthMiddleware} from "./middleware/auth-middleware"
 
 import cookieSession from "cookie-session"; 
 
@@ -25,7 +25,6 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
-require("./config/socket")(io);
 app.use(
   cookieSession({ name: "session", keys: ["vinhlenguyenthanh"], maxAge: 24 * 60 * 60 * 100 })
 );
@@ -45,14 +44,16 @@ app.use(
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
 
+
   app.all('/', function (req: Request, res: Response, next:NextFunction) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "*");
     next()
   });
   
-  
 app.use("/", Routes);
+require("./config/socket")(io);
+
 discountSchedule.start();
 
 server.listen(process.env.PORT,async () => {
