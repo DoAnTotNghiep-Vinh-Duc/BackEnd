@@ -13,6 +13,21 @@ export class AccountController {
             });
         }
     }
+    static async filterAccountWithOrderQuantity (req: Request, res: Response): Promise<any> {
+        try {
+            // keySearch?:String, nameSort?:String, typeSort?:String
+            const keySearch: any = req.query.keySearch;
+            const nameSort: any = req.query.keySearch;
+            const typeSort: any = req.query.typeSort;
+            const data = await AccountService.filterAccountWithOrderQuantity(keySearch, nameSort, typeSort);
+            return res.status(data.status).json(data);
+        
+        } catch (error: any) {
+            return res.status(500).send({
+            message: error.message,
+            });
+        }
+    }
     static async closeAccount (req: Request, res: Response): Promise<any> {
         try {
             const {accountId} = req.body
