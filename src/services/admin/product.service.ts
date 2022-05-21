@@ -73,10 +73,10 @@ export class ProductService {
             }
             if(nameSort==="PRICE"){
                 if(typeSort==="ASC"){
-                    query.push({$sort:{"priceDiscount":1}})
+                    query.push({$sort:{"price":1}})
                 }
                 else{
-                    query.push({$sort:{"priceDiscount":-1}})
+                    query.push({$sort:{"price":-1}})
                 }
             }
             const products = await Product.aggregate(query)

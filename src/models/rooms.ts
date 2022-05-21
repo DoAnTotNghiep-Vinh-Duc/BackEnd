@@ -4,10 +4,10 @@ const Schema = mongoose.Schema;
 const RoomSchema = Schema(
   {
     name: String,
-    adminId:{
+    admin:{
       type: Schema.Types.ObjectId,
     },
-    userId: {
+    user: {
       type: Schema.Types.ObjectId,
     },
     avatar:String,

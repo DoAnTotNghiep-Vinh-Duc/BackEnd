@@ -3,8 +3,8 @@ const Schema = mongoose.Schema;
 
 const MessageSchema = new Schema(
   {
-    roomId: {
-      type: String,
+    room: {
+      type: Schema.Types.ObjectId,
     },
     text: {
       type: String,
@@ -18,13 +18,15 @@ const MessageSchema = new Schema(
       default: true,
     },
     type: {
-      type: String
+      type: String,
+      default:"Text"
     },
     
     nameFile: {
-      type: String
+      type: String,
+      require:false
     }
   },
   { timestamps: true }
 );
-export const message = mongoose.model("Message", MessageSchema);
+export const Message = mongoose.model("Message", MessageSchema);

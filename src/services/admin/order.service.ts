@@ -42,7 +42,7 @@ export class OrderService {
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
             }
-            const order = await Order.aggregate([{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}}])
+            const order = await Order.aggregate([{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}},{$sort:{createdAt:-1}}])
             if(order){
                 await RedisCache.setCache(key, JSON.stringify(order), 60*5);
                 
