@@ -3,7 +3,7 @@ import { Room } from "../models/rooms";
 import { Account } from "../models/account";
 import {Supplier} from "../models/supplier";
 import { Message } from "../models/message";
-export class SupplierService {
+export class MessageService {
     static async getMessageOfUser(accountId: String) {
         try {
             const room = await Room.findOne({user:new ObjectId(`${accountId}`)})            

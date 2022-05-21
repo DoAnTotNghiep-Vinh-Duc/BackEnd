@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Room } from "../../models/rooms";
-export class SupplierService {
+export class RoomService {
 
     static async getAllRoomAdmin(){
         try {

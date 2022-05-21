@@ -3,7 +3,7 @@ import { Room } from "../models/rooms";
 import { Account } from "../models/account";
 import {Supplier} from "../models/supplier";
 import { Message } from "../models/message";
-export class SupplierService {
+export class RoomService {
 
     static async getRoomChatForUser(accountId: String){
         try {
@@ -14,10 +14,10 @@ export class SupplierService {
             if (!account) {
               return({status: 403, message: 'Người dùng chưa đăng nhập!!!',});
             }
-            const room = await Room.findOne({userId:new ObjectId(`${accountId}`)});
-
-            
-            return {status:200, message:"get Room chat success", data:room};
+            else{
+                const room = await Room.findOne({userId:new ObjectId(`${accountId}`)});
+                return {status:200, message:"get Room chat success", data:room};
+            }
           } catch (error) {
             return{status: 500,message: "Something went wrong !", error: error};
           }
