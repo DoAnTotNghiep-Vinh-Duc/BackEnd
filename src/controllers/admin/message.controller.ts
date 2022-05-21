@@ -19,6 +19,8 @@ export class MessageController {
         try {
             const {text} = req.body
             const {roomId} = req.body
+            console.log(text, roomId);
+            
             const data = await MessageService.addMessageAdmin(roomId,req.payload.userId, {text});
             return res.status(data.status).json(data)
         

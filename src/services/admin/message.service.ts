@@ -16,7 +16,7 @@ export class MessageService {
 
     static async addMessageAdmin(roomId:String, accountId: String, message: any) { //Chưa làm gửi file
         try {
-            const room = await Room.findOne({user:new ObjectId(`${roomId}`)});
+            const room = await Room.findOne({_id:new ObjectId(`${roomId}`)});
             // const admin = await Account.findOne({
             //     _id: room.admin,
             //     roleAccount: 'Admin',
@@ -36,6 +36,8 @@ export class MessageService {
                 return {status:400, message:"chat đã bị khóa !"};
             }
         } catch (error) {
+            console.log(error);
+            
             return{status: 500,message: "Something went wrong !", error: error};
         }
     }
