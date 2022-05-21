@@ -4,6 +4,8 @@ import { Request, Response } from "express";
 export class MessageController {
     static async getMessageOfUser (req: Request, res: Response): Promise<any> {
         try {
+            console.log(req.payload.userId);
+            
             const data = await MessageService.getMessageOfUser(req.payload.userId);
             return res.status(data.status).json(data)
         

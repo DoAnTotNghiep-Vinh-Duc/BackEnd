@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Room } from "../../models/rooms";
+import { Room } from "../../models/room";
 import { Account } from "../../models/account";
 import {Supplier} from "../../models/supplier";
 import { Message } from "../../models/message";

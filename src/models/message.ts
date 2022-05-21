@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const MessageSchema = new Schema(
@@ -27,6 +27,5 @@ const MessageSchema = new Schema(
       require:false
     }
   },
-  { timestamps: true }
-);
+  { timestamps: true , collection:"Message"});
 export const Message = mongoose.model("Message", MessageSchema);

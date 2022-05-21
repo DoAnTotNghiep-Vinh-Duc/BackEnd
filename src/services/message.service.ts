@@ -1,15 +1,19 @@
 import { ObjectId } from "mongodb";
-import { Room } from "../models/rooms";
+import { Room } from "../models/room";
 import { Account } from "../models/account";
 import {Supplier} from "../models/supplier";
 import { Message } from "../models/message";
 export class MessageService {
     static async getMessageOfUser(accountId: String) {
         try {
+            console.log("accountId",accountId);
+            
             const room = await Room.findOne({user:new ObjectId(`${accountId}`)})            
             const messages = await Message.find({room:room._id});
             return{status: 200,message: "Lấy tin nhắn thành công !", data: messages};
         } catch (error) {
+            console.log(error);
+            
             return{status: 500,message: "Something went wrong !", error: error};
         }
     }

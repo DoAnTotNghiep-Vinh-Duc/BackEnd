@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Room } from "../../models/rooms";
+import { Room } from "../../models/room";
 export class RoomService {
 
     static async getAllRoomAdmin(){

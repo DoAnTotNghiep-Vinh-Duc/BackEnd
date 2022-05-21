@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-const RoomSchema = Schema(
+const RoomSchema = new Schema(
   {
     name: String,
     admin:{
@@ -16,8 +16,7 @@ const RoomSchema = Schema(
       default: true,
     }
   },
-  { timestamps: true }
-);
+  { timestamps: true, collection:"Room" });
 
 export const Room = mongoose.model("Room", RoomSchema);
 

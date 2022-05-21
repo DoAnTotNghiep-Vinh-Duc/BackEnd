@@ -8,6 +8,7 @@ import { CartService } from "../cart.service";
 import { AuthMiddleware } from "../../middleware/auth-middleware";
 import {FavoriteService} from "../favorites.service";
 import { SendMailService } from "../send-mail.service";
+import {Room} from "../../models/room"
 import axios from "axios";
 import { ObjectId } from "mongodb";
 export class AuthService{
@@ -170,6 +171,11 @@ export class AuthService{
               account: newAccount._id
             }
             const newFavorite = await FavoriteService.createFavorite(favorite)
+            await Room.create({
+              admin:new ObjectId("627a6fe62706176b4a5b5dfa"),
+              user: newAccount._id,
+              avatar: newInformation.avatar
+            })
             const verifyCode = await bcrypt.hash(account.email+account.password, salt);
             await RedisCache.setCache(`${verifyCode}`,account.email, Number.parseInt(`${process.env.TTL_REGISTER}`));
             await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
