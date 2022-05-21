@@ -255,7 +255,7 @@ export class AuthService{
         const accessToken = await AuthService.signAccessToken(foundAccount._id);
         const refreshToken = await AuthService.signRefreshToken(foundAccount._id);
         const information = await Information.findOne({_id:foundAccount.information})
-        return{status: 200, message:{account: {email:foundAccount.email,nameDisplay:foundAccount.nameDisplay, role: foundAccount.roleAccount, avatar:information.avatar}, accessToken, refreshToken}}
+        return{status: 200, message:{account: {_id:foundAccount._id,email:foundAccount.email,nameDisplay:foundAccount.nameDisplay, role: foundAccount.roleAccount, avatar:information.avatar}, accessToken, refreshToken}}
       }
     }
     static async changePassword(userId: any, password: String, newPassword: any, reEnterPassword:any): Promise<any>{
