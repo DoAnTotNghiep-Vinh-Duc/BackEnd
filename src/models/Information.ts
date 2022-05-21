@@ -22,8 +22,7 @@ const InformationSchema = new Schema({
     email: String,
     phone: String,
     avatar: {
-        type: String,
-        required: false
+        type: String
     },
 },{timestamps: true, collection:"Information"});
 

@@ -131,6 +131,8 @@ export class AuthService{
 
     static async registerWebAccount(account: any): Promise<any>{
       // account: name, email, password
+      console.log(account);
+      
       try {
         if(!account.token){
           return {status:400, message:"token is missing"}
@@ -141,13 +143,12 @@ export class AuthService{
         if(success){
           const user = await Account.findOne({ email: account.email });
           if(!user){
-            const newInformation = new Information({
+            const newInformation = await Information.create({
               name: account.name,
               email: account.email,
               phone: "",
               avatar: "https://cdn-icons-png.flaticon.com/512/147/147142.png"
             })
-            await newInformation.save();
             // Generate a salt
             const salt = await bcrypt.genSalt(10);
             // Generate a password hash (salt + hash)
