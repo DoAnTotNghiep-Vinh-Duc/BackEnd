@@ -19,7 +19,7 @@ export class MessageController {
     static async addMessage (req: Request, res: Response): Promise<any> {
         try {
             const {text} = req.body
-            const data = await MessageService.addMessage(req.payload.userId, {text});
+            const data = await MessageService.addMessage(req.payload.userId, {text}, req.io);
             return res.status(data.status).json(data)
         
         } catch (error: any) {
