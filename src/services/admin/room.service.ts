@@ -22,7 +22,7 @@ export class RoomService {
             }
             console.log("roomHaveMessage",roomHaveMessage);
             
-            roomHaveMessage.sort((a,b) => a.lastestMessage.createdAt.getTime() - b.lastestMessage.createdAt.getTime());
+            roomHaveMessage.sort((a,b) => b.lastestMessage.createdAt.getTime() - a.lastestMessage.createdAt.getTime());
             roomAndLastestMessage = [...roomHaveMessage, ...roomHaveNoMessage]               
             return {status:200, message:"get Room chat success", data:roomAndLastestMessage};
           } catch (error) {
