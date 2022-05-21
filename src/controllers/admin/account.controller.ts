@@ -17,8 +17,8 @@ export class AccountController {
         try {
             // keySearch?:String, nameSort?:String, typeSort?:String
             const keySearch: any = req.query.keySearch;
-            const nameSort: any = req.query.keySearch;
-            const typeSort: any = req.query.typeSort;
+            const nameSort: any = req.query.keySearch;// NAME||PHONE||NUMBERPURCHASES
+            const typeSort: any = req.query.typeSort;// ASC||DSC
             const data = await AccountService.filterAccountWithOrderQuantity(keySearch, nameSort, typeSort);
             return res.status(data.status).json(data);
         

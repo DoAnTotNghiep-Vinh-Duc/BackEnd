@@ -27,6 +27,65 @@ export class ProductService {
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }
+    static async filterProductAdmin(keySearch?:String, nameSort?:String, typeSort?:String) {
+        try {
+            const key = `ProductService_filterProductAdmin(keySearch?:${keySearch},nameSort?:${nameSort},typeSort?:${typeSort})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "filter Product success !", data: JSON.parse(dataCache)};
+            }
+            let query: Array<any> = [];
+            query.push({$lookup:{from:"ProductDetail", localField:"_id",foreignField:"product", as:"productDetail"}});
+            query.push({$unwind:"$productDetail"});
+            query.push({$match:{"productDetail.status":{$ne:"DELETE"}}});
+            query.push({"$group": { "_id": "$_id",product:{$first:"$$ROOT"},quantity:{$sum:"$productDetail.quantity"} }});
+            query.push({ "$replaceRoot": { "newRoot": { "$mergeObjects": ["$product", { quantity: "$quantity" }]} } });
+            query.push({$project:{"productDetail":0}});
+            query.push({$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}});
+            query.push({$unwind:"$discount"});
+            if(keySearch){
+                let arr = keySearch.split(" ");
+                let keySearchs = [];
+                for(let i =0;i<arr.length;i++){
+                    if(arr[i]!==" "&&arr[i].trim().length>0){
+                        keySearchs.push({"name":{"$regex":arr[i].toLowerCase(),$options:'i'}});
+                    }
+                }
+                console.log(keySearchs);
+                let queryKeySearch1 = {$match:{$or:keySearchs}};
+                query.push(queryKeySearch1);
+            }
+            if(nameSort==="NAME"){
+                if(typeSort==="ASC"){
+                    query.push({$sort:{"name":1}})
+                }
+                else{
+                    query.push({$sort:{"name":-1}})
+                }
+            }
+            if(nameSort==="QUANTITY"){
+                if(typeSort==="ASC"){
+                    query.push({$sort:{"quantity":1}})
+                }
+                else{
+                    query.push({$sort:{"quantity":-1}})
+                }
+            }
+            if(nameSort==="PRICE"){
+                if(typeSort==="ASC"){
+                    query.push({$sort:{"priceDiscount":1}})
+                }
+                else{
+                    query.push({$sort:{"priceDiscount":-1}})
+                }
+            }
+            const products = await Product.aggregate(query)
+            await RedisCache.setCache(key, JSON.stringify(products), 60*5);
+            return {status: 200,message: "filter Product success !", data: products};
+        } catch (error) {
+            return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
     static async getProductAndDetailByIdAdmin(productId: String){
         try {
             const key: String = `ProductService_getProductAndDetailByIdAdmin(${productId})`

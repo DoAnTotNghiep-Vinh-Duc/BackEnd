@@ -15,6 +15,7 @@ let storage = multer.memoryStorage({
 let upload = multer({ storage: storage });
 
 productRoutes.get("/",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getAllProductAdmin);
+productRoutes.get("/filter-product",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.filterProductAdmin);
 productRoutes.get("/get-all/:page/:limit",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getAllProductLimitPageAdmin);
 productRoutes.get("/new-product",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getNewProductAdmin);
 productRoutes.get("/types",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, ProductController.getProductWithNameTypeAdmin);

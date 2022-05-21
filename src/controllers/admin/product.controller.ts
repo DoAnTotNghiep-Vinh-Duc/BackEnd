@@ -13,7 +13,21 @@ export class ProductController{
             });
         }
     }
-
+    static async filterProductAdmin (req: Request, res: Response): Promise<any> {
+        try {
+            // keySearch?:String, nameSort?:String, typeSort?:String
+            const keySearch: any = req.query.keySearch;
+            const nameSort: any = req.query.keySearch;// NAME||QUANTITY||PRICE
+            const typeSort: any = req.query.typeSort;// ASC||DSC
+            const data = await ProductService.filterProductAdmin(keySearch, nameSort, typeSort);
+            return res.status(data.status).json(data);
+        
+        } catch (error: any) {
+            return res.status(500).send({
+            message: error.message,
+            });
+        }
+    }
     static async getAllProductLimitPageAdmin (req: Request, res: Response): Promise<any> {
         try {
             const page: any = req.params.page;
