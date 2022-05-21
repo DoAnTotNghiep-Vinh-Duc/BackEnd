@@ -21,7 +21,7 @@ export class MessageController {
             const {roomId} = req.body
             console.log(text, roomId);
             
-            const data = await MessageService.addMessageAdmin(roomId,req.payload.userId, {text});
+            const data = await MessageService.addMessageAdmin(roomId,req.payload.userId, {text}, req.io);
             return res.status(data.status).json(data)
         
         } catch (error: any) {

@@ -14,7 +14,7 @@ export class MessageService {
         }
     }
 
-    static async addMessageAdmin(roomId:String, accountId: String, message: any) { //Chưa làm gửi file
+    static async addMessageAdmin(roomId:String, accountId: String, message: any, socket: any) { //Chưa làm gửi file
         try {
             const room = await Room.findOne({_id:new ObjectId(`${roomId}`)});
             // const admin = await Account.findOne({
@@ -30,6 +30,7 @@ export class MessageService {
                     type: "Text",
                     active: true,
                 });
+                socket.to(room._id.toString()).emit("adminAddMessage",{savedMessage});
                 return{status: 200,message: "Thêm tin nhắn thành công !", data: savedMessage};
             }
             else{
