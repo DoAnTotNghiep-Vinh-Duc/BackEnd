@@ -17,7 +17,7 @@ export class ProductController{
         try {
             // keySearch?:String, nameSort?:String, typeSort?:String
             const keySearch: any = req.query.keySearch;
-            const nameSort: any = req.query.keySearch;// NAME||QUANTITY||PRICE
+            const nameSort: any = req.query.nameSort;// NAME||QUANTITY||PRICE
             const typeSort: any = req.query.typeSort;// ASC||DSC
             const data = await ProductService.filterProductAdmin(keySearch, nameSort, typeSort);
             return res.status(data.status).json(data);
