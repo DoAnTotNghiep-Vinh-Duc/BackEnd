@@ -110,5 +110,19 @@ export class RateController {
             });
         }
     }
+
+    static async getRateByRateId(req: Request, res: Response): Promise<any> {
+        try {
+            const {userId} = req.payload;
+            const {rateId} = req.params;
+            const data = await RateService.getRateByRateId(userId, rateId);
+            return res.status(data.status).json(data)
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              message: error.message,
+            });
+        }
+    }
 }
 

@@ -290,4 +290,21 @@ export class RateService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
+
+    static async getRateByRateId(accountId: String, rateId: String) {
+        try {
+            const key = `RateService_getRateByRateId(accountId:${accountId},rateId:${rateId})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Rate success !", data: JSON.parse(dataCache)};
+            }
+            
+            const rates = await Rate.aggregate([{$match:{account: new ObjectId(`${accountId}`), _id:new ObjectId(`${rateId}`)}},{$lookup:{from:"Product", localField:"product",foreignField:"_id", as:"product"}},{$unwind:"$product"}])
+            await RedisCache.setCache(key, JSON.stringify(rates), 60*5);
+            return {status: 200, message:"get rate by account success !", data:rates}
+        } catch (error) {
+            console.log(error);
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
 }
