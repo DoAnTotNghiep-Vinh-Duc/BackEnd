@@ -85,9 +85,10 @@ export class RateController {
 
     static async updateRateProduct(req: Request, res: Response): Promise<any> {
         try {
-            const {productId, point, content, image} = req.body
+            const {newRate} = req.body
             const {userId} = req.payload
-            const data = await RateService.updateRateProduct(userId, productId, {point, content, image});
+            const uploadFile = req.files;
+            const data = await RateService.updateRateProduct(userId, newRate, uploadFile);
             return res.status(data.status).json(data)
          
         } catch (error: any) {

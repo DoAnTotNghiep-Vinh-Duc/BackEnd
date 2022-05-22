@@ -182,7 +182,6 @@ export class RateService {
                     url: s3Response.Location
                 })
             }
-            
 
             const tmpRate = {
                 account:new ObjectId(`${accountId}`),
@@ -214,24 +213,60 @@ export class RateService {
         }
     }
 
-    static async updateRateProduct(accountId: String,productId: String, newRate: any){
+    static async updateRateProduct(userId:String, newRate: any, uploadFile:any){
         try {
-            const rate = await Rate.findOne({account: new ObjectId(`${accountId}`), product: new ObjectId(`${productId}`)})
-            if(rate){
-                const oldPoint = rate.point;
-                const product = await Product.findOne({_id:new ObjectId(`${productId}`)})
-                product.point = (Math.round(product.point*product.rated)-(oldPoint-newRate.point))/product.rated;
-                await product.save()
-                rate.point = newRate.point,
-                rate.content = newRate?.content,
-                rate.image = newRate?.image
-                await rate.save()
-                const keysRate = await RedisCache.getKeys(`RateService*`);
-                await RedisCache.delKeys(keysRate);
-                return {status: 204, message: "update Rate success !", data: rate}
+            const rate = await Rate.findOne({_id: new ObjectId(`${newRate.rateId}`), account:new ObjectId(`${userId}`)})
+            if(!rate){
+                return {status:404, message:"Not found rate"}
             }
-            else
-                return {status: 404, message: "Not found Rate !"}
+            const s3 = new AWS.S3({
+                accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+                secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+                region:"us-east-1"
+            });
+            let listResponse = [];
+            for(let i = 0; i< uploadFile.length; i++){
+                let ul = uploadFile[i].originalname.split(".");
+                let filesTypes = ul[ul.length - 1];
+                let filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
+                console.log("filePath", filePath);
+                
+                let params: any = {
+                    Body: uploadFile[i].buffer,
+                    Bucket: `${process.env.AWS_BUCKET_NAME}`,
+                    Key: `${filePath}`,
+                    ACL: "public-read",
+                    ContentType: uploadFile[i].mimetype,
+                };
+                let s3Response = await s3.upload(params).promise();
+                console.log("s3Response",s3Response);
+                
+                listResponse.push({
+                    url: s3Response.Location
+                })
+            }
+
+            const oldPoint = rate.point;
+            const product = await Product.findOne({_id:rate.product})
+            product.point = (Math.round(product.point*product.rated)-(oldPoint-newRate.point))/product.rated;
+            await product.save()
+            
+            while (rate.image.length>0) {
+                rate.image.pop();
+            }
+            for (let index = 0; index <  newRate?.image.length; index++) {
+                rate.image.push(newRate?.image[index])     
+            }
+            for (let index = 0; index < listResponse.length; index++) {
+                rate.image.push(listResponse[index].url)
+            }
+            rate.point = newRate.point,
+            rate.content = newRate?.content,
+            rate.image = newRate?.image
+            await rate.save()
+            const keysRate = await RedisCache.getKeys(`RateService*`);
+            await RedisCache.delKeys(keysRate);
+            return {status: 204, message: "update Rate success !", data: rate}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
         }

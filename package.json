@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "pm2 delete all || tsc && pm2 start dist/src/index.js && pm2 logs",
     "start": "ts-node src/index.ts",
-    "build": "pm2 stop all && mkdir dist || del -R dist* && npm run tsc && tar.exe -a -c -f ..\\..\\do-an-tot-nghiep_api.zip dist tsconfig.json types package.json && scp -i E:\\DoAnTotNghiep\\do-an-tot-nghiep.pem  ..\\..\\do-an-tot-nghiep_api.zip ubuntu@13.213.63.210:~/ && deploy.bat",
+    "build": "pm2 stop all && mkdir dist || del -R dist* && npm run tsc && tar.exe -a -c -f ..\\..\\do-an-tot-nghiep_api.zip dist tsconfig.json types package.json && scp -i E:\\DoAnTotNghiep\\do-an-tot-nghiep.pem  ..\\..\\do-an-tot-nghiep_api.zip ubuntu@13.213.8.146:~/ && deploy.bat",
     "tsc": "tsc"
   },
   "author": "",
