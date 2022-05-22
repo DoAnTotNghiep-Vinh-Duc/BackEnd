@@ -97,5 +97,18 @@ export class RateController {
             });
         }
     }
+
+    static async getAllRateByAccountId(req: Request, res: Response): Promise<any> {
+        try {
+            const {userId} = req.payload
+            const data = await RateService.getAllRateByAccountId(userId);
+            return res.status(data.status).json(data)
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              message: error.message,
+            });
+        }
+    }
 }
 

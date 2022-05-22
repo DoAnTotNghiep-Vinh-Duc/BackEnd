@@ -82,6 +82,7 @@ export class RateService {
             return{status: 500, message: "Something went wrong !", error: error};
         }
     }
+
     static async getProductForRateInOrder(accountId: String, orderId: String) {
         try {
             const key = `RateService_getProductForRateInOrder(accountId:${accountId},orderId:${orderId})`;
@@ -135,6 +136,7 @@ export class RateService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
+
     static async getRateByAccountAndProduct(accountId: String,productId: String){
         try {
 
@@ -269,6 +271,23 @@ export class RateService {
             return {status: 204, message: "update Rate success !", data: rate}
         } catch (error) {
             return {status: 500,message: "Something went wrong !", error: error};
+        }
+    }
+
+    static async getAllRateByAccountId(accountId: String) {
+        try {
+            const key = `RateService_getAllRateByAccountId(accountId:${accountId})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Rate success !", data: JSON.parse(dataCache)};
+            }
+            
+            const rates = await Rate.aggregate([{$match:{account: new ObjectId(`${accountId}`)}},{$lookup:{from:"Product", localField:"product",foreignField:"_id", as:"product"}},{$unwind:"$product"}])
+            await RedisCache.setCache(key, JSON.stringify(rates), 60*5);
+            return {status: 200, message:"get rate by account success !", data:rates}
+        } catch (error) {
+            console.log(error);
+            return {status: 500, message: "Something went wrong !", error: error};
         }
     }
 }
