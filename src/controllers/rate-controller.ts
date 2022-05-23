@@ -88,7 +88,7 @@ export class RateController {
             const {newRate} = req.body
             const {userId} = req.payload
             const uploadFile = req.files;
-            const data = await RateService.updateRateProduct(userId, newRate, uploadFile);
+            const data = await RateService.updateRateProduct(userId,JSON.parse(newRate) , uploadFile);
             return res.status(data.status).json(data)
          
         } catch (error: any) {

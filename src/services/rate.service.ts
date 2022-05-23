@@ -218,6 +218,8 @@ export class RateService {
     static async updateRateProduct(userId:String, newRate: any, uploadFile:any){
         try {
             const rate = await Rate.findOne({_id: new ObjectId(`${newRate.rateId}`), account:new ObjectId(`${userId}`)})
+            console.log(rate);
+            
             if(!rate){
                 return {status:404, message:"Not found rate"}
             }
@@ -248,28 +250,39 @@ export class RateService {
                 })
             }
 
-            const oldPoint = rate.point;
+            const oldPoint =Number.parseInt(rate.point) ;
             const product = await Product.findOne({_id:rate.product})
-            product.point = (Math.round(product.point*product.rated)-(oldPoint-newRate.point))/product.rated;
+            console.log("product",product);
+            
+            console.log("Math.round(product.point*product.voted)",Math.round(product.point*product.voted));
+            console.log("(oldPoint-Number.parseInt(newRate.point))",(oldPoint-Number.parseInt(newRate.point)));
+            console.log("product.voted",product.voted);
+            
+            console.log("point",(Math.round(product.point*product.voted)-(oldPoint-Number.parseInt(newRate.point)))/product.voted);
+            
+            product.point = (Math.round(product.point*product.voted)-(oldPoint-Number.parseInt(newRate.point)))/product.voted;
             await product.save()
             
             while (rate.image.length>0) {
                 rate.image.pop();
             }
+            console.log(newRate?.image);
+            
             for (let index = 0; index <  newRate?.image.length; index++) {
-                rate.image.push(newRate?.image[index])     
+                rate.image.push(newRate?.image[index].url)     
             }
             for (let index = 0; index < listResponse.length; index++) {
                 rate.image.push(listResponse[index].url)
             }
             rate.point = newRate.point,
             rate.content = newRate?.content,
-            rate.image = newRate?.image
             await rate.save()
             const keysRate = await RedisCache.getKeys(`RateService*`);
             await RedisCache.delKeys(keysRate);
             return {status: 204, message: "update Rate success !", data: rate}
         } catch (error) {
+            console.log(error);
+            
             return {status: 500,message: "Something went wrong !", error: error};
         }
     }

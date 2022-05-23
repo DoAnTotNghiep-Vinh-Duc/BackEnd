@@ -20,7 +20,6 @@ export class AuthMiddleware {
           return res.status(401).json({ error: { message: err.message } });
         }
         req.payload = payload;
-        console.log("req.payload auth", req.payload);
         
         next();
       });

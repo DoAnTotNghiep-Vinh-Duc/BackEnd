@@ -58,7 +58,7 @@ export class ProductService {
             if(dataCache){
                 return {status: 200,message: "found Product success !", data: JSON.parse(dataCache)}
             }
-            const products = await Product.aggregate([{$match:{status:"ACTIVE"}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{createdAt:1}}]);
+            const products = await Product.aggregate([{$match:{status:"ACTIVE"}}, {$lookup:{from:"Discount", localField:"discount",foreignField:"_id", as:"discount"}},{$unwind:"$discount"},{$sort:{createdAt:-1}}]);
             await RedisCache.setCache(key,JSON.stringify(products),60*5)
             return {status: 200,message: "get products success !", data: products};
         } catch (error) {
