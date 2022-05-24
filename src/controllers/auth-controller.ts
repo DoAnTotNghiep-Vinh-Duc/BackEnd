@@ -1,6 +1,4 @@
 
-const CLIENT_URL = "http://localhost:3000/";
-
 import passport from "passport";
 import { googleStrategy } from "../config/google-strategy";
 import { facebookStrategy } from "../config/facebook-strategy";

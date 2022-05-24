@@ -193,6 +193,8 @@ export class AuthService{
             const verifyCode = await bcrypt.hash(account.email+account.password, salt);
             await RedisCache.setCache(`${verifyCode}`,account.email, Number.parseInt(`${process.env.TTL_REGISTER}`));
             await SendMailService.sendMail(account.name,account.email,verifyCode, "I create account", (data: any)=>{});
+            const keysRoom = await RedisCache.getKeys(`RoomService*`);
+            await RedisCache.delKeys(keysRoom);
             return {status: 201, message: "create account success, please check your email for verify !"} ;
           }
           else{

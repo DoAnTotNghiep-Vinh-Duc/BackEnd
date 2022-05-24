@@ -16,7 +16,7 @@ passport.serializeUser((user: any, done: any) => {
 passport.deserializeUser((user: any, done: any) => {
   done(null, user);
 });
-const CLIENT_URL = "http://localhost:3000/";
+const CLIENT_URL = `${process.env.DOMAIN_FRONTEND}/`;
 
 authRoutes.get("/login/success", AuthController.loginSuccess);
 

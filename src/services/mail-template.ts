@@ -63,7 +63,7 @@ export class MaiTemplateService {
                                       cursor: pointer;
                                       text-decoration: none;
                                     "
-                                    href="http://localhost:3000/verifyAccount/${encodeURIComponent(data.verifyCode)}"
+                                    href="${process.env.DOMAIN_FRONTEND}/verifyAccount/${encodeURIComponent(data.verifyCode)}"
                                     target="_blank"
                                   >
                                     Xác thực tài khoản
@@ -196,7 +196,7 @@ export class MaiTemplateService {
                                     border-radius: 5px;
                                     cursor: pointer;
                                     text-decoration: none;
-                                  " href="http://localhost:3000/verifyPassword/${encodeURIComponent(data.code)}" target="_blank">
+                                  " href="${process.env.DOMAIN_FRONTEND}/verifyPassword/${encodeURIComponent(data.code)}" target="_blank">
                           Xác thực để thay đổi mật khẩu
                       </a>
                   </div>

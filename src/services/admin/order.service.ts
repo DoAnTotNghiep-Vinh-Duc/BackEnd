@@ -374,7 +374,7 @@ export class OrderService {
                     const timezone = "Asia/Ho_Chi_Minh";
                     let date = zonedTimeToUtc(new Date(), timezone);
 
-                    let start = startOfMonth(date);
+                    let start = new Date();
                     start.setHours(start.getHours()+7);
                     await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DELIVERING", deliveryDay: start}})
                 }
@@ -382,7 +382,7 @@ export class OrderService {
                     const timezone = "Asia/Ho_Chi_Minh";
                     let date = zonedTimeToUtc(new Date(), timezone);
 
-                    let start = startOfMonth(date);
+                    let start = new Date();
                     start.setHours(start.getHours()+7);
                     await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE", receiveDay: start}})
                 }
@@ -411,17 +411,43 @@ export class OrderService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
-    static async testTransaction(){
-        const session = await mongoose.startSession();
-        session.startTransaction();
+    static async getDataOrderForChart(){
         try {
-            const opts = {session,returnOriginal: false}
-            const a = await Order.findOneAndUpdate({_id:new ObjectId("626a8c05d5b146dd050c67a5")},{status:"OKOK"},opts);
-            throw new Error("Lỗi nè");
+            const key = `OrderService_getDataOrderForChart`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "get data success success !", data: JSON.parse(dataCache)};
+            }
+            let nowDate = new Date();
+            nowDate.setHours(24,0,0,0);
+            nowDate.setHours(nowDate.getHours()+7);
+            let sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate()-7);
+            sevenDaysAgo.setHours(24,0,0,0)
+            sevenDaysAgo.setHours(sevenDaysAgo.getHours()+7);
+            
+            let order = await Order.aggregate([{$match:{status:"DONE"}},{$match:{$and:[{receiveDay:{$lte:nowDate}},{receiveDay:{$gte:sevenDaysAgo}}]}},{$project:{total:1,receiveDay:1}}]);
+            console.log(order);
+            let listDate :Array<any>=[];
+            let listData :Array<any>=[];
+            for(let i = 1; i <= 7; i++){
+                let nextDate = new Date(sevenDaysAgo);
+                nextDate.setDate(nextDate.getDate()+i);
+                let afterDate = new Date(sevenDaysAgo);
+                afterDate.setDate(nextDate.getDate()-1);
+                let totalMoney = 0;
+                for (let index = 0; index < order.length; index++) {
+                    if(order[index].receiveDay.getTime()>afterDate.getTime()&&order[index].receiveDay.getTime()<nextDate.getTime()){
+                        totalMoney+=order[index].total;
+                    }
+                }
+                listData.push(totalMoney);
+                listDate.push(afterDate);
+            }
+            await RedisCache.setCache(key, JSON.stringify({listDate, listData}), 60*5);
+            return {status: 200,message: "get data success !", data:{listDate, listData}};
             
         } catch (error) {
-            await session.abortTransaction();
-            session.endSession();
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
@@ -434,4 +460,7 @@ async function delKeyRedisWhenChangeOrder() {
     await RedisCache.delKeys(keysCart);
     const keysProduct = await RedisCache.getKeys(`ProductService*`);
     await RedisCache.delKeys(keysProduct);
+}
+function filterNumbers(min: number, max: number) {
+    return function (a: number) { return a >= min && a <= max; };
 }
