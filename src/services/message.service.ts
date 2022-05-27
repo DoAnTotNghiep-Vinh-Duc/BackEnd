@@ -40,6 +40,8 @@ export class MessageService {
                 socket.to(room._id.toString()).emit("addMessage",{savedMessage});
                 const keysMessage = await RedisCache.getKeys(`MessageService*`);
                 await RedisCache.delKeys(keysMessage);
+                const keysRoom = await RedisCache.getKeys(`RoomService*`);
+                await RedisCache.delKeys(keysRoom);
                 return{status: 200,message: "Thêm tin nhắn thành công !", data: savedMessage};
             }
             else{
