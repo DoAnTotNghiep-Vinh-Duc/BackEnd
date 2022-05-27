@@ -3,11 +3,18 @@ import { Room } from "../../models/room";
 import { Account } from "../../models/account";
 import {Supplier} from "../../models/supplier";
 import { Message } from "../../models/message";
+import { RedisCache } from "../../config/redis-cache";
 export class MessageService {
     static async getMessageByRoomId(roomId: String) {
         try {
+            const key = `MessageService_getMessageByRoomId(roomId:${roomId})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "Lấy tin nhắn thành công !", data: JSON.parse(dataCache)};
+            }  
             const room = await Room.findOne({_id:new ObjectId(`${roomId}`)})            
             const messages = await Message.find({room:room._id});
+            await RedisCache.setCache(key, JSON.stringify(messages), 60*5);
             return{status: 200,message: "Lấy tin nhắn thành công !", data: messages};
         } catch (error) {
             return{status: 500,message: "Something went wrong !", error: error};
@@ -31,6 +38,8 @@ export class MessageService {
                     active: true,
                 });
                 socket.to(room._id.toString()).emit("adminAddMessage",{savedMessage});
+                const keysMessage = await RedisCache.getKeys(`MessageService*`);
+                await RedisCache.delKeys(keysMessage);
                 return{status: 200,message: "Thêm tin nhắn thành công !", data: savedMessage};
             }
             else{

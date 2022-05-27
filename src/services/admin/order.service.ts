@@ -163,8 +163,9 @@ export class OrderService {
                 let end = endOfMonth(date);
                 start.setHours(start.getHours()+7);
                 end.setHours(end.getHours()+7);
-                
-                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}},{$match:{status:"DONE"}}])
+                console.log("start",start);
+                console.log("end",end);
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$match:{status:"DONE"}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
                 users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
