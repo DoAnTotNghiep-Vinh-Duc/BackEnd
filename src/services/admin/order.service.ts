@@ -200,7 +200,7 @@ export class OrderService {
             }
 
             if(orders){
-                await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
+                await RedisCache.setCache(key, JSON.stringify({orders, user:users.length}), 60*5);
                 return {status: 200,message: "found Orders success !", data: {orders, user:users.length}}
             }
             else
