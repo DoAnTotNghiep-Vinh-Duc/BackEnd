@@ -111,7 +111,7 @@ export class OrderService {
                 start.setHours(start.getHours()+7);
                 end.setHours(end.getHours()+7);
                 
-                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}},{$match:{status:"DONE"}}])
 
                 users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
@@ -123,7 +123,7 @@ export class OrderService {
                 yesterdayEnd.setHours(23,59,59,999);
                 yesterdayStart.setHours(yesterdayStart.getHours()+7);
                 yesterdayEnd.setHours(yesterdayEnd.getHours()+7);
-                orders = await Order.aggregate([{$match:{createdAt: { $gte: yesterdayStart, $lte: yesterdayEnd}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: yesterdayStart, $lte: yesterdayEnd}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}},{$match:{status:"DONE"}}])
                 users = await Account.aggregate([{$match:{createdAt: { $gte: yesterdayStart, $lte: yesterdayEnd}}}])
             }
 
@@ -136,7 +136,7 @@ export class OrderService {
                 start.setHours(start.getHours()+7);
                 end.setHours(end.getHours()+7);
                 
-                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}},{$match:{status:"DONE"}}])
                 users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
@@ -151,7 +151,7 @@ export class OrderService {
                 end.setHours(end.getHours()+7);
                 end.setDate(end.getDate()-7);
                 
-                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}},{$match:{status:"DONE"}}])
                 users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
@@ -164,7 +164,7 @@ export class OrderService {
                 start.setHours(start.getHours()+7);
                 end.setHours(end.getHours()+7);
                 
-                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}},{$match:{status:"DONE"}}])
                 users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
@@ -181,7 +181,7 @@ export class OrderService {
 
                 console.log("start: ",start)
                 console.log("end: ", end);
-                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}},{$match:{status:"DONE"}}])
                 users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
@@ -193,7 +193,7 @@ export class OrderService {
                     let start = zonedTimeToUtc(new Date(beginDate), timezone);
                     let end = zonedTimeToUtc(new Date(endDate), timezone);
                     end.setHours(23,59,59,999);
-                    orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                    orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}},{$match:{status:"DONE"}}])
                     users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
                 }
                 
