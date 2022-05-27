@@ -101,8 +101,7 @@ export class OrderService {
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
             }
             let orders = null;
-            console.log("typeRequest",typeRequest);
-            
+            let users: Array<any> = [];            
             if(typeRequest==="TODAY"){
                 let start = new Date();
                 start.setHours(0,0,0,0);
@@ -113,6 +112,8 @@ export class OrderService {
                 end.setHours(end.getHours()+7);
                 
                 orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+
+                users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
             else if(typeRequest==="YESTERDAY"){
@@ -123,6 +124,7 @@ export class OrderService {
                 yesterdayStart.setHours(yesterdayStart.getHours()+7);
                 yesterdayEnd.setHours(yesterdayEnd.getHours()+7);
                 orders = await Order.aggregate([{$match:{createdAt: { $gte: yesterdayStart, $lte: yesterdayEnd}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                users = await Account.aggregate([{$match:{createdAt: { $gte: yesterdayStart, $lte: yesterdayEnd}}}])
             }
 
             else if(typeRequest === "THISWEEK"){
@@ -135,6 +137,7 @@ export class OrderService {
                 end.setHours(end.getHours()+7);
                 
                 orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
             else if(typeRequest === "LASTWEEK"){
@@ -149,6 +152,7 @@ export class OrderService {
                 end.setDate(end.getDate()-7);
                 
                 orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
             else if(typeRequest === "THISMONTH"){
@@ -161,6 +165,7 @@ export class OrderService {
                 end.setHours(end.getHours()+7);
                 
                 orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
             else if(typeRequest === "LASTMONTH"){
@@ -177,6 +182,7 @@ export class OrderService {
                 console.log("start: ",start)
                 console.log("end: ", end);
                 orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
             }
 
             else if(typeRequest === "TWODATE"){
@@ -188,13 +194,14 @@ export class OrderService {
                     let end = zonedTimeToUtc(new Date(endDate), timezone);
                     end.setHours(23,59,59,999);
                     orders = await Order.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}},{$group:{"_id":"$_id",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:1}}])
+                    users = await Account.aggregate([{$match:{createdAt: { $gte: start, $lte: end}}}])
                 }
                 
             }
 
             if(orders){
                 await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
-                return {status: 200,message: "found Orders success !", data: orders}
+                return {status: 200,message: "found Orders success !", data: {orders, user:users.length}}
             }
             else
                 return {status: 404, message: "Not found Orders !"}

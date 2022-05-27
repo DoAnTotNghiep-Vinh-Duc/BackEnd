@@ -4,9 +4,9 @@ import { MaiTemplateService } from './mail-template';
 export class SendMailService {
     static async sendMail(name: any, email: any,verifyCode: any, content: any, callback: any){
         const client: any = new SMTPClient({
-            user: process.env.MAIL,
-            password: process.env.MAIL_PASSWORD,
-            host: process.env.MAIL_HOST,
+            user: `${process.env.MAIL}`,
+            password: `${process.env.MAIL_PASSWORD}`,
+            host: `${process.env.MAIL_HOST}`,
             ssl: true,
         });
         try {
