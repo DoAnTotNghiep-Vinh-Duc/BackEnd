@@ -6,6 +6,11 @@ const OrderSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref:'Account'
     },
+    shipper:{
+        type: Schema.Types.ObjectId,
+        ref:'Account',
+        default:null
+    },
     listOrderDetail: {
         type:[
             {

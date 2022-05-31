@@ -28,6 +28,19 @@ export class OrderController {
         }
     }
 
+    static async getOrderByAccountShipperId(req: Request, res: Response): Promise<any> {
+        try {
+            const statusOrder: any = req.query.statusOrder;// status order: 'HANDLING','DELIVERING','DONE','CANCELED', 'ALL'
+            const data = await OrderService.getOrderByAccountShipperId(req.payload.userId, statusOrder);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
+
     static async createOrder(req: Request, res: Response): Promise<any> {
         try {
             const account = req.payload.userId;
