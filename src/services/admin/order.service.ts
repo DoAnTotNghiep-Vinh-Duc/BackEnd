@@ -409,7 +409,10 @@ export class OrderService {
             let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
             if(order){
                 await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"CANCELED"}})
-                // await RedisCache.clearCache();
+                for (let index = 0; index < order.listOrderDetail.length; index++) {
+                    const element = order.listOrderDetail[index];
+                    await ProductDetail.findOneAndUpdate({_id:order.listOrderDetail[index].productDetail},{$inc:{quantity:order.listOrderDetail[index].quantity}})
+                }
                 delKeyRedisWhenChangeOrder();
                 return {status: 204,message: "cancel Order success !"};
             }

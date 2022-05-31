@@ -18,8 +18,13 @@ export class OrderService {
             }
             const order = await Order.aggregate([{$match:{$and:[{_id:new ObjectId(`${orderId}`)},{account:new ObjectId(`${accountId}`)}]}},{$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}},{$unwind:"$account.information"},{$project:{"account.password":0}},{$unwind:"$listOrderDetail"},{$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{ "$lookup": { "from": "Product", "localField": "listOrderDetail.productDetail.product", "foreignField": "_id", "as": "listOrderDetail.productDetail.product" }},{$unwind:"$listOrderDetail.productDetail.product"},{ "$lookup": { "from": "Color", "localField": "listOrderDetail.productDetail.color", "foreignField": "_id", "as": "listOrderDetail.productDetail.color" }},{$unwind:"$listOrderDetail.productDetail.color"},{$project:{"listOrderDetail.productDetail.product.listProductDetail":0}},{ "$group": { "_id": "$_id",account:{$first:"$account"},status:{$first:"$status"},subTotal:{$first:"$subTotal"},feeShip:{$first:"$feeShip"},total:{$first:"$total"},typePayment:{$first:"$typePayment"},name:{$first:"$name"},city:{$first:"$city"},district:{$first:"$district"},ward:{$first:"$ward"},street:{$first:"$street"},phone:{$first:"$phone"},createdAt:{$first:"$createdAt"},updatedAt:{$first:"$updatedAt"}, "listOrderDetail": { "$push": "$listOrderDetail" } }}])
             if(order){
+                const canCancelOrderCache = await RedisCache.getCache(`CancelOrder_${orderId.toString()}`);
+                let canCancelOrder = false;
+                if(canCancelOrderCache){
+                    canCancelOrder = true;
+                }
                 await RedisCache.setCache(key, JSON.stringify(order), 60*5);
-                return {status: 200,message: "found Order success !", data: order}
+                return {status: 200,message: "found Order success !", data: {order,canCancelOrder}}
             }
             else
                 return {status: 404, message: "Not found Order !"}
@@ -97,8 +102,8 @@ export class OrderService {
 
                 await session.commitTransaction();
                 session.endSession();
-                // await RedisCache.clearCache();
                 delKeyRedisWhenChangeOrder();
+                await RedisCache.setCache(`CancelOrder_${newOrder._id.toString()}`,JSON.stringify(newOrder),Number.parseInt(`${process.env.TTL_CANCELORDER}`));
                 return {status: 201, message: "create Order success !", data:newOrder}
             }
             else{
@@ -149,6 +154,26 @@ export class OrderService {
             
             return {status: 500, message: "Something went wrong !", error: error};
         }
+    }
+
+    static async cancelOrder(orderId: String, accountId: String){
+        let key = `CancelOrder_${orderId}`;
+        const canCancelOrder = await RedisCache.getCache(key);
+        if(!canCancelOrder){
+            return {status: 400, message:"Bạn không thể hủy đơn hàng quá 30 phút !"};
+        }
+        let order = await Order.findOne({_id:new ObjectId(`${orderId}`), account: new ObjectId(`${accountId}`)});
+        if(order){
+            await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"CANCELED"}})
+            for (let index = 0; index < order.listOrderDetail.length; index++) {
+                const element = order.listOrderDetail[index];
+                await ProductDetail.findOneAndUpdate({_id:order.listOrderDetail[index].productDetail},{$inc:{quantity:order.listOrderDetail[index].quantity}})
+            }
+            delKeyRedisWhenChangeOrder();
+            return {status: 204,message: "cancel Order success !"};
+        }
+        else
+            return {status: 404, message: "Not found Order !"}
     }
 }
 async function delKeyRedisWhenChangeOrder() {

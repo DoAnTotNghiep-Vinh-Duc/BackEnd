@@ -42,6 +42,20 @@ export class OrderController {
         }
     }
 
+    static async cancelOrder(req: Request, res: Response): Promise<any> {
+        try {
+            const account = req.payload.userId;
+            const {orderId} = req.body
+            const data = await OrderService.cancelOrder(orderId, account);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
+
     static async paymentWithPayPal(req: Request, res: Response): Promise<any> {
         
     }

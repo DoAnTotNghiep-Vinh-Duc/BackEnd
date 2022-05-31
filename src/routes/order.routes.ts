@@ -50,8 +50,8 @@ orderRoutes.get("/payment-paypal",(req, res)=>{
                 "payment_method": "paypal"
             },
             "redirect_urls": {
-                "return_url": "http://localhost:5000/order/success",
-                "cancel_url": "http://localhost:5000/order/cancel"
+                "return_url": `http://localhost:${process.env.PORT}/order/success`,
+                "cancel_url": `http://localhost:${process.env.PORT}/order/cancel`
             },
             "transactions": [{
                 "item_list": {
@@ -111,10 +111,11 @@ orderRoutes.get("/success",(req, res)=>{
         return res.send('error');
         } else {
             console.log(JSON.stringify(payment));
-            return res.redirect("localhost:3000");
+            return res.redirect("http://localhost:3000");
         }
     });
 })
 orderRoutes.post("/",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone, OrderController.createOrder);
 orderRoutes.get("/get-order-by-account", AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive, OrderController.getOrderByAccountId)
 orderRoutes.get("/get-order-by-orderId/:orderId", AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive, OrderController.getOrderByOrderId)
+orderRoutes.post("/cancel-order",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone, OrderController.cancelOrder)
