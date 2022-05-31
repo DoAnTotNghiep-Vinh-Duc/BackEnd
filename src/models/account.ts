@@ -35,7 +35,7 @@ const AccountSchema = new Schema({
     },
     roleAccount: {
         type: String,
-        enum:['Admin', 'User'],
+        enum:['Admin', 'User', 'Shipper'],
         default: 'User'
     },
     information:{

@@ -8,6 +8,7 @@ import {accountRoutes} from './account.routes';
 import {discountRoutes} from "./discount.routes";
 import {roomRoutes} from "./room.routes"
 import {messageRoutes} from "./message.routes"
+import { shipperRoutes } from './shipper.routes';
 export const adminRoutes = express.Router();
 adminRoutes.use('/', supplierRoutes);
 adminRoutes.use('/', typeProductRoutes);
@@ -18,3 +19,4 @@ adminRoutes.use('/account', accountRoutes);
 adminRoutes.use('/discount', discountRoutes);
 adminRoutes.use('/room', roomRoutes);
 adminRoutes.use('/message', messageRoutes);
+adminRoutes.use('/shipper', shipperRoutes)
