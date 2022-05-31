@@ -425,10 +425,10 @@ export class OrderService {
     static async getDataOrderForChart(){
         try {
             const key = `OrderService_getDataOrderForChart`;
-            const dataCache = await RedisCache.getCache(key);
-            if(dataCache){
-                return {status: 200,message: "get data success success !", data: JSON.parse(dataCache)};
-            }
+            // const dataCache = await RedisCache.getCache(key);
+            // if(dataCache){
+            //     return {status: 200,message: "get data success success !", data: JSON.parse(dataCache)};
+            // }
             let nowDate = new Date();
             nowDate.setHours(24,0,0,0);
             nowDate.setHours(nowDate.getHours()+7);
@@ -438,14 +438,14 @@ export class OrderService {
             sevenDaysAgo.setHours(sevenDaysAgo.getHours()+7);
             
             let order = await Order.aggregate([{$match:{status:"DONE"}},{$match:{$and:[{receiveDay:{$lte:nowDate}},{receiveDay:{$gte:sevenDaysAgo}}]}},{$project:{total:1,receiveDay:1}}]);
-            console.log(order);
             let listDate :Array<any>=[];
             let listData :Array<any>=[];
             for(let i = 1; i <= 7; i++){
                 let nextDate = new Date(sevenDaysAgo);
-                nextDate.setDate(nextDate.getDate()+i);
+                nextDate.setTime(nextDate.getTime()+24 * 60 * 60 * 1000*i);
                 let afterDate = new Date(sevenDaysAgo);
-                afterDate.setDate(nextDate.getDate()-1);
+                afterDate.setTime(nextDate.getTime()-24 * 60 * 60 * 1000);
+                console.log("afterDate",afterDate);
                 let totalMoney = 0;
                 for (let index = 0; index < order.length; index++) {
                     if(order[index].receiveDay.getTime()>afterDate.getTime()&&order[index].receiveDay.getTime()<nextDate.getTime()){
@@ -455,6 +455,8 @@ export class OrderService {
                 listData.push(totalMoney);
                 listDate.push(afterDate);
             }
+            console.log(listDate);
+            
             await RedisCache.setCache(key, JSON.stringify({listDate, listData}), 60*5);
             return {status: 200,message: "get data success !", data:{listDate, listData}};
             

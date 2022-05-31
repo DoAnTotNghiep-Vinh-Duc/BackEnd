@@ -18,50 +18,44 @@ paypal.configure({
     'client_id': `${process.env.PAYPAL_CLIENTID}`,
     'client_secret': `${process.env.PAYPAL_CLIENTSECRET}`
 });
-orderRoutes.get("/payment-paypal",async (req, res)=>{
+orderRoutes.get("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone, async (req, res)=>{
     try {
         const account = req.payload.userId;
-        // const order = req.body // order = {listOrderDetail, name, city, district, ward, street, phone}
-        const order = {
-            "account":"627680b34a41c1347aef6e06",
-            "listOrderDetail":["6293998830ca8f682db50f0c"],
-            "name":"Vinh",
-            "city":"Hồ Chí Minh",
-            "district":"Gò Vấp",
-            "ward":"phường 4",
-            "street":"Nguyễn Văn Bảo",
-            "phone":"0905242343"
-        }
+        const order = req.body // order = {listOrderDetail, name, city, district, ward, street, phone}
         let total = 0;
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        const opts = {session,returnOriginal: false};
 
         const cart = await Cart.findOne({account: order.account})
         const cartDetail = await CartDetail.find({$and:[{cartId:cart._id}, {status:"ACTIVE"}]});
         let items: Array<any> = [];
 
         let listOutOfStock = [];
+        
         for(let i =0;i< order.listOrderDetail.length; i++){
             let result = cartDetail.find((obj: any) => {
                 return obj.productDetail.toString() === order.listOrderDetail[i]
             })          
             if(result){
+                
                 const productDetail = await ProductDetail.aggregate([{$match:{_id: result.productDetail}},{ "$lookup": { "from": "Product", "localField": "product", "foreignField": "_id", "as": "product" }},{$unwind:"$product"},{ "$lookup": { "from": "Color", "localField": "color", "foreignField": "_id", "as": "color" }},{$unwind:"$color"}]);
                 let tmpObject = {
                     "name": productDetail[0].product.name+ " "+productDetail[0].size+ " " +productDetail[0].color.name,
-                    "sku": `${productDetail[0]._id.slice(-6)}`,
-                    "price": `${productDetail[0].product.priceDiscount/23000}`,
+                    "sku": `${productDetail[0]._id.toString().slice(-6)}`,
+                    "price": `${(productDetail[0].product.priceDiscount/23000).toFixed(2)}`,
                     "currency": "USD",
                     "quantity": result.quantity
                 }
                 items.push(tmpObject);
-                total+=productDetail[0].product.priceDiscount/23000;
+                let tmpPrice = (productDetail[0].product.priceDiscount/23000).toFixed(2)
+                total+=Number.parseFloat(tmpPrice);
+                
                 if(result.quantity>productDetail[0].quantity){
                     listOutOfStock.push(result)
                 }
             }
         }
+        console.log(items);
+        console.log(total);
+        
         if(listOutOfStock.length>0){
             return {status: 400, message: "Bạn không thể đặt hàng ! Hết hàng !"}
         }
@@ -85,8 +79,9 @@ orderRoutes.get("/payment-paypal",async (req, res)=>{
                 "description": "Đặt hàng"
             }]
         }
-
-        paypal.payment.create(create_payment_json,async function (error: any, payment: any) {
+        
+        paypal.payment.create(create_payment_json, async function (error: any, payment: any) {
+            
             if (error) {
                 return { status: 400, message: "cancel" };
             } else {
@@ -95,8 +90,8 @@ orderRoutes.get("/payment-paypal",async (req, res)=>{
 
                     if (payment.links[i].rel === 'approval_url') {
                         console.log("return here");
-                        await RedisCache.setCache(`OrerPaypal_${account}`,order, 60*5);
-                        res.redirect(payment.links[i].href);
+                        await RedisCache.setCache(`OrderPaypal_${account}`,JSON.stringify(order), 60*5);
+                        res.send(payment.links[i].href);
                     }
                 }
             }
@@ -114,9 +109,11 @@ orderRoutes.get("/cancel",(req, res)=>{
     res.status(200).send("Cancel success")
 })
 
-orderRoutes.get("/success",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone,async (req, res)=>{
+orderRoutes.get("/success",async (req, res)=>{
+
     const account = req.payload.userId;
-    let cacheOrder = await RedisCache.getCache(`OrerPaypal_${account}`);
+    let cacheOrder = await RedisCache.getCache(`OrderPaypal_${account}`);
+    
     if(!cacheOrder){
         return res.send('error');
     }
@@ -126,6 +123,8 @@ orderRoutes.get("/success",AuthMiddleware.verifyAccessToken,AuthMiddleware.check
     let total = 0;
     const cart = await Cart.findOne({account: parseCacheOrder.account})
     const cartDetail = await CartDetail.find({$and:[{cartId:cart._id}, {status:"ACTIVE"}]});
+    console.log(parseCacheOrder.listOrderDetail);
+    
     for(let i =0;i< parseCacheOrder.listOrderDetail.length; i++){
         let result = cartDetail.find((obj: any) => {
             return obj.productDetail.toString() === parseCacheOrder.listOrderDetail[i]
@@ -134,14 +133,18 @@ orderRoutes.get("/success",AuthMiddleware.verifyAccessToken,AuthMiddleware.check
             const productDetail = await ProductDetail.aggregate([{$match:{_id: result.productDetail}},{ "$lookup": { "from": "Product", "localField": "product", "foreignField": "_id", "as": "product" }},{$unwind:"$product"},{ "$lookup": { "from": "Color", "localField": "color", "foreignField": "_id", "as": "color" }},{$unwind:"$color"}]);
             let tmpObject = {
                 "name": productDetail[0].product.name+ " "+productDetail[0].size+ " " +productDetail[0].color.name,
-                "sku": `${productDetail[0]._id.slice(-6)}`,
-                "price": `${productDetail[0].product.priceDiscount/23000}`,
+                "sku": `${productDetail[0]._id.toString().slice(-6)}`,
+                "price": `${(productDetail[0].product.priceDiscount/23000).toFixed(2)}`,
                 "currency": "USD",
                 "quantity": result.quantity
             }
-            total+=productDetail[0].product.priceDiscount/23000;
+            let tmpPrice = (productDetail[0].product.priceDiscount/23000).toFixed(2)
+            total+=Number.parseFloat(tmpPrice);
+            
         }
     }
+    console.log(total);
+
     const execute_payment_json: any = {
         "payer_id": payerId,
         "transactions": [{
@@ -151,13 +154,17 @@ orderRoutes.get("/success",AuthMiddleware.verifyAccessToken,AuthMiddleware.check
             }
         }]
     };
-
-    paypal.payment.execute(paymentId, execute_payment_json, async function (error, payment) {
+    console.log(execute_payment_json);
+    
+    paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
         if (error) {
+            console.log(error);
+            
         return res.send('error');
         } else {
-            const data = await OrderService.createOrder(parseCacheOrder);
-
+            // const data = await OrderService.createOrder(parseCacheOrder);
+            // console.log(data);
+            
             return res.redirect("http://localhost:3000");
         }
     });
