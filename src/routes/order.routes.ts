@@ -53,7 +53,7 @@ orderRoutes.post("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddlewa
         }
         console.log(items);
         console.log(total);
-        
+        let tmpTotal = total.toFixed(2);
         if(listOutOfStock.length>0){
             return {status: 400, message: "Bạn không thể đặt hàng ! Hết hàng !"}
         }
@@ -72,7 +72,7 @@ orderRoutes.post("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddlewa
                 },
                 "amount": {
                     "currency": "USD",
-                    "total": total.toString()
+                    "total": tmpTotal.toString()
                 },
                 "description": "Đặt hàng"
             }]
@@ -142,13 +142,13 @@ orderRoutes.get("/success",async (req, res)=>{
         }
     }
     console.log(total);
-
+    let tmpTotal = total.toFixed(2);
     const execute_payment_json: any = {
         "payer_id": payerId,
         "transactions": [{
             "amount": {
                 "currency": "USD",
-                "total": total.toString()
+                "total": tmpTotal.toString()
             }
         }]
     };
