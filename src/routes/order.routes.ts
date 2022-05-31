@@ -44,7 +44,7 @@ orderRoutes.post("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddlewa
                 }
                 items.push(tmpObject);
                 let tmpPrice = (productDetail[0].product.priceDiscount/23000).toFixed(2)
-                total+=Number.parseFloat(tmpPrice);
+                total+=Number.parseFloat(tmpPrice)*result.quantity;
                 
                 if(result.quantity>productDetail[0].quantity){
                     listOutOfStock.push(result)
@@ -137,7 +137,7 @@ orderRoutes.get("/success",async (req, res)=>{
                 "quantity": result.quantity
             }
             let tmpPrice = (productDetail[0].product.priceDiscount/23000).toFixed(2)
-            total+=Number.parseFloat(tmpPrice);
+            total+=Number.parseFloat(tmpPrice)*result.quantity;
             
         }
     }
