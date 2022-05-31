@@ -3,22 +3,18 @@ import { OrderController } from '../controllers/order-controller';
 import { CheckPhoneMiddleware } from '../middleware/check-phone-middleware';
 import { AuthMiddleware } from '../middleware/auth-middleware';
 import paypal from "paypal-rest-sdk"
-import { OrderService } from '../services/order.service';
-import mongoose from 'mongoose';
 import { Cart } from '../models/cart';
-import { Information } from '../models/information';
-import { Account } from '../models/account';
 import { CartDetail } from '../models/cart-detail';
 import { ProductDetail } from '../models/product-detail';
-import { Order } from '../models/order';
 import { RedisCache } from '../config/redis-cache';
+import { OrderService } from '../services/order.service';
 export const orderRoutes = express.Router();
 paypal.configure({
     'mode': 'sandbox', //sandbox or live
     'client_id': `${process.env.PAYPAL_CLIENTID}`,
     'client_secret': `${process.env.PAYPAL_CLIENTSECRET}`
 });
-orderRoutes.get("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone, async (req, res)=>{
+orderRoutes.post("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone, async (req, res)=>{
     try {
         const account = req.payload.userId;
         const order = req.body // order = {listOrderDetail, name, city, district, ward, street, phone}
@@ -156,15 +152,14 @@ orderRoutes.get("/success",async (req, res)=>{
     };
     console.log(execute_payment_json);
     
-    paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+    paypal.payment.execute(paymentId, execute_payment_json,async function (error, payment) {
         if (error) {
             console.log(error);
             
         return res.send('error');
         } else {
-            // const data = await OrderService.createOrder(parseCacheOrder);
-            // console.log(data);
-            
+            const data = await OrderService.createOrder(parseCacheOrder);
+            delKeyRedisWhenChangeOrder();
             return res.redirect("http://localhost:3000");
         }
     });
