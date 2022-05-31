@@ -20,7 +20,9 @@ orderRoutes.post("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddlewa
         const order = req.body // order = {listOrderDetail, name, city, district, ward, street, phone}
         let total = 0;
 
-        const cart = await Cart.findOne({account: order.account})
+        const cart = await Cart.findOne({account: account})
+        console.log(cart);
+        
         const cartDetail = await CartDetail.find({$and:[{cartId:cart._id}, {status:"ACTIVE"}]});
         let items: Array<any> = [];
 
