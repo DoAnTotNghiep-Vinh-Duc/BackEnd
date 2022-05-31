@@ -34,7 +34,7 @@ app.use(passport.session());
 app.use(morgan("dev"));
 app.use(
   cors({
-    origin: `${process.env.DOMAIN_FRONTEND}`,
+    origin: [`${process.env.DOMAIN_FRONTEND}`, "http://localhost:3006"],
     // origin: "http://localhost:3000",
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
