@@ -23,7 +23,7 @@ export class OrderService {
                 if(canCancelOrderCache){
                     canCancelOrder = true;
                 }
-                await RedisCache.setCache(key, JSON.stringify(order), 60*5);
+                await RedisCache.setCache(key, JSON.stringify({order,canCancelOrder}), 60*5);
                 return {status: 200,message: "found Order success !", data: {order,canCancelOrder}}
             }
             else
@@ -80,7 +80,7 @@ export class OrderService {
                     const cartDetail = await CartDetail.findById({_id:result._id});
                     cartDetail.status = "PAID";
                     await cartDetail.save(opts);
-                    await Cart.findByIdAndUpdate({_id:cart._id},{$pull:{'listCartDetail':result._id}}, opts);         
+                    await Cart.findOneAndUpdate({_id:cart._id},{$pull:{'listCartDetail':result._id}}, opts);         
                 }
             }
             

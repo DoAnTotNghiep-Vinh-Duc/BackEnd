@@ -44,8 +44,16 @@ const OrderSchema = new Schema({
     },
     typePayment:{
         type:String,
-        enum:['CASH','CARD'],
+        enum:['CASH','PAYPAL'],
         default:'CASH'
+    },
+    paymentId:{
+        type:String,
+        required:false
+    },
+    payerId:{
+        type:String,
+        required:false
     },
     name:{
         type: String,
