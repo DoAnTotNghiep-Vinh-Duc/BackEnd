@@ -107,7 +107,7 @@ orderRoutes.get("/cancel",(req, res)=>{
     res.status(200).send("Cancel success")
 })
 
-orderRoutes.get("/success",async (req, res)=>{
+orderRoutes.get("/success",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone,async (req, res)=>{
 
     const account = req.payload.userId;
     let cacheOrder = await RedisCache.getCache(`OrderPaypal_${account}`);
