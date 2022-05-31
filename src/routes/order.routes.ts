@@ -14,12 +14,15 @@ paypal.configure({
     'client_id': `${process.env.PAYPAL_CLIENTID}`,
     'client_secret': `${process.env.PAYPAL_CLIENTSECRET}`
 });
+var key = "";
 orderRoutes.post("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone, async (req, res)=>{
     try {
         const account = req.payload.userId;
         const order = req.body // order = {listOrderDetail, name, city, district, ward, street, phone}
         let total = 0;
-
+        order.account = account;
+        console.log("order", order);
+        
         const cart = await Cart.findOne({account: account})
         console.log(cart);
         
@@ -88,6 +91,7 @@ orderRoutes.post("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddlewa
 
                     if (payment.links[i].rel === 'approval_url') {
                         console.log("return here");
+                        key = `OrderPaypal_${account}`
                         await RedisCache.setCache(`OrderPaypal_${account}`,JSON.stringify(order), 60*5);
                         res.send(payment.links[i].href);
                     }
@@ -107,10 +111,10 @@ orderRoutes.get("/cancel",(req, res)=>{
     res.status(200).send("Cancel success")
 })
 
-orderRoutes.get("/success",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone,async (req, res)=>{
-
-    const account = req.payload.userId;
-    let cacheOrder = await RedisCache.getCache(`OrderPaypal_${account}`);
+orderRoutes.get("/success",async (req, res)=>{
+    console.log("key",key);
+    
+    let cacheOrder = await RedisCache.getCache(key);
     
     if(!cacheOrder){
         return res.send('error');
@@ -129,13 +133,6 @@ orderRoutes.get("/success",AuthMiddleware.verifyAccessToken,AuthMiddleware.check
         })          
         if(result){
             const productDetail = await ProductDetail.aggregate([{$match:{_id: result.productDetail}},{ "$lookup": { "from": "Product", "localField": "product", "foreignField": "_id", "as": "product" }},{$unwind:"$product"},{ "$lookup": { "from": "Color", "localField": "color", "foreignField": "_id", "as": "color" }},{$unwind:"$color"}]);
-            let tmpObject = {
-                "name": productDetail[0].product.name+ " "+productDetail[0].size+ " " +productDetail[0].color.name,
-                "sku": `${productDetail[0]._id.toString().slice(-6)}`,
-                "price": `${(productDetail[0].product.priceDiscount/23000).toFixed(2)}`,
-                "currency": "USD",
-                "quantity": result.quantity
-            }
             let tmpPrice = (productDetail[0].product.priceDiscount/23000).toFixed(2)
             total+=Number.parseFloat(tmpPrice)*result.quantity;
             
