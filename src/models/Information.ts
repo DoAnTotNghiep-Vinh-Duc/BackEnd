@@ -20,7 +20,10 @@ const InformationSchema = new Schema({
         default:""
     },
     email: String,
-    phone: String,
+    phone: {
+        type:String,
+        default:""
+    },
     avatar: {
         type: String
     },

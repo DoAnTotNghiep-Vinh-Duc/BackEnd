@@ -8,9 +8,9 @@ export class ShipperService {
             const user = await Account.findOne({ email: account.email });
             if(!user){
               const newInformation = await Information.create({
-                name: account.name,
+                name: information.name,
                 email: account.email,
-                phone: account.phone,
+                phone: information.phone,
                 avatar: "https://play-lh.googleusercontent.com/NqAyU0vJMDdXNyVjSDs4c0L8E_47YoCca8U5MNzHAXkkGJN0tcuIByBD3IkSLGWB_w",
                 city:information.city,
                 district:information.district,
