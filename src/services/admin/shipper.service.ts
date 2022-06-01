@@ -1,6 +1,7 @@
 import { Account } from "../../models/account";
 import { Information } from "../../models/information";
 import bcrypt from "bcryptjs";
+import { RedisCache } from "../../config/redis-cache";
 export class ShipperService {
     static async createShipper(account: any, information: any) {
         try {
@@ -31,7 +32,7 @@ export class ShipperService {
                 roleAccount: 'Shipper'
               })
               await newAccount.save();
-    
+              await RedisCache.delCache(`getAllShipperWithOrderQuantity`)
               return {status: 201, message: "Tạo tài khoản người vận chuyển thành công!"} ;
             }
             else{
@@ -41,5 +42,18 @@ export class ShipperService {
             return {status: 500,message:"Something error when register account ! Please try again !", error: error} ;
           }
     }
-
+    static async getAllShipperWithOrderQuantity(){
+      try {
+          const key = `getAllShipperWithOrderQuantity`;
+          const dataCache = await RedisCache.getCache(key);
+          if(dataCache){
+              return {status: 200,message: "get all Account success !", data: JSON.parse(dataCache)};
+          }
+          const accounts = await Account.aggregate([{$match:{roleAccount:"Shipper"}},{ "$lookup": { "from": "Information", "localField": "information", "foreignField": "_id", "as": "information" }},{$unwind:"$information"},{ "$lookup": { "from": "Order", "localField": "_id", "foreignField": "shipper", "as": "listOrder" }},{$project:{email:1,nameDisplay:1,isVerifyPhone:1,isVerifyAccountWeb:1,typeAccount:1,roleAccount:1,information:1,createdAt:1,updatedAt:1,status:1,orderQuantity:{$size:"$listOrder"}}}])
+          await RedisCache.setCache(key, JSON.stringify(accounts), 60*5);
+          return {status: 200, message: "get all shipper success !", data: accounts};
+      } catch (error) {
+          return{status: 500, message: "Something went wrong !", error: error};
+      }
+  }
 }

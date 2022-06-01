@@ -16,5 +16,16 @@ export class ShipperController {
         }
     }
     
+    static async getAllShipperWithOrderQuantity (req: Request, res: Response): Promise<any> {
+        try {
+            const data = await ShipperService.getAllShipperWithOrderQuantity();
+            return res.status(data.status).json(data);
+        
+        } catch (error: any) {
+            return res.status(500).send({
+            message: error.message,
+            });
+        }
+    }
 }
 
