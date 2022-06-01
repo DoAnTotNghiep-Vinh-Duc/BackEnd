@@ -94,7 +94,7 @@ const OrderSchema = new Schema({
     },
     confirmOrderImage:{
         type:String,
-        default:""
+        default:[]
     }
 },{timestamps: true, collection:"Order"});
 
