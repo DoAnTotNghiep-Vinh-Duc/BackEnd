@@ -13,6 +13,17 @@ export class AccountController {
             });
         }
     }
+    static async getAllShipperWithOrderQuantity (req: Request, res: Response): Promise<any> {
+        try {
+            const data = await AccountService.getAllShipperWithOrderQuantity();
+            return res.status(data.status).json(data);
+        
+        } catch (error: any) {
+            return res.status(500).send({
+            message: error.message,
+            });
+        }
+    }
     static async filterAccountWithOrderQuantity (req: Request, res: Response): Promise<any> {
         try {
             // keySearch?:String, nameSort?:String, typeSort?:String

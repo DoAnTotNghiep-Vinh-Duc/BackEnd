@@ -9,16 +9,30 @@ export class AccountService {
             if(dataCache){
                 return {status: 200,message: "get all Account success !", data: JSON.parse(dataCache)};
             }
-            const accounts = await Account.aggregate([{ "$lookup": { "from": "Information", "localField": "information", "foreignField": "_id", "as": "information" }},{$unwind:"$information"},{ "$lookup": { "from": "Order", "localField": "_id", "foreignField": "account", "as": "listOrder" }},{$project:{email:1,nameDisplay:1,isVerifyPhone:1,isVerifyAccountWeb:1,typeAccount:1,roleAccount:1,information:1,createdAt:1,updatedAt:1,status:1,orderQuantity:{$size:"$listOrder"}}}])
+            const accounts = await Account.aggregate([{$match:{roleAccount:"User"}},{ "$lookup": { "from": "Information", "localField": "information", "foreignField": "_id", "as": "information" }},{$unwind:"$information"},{ "$lookup": { "from": "Order", "localField": "_id", "foreignField": "account", "as": "listOrder" }},{$project:{email:1,nameDisplay:1,isVerifyPhone:1,isVerifyAccountWeb:1,typeAccount:1,roleAccount:1,information:1,createdAt:1,updatedAt:1,status:1,orderQuantity:{$size:"$listOrder"}}}])
             await RedisCache.setCache(key, JSON.stringify(accounts), 60*5);
             return {status: 200, message: "get all Account success !", data: accounts};
         } catch (error) {
             return{status: 500, message: "Something went wrong !", error: error};
         }
     }
+    static async getAllShipperWithOrderQuantity(){
+        try {
+            const key = `getAllShipperWithOrderQuantity`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "get all Account success !", data: JSON.parse(dataCache)};
+            }
+            const accounts = await Account.aggregate([{$match:{roleAccount:"Shipper"}},{ "$lookup": { "from": "Information", "localField": "information", "foreignField": "_id", "as": "information" }},{$unwind:"$information"},{ "$lookup": { "from": "Order", "localField": "_id", "foreignField": "shipper", "as": "listOrder" }},{$project:{email:1,nameDisplay:1,isVerifyPhone:1,isVerifyAccountWeb:1,typeAccount:1,roleAccount:1,information:1,createdAt:1,updatedAt:1,status:1,orderQuantity:{$size:"$listOrder"}}}])
+            await RedisCache.setCache(key, JSON.stringify(accounts), 60*5);
+            return {status: 200, message: "get all shipper success !", data: accounts};
+        } catch (error) {
+            return{status: 500, message: "Something went wrong !", error: error};
+        }
+    }
     static async filterAccountWithOrderQuantity(keySearch?:String, nameSort?:String, typeSort?:String){
         try {
-const key = `getAllAccountWithOrderQuantity(keySearch?:${keySearch},nameSort?:${nameSort},typeSort?:${typeSort})`;
+            const key = `filterAccountWithOrderQuantity(keySearch?:${keySearch},nameSort?:${nameSort},typeSort?:${typeSort})`;
             const dataCache = await RedisCache.getCache(key);
             if(dataCache){
                 return {status: 200,message: "get all Account success !", data: JSON.parse(dataCache)};
