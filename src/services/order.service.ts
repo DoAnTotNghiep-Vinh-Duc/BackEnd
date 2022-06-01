@@ -128,7 +128,7 @@ export class OrderService {
             }
             let query: Array<any> = [];
             query.push({$match:{account:new ObjectId(`${accountId}`)}});
-            if(statusOrder==='HANDLING'||statusOrder==='DELIVERING'||statusOrder==='DONE'||statusOrder==='CANCELED'){
+            if(statusOrder==='HANDLING'||statusOrder==='WAITING'||statusOrder==='DELIVERING'||statusOrder==='DONE'||statusOrder==='CANCELED'){
                 query.push({$match:{status:statusOrder}})
             }
             query.push({$project:{account:1,listOrderDetail:1,status:1,subTotal:1,feeShip:1,total:1,typePayment:1,name:1,city:1,district:1,ward:1,street:1,phone:1,createdAt:1,updatedAt:1,quantity:{$sum:"$listOrderDetail.quantity"}}})
@@ -166,7 +166,7 @@ export class OrderService {
             }
             let query: Array<any> = [];
             query.push({$match:{shipper:new ObjectId(`${accountId}`)}});
-            if(statusOrder==='HANDLING'||statusOrder==='DELIVERING'||statusOrder==='DONE'||statusOrder==='CANCELED'){
+            if(statusOrder==='HANDLING'||statusOrder==='WAITING'||statusOrder==='DELIVERING'||statusOrder==='DONE'||statusOrder==='CANCELED'){
                 query.push({$match:{status:statusOrder}})
             }
             query.push({$project:{account:1,listOrderDetail:1,status:1,subTotal:1,feeShip:1,total:1,typePayment:1,name:1,city:1,district:1,ward:1,street:1,phone:1,createdAt:1,updatedAt:1,quantity:{$sum:"$listOrderDetail.quantity"}}})

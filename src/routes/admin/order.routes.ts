@@ -14,7 +14,7 @@ orderRoutes.get("/get-user-order", OrderController.getUserOrderAdmin);
 orderRoutes.get("/top-customer/:page/:limit",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopCustomerLimitPage);
 orderRoutes.get("/top-sell-product/:page/:limit",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopSellProductLimitPage);
 orderRoutes.get("/get-order-by-id/:orderId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getOrderByOrderIdAdmin);
-orderRoutes.put("/next-status-order/:orderId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.nextStatusOrder);
+// orderRoutes.put("/next-status-order/:orderId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.nextStatusOrder);
 orderRoutes.put("/cancel-order/:orderId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.cancelOrder);
 orderRoutes.put("/add-shipper-to-order/:orderId/:shipperId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.addShipperToOrder);
 orderRoutes.get("/get-data-order-for-chart",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getDataOrderForChart);

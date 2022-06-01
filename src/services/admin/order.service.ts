@@ -223,7 +223,7 @@ export class OrderService {
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
             }
-            const orders = await Order.aggregate([{$match:{}},{$group:{"_id":"$account",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:-1}},{$lookup:{from:"Account", localField:"_id",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"account.information":1, totalQuantity:1, totalPrice:1}},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"information":"$account", totalQuantity:1, totalPrice:1}}])
+            const orders = await Order.aggregate([{$match:{status:"DONE"}},{$group:{"_id":"$account",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:-1}},{$lookup:{from:"Account", localField:"_id",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"account.information":1, totalQuantity:1, totalPrice:1}},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"information":"$account", totalQuantity:1, totalPrice:1}}])
             if(orders){
                 await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}
@@ -242,7 +242,7 @@ export class OrderService {
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
             }
-            const orders = await Order.aggregate([{$match:{}},{$group:{"_id":"$account",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:-1}},{$lookup:{from:"Account", localField:"_id",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"account.information":1, totalQuantity:1, totalPrice:1}},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"information":"$account", totalQuantity:1, totalPrice:1}},{$skip:(page-1)*limit},{$limit:limit}])
+            const orders = await Order.aggregate([{$match:{status:"DONE"}},{$group:{"_id":"$account",totalQuantity:{$sum:{$sum:"$listOrderDetail.quantity"}},totalPrice:{$sum:"$total"} }},{$sort:{totalPrice:-1}},{$lookup:{from:"Account", localField:"_id",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"account.information":1, totalQuantity:1, totalPrice:1}},{$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account"}},{$unwind:"$account"},{$project:{"information":"$account", totalQuantity:1, totalPrice:1}},{$skip:(page-1)*limit},{$limit:limit}])
             if(orders){
                 await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}
@@ -261,7 +261,7 @@ export class OrderService {
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
             }
-            const orders = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}}])
+            const orders = await Order.aggregate([{$match:{status:"DONE"}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}}])
             if(orders){
                 await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}
@@ -280,7 +280,7 @@ export class OrderService {
             if(dataCache){
                 return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
             }
-            const orders = await Order.aggregate([{$match:{}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$skip:(page-1)*limit},{$limit:limit}])
+            const orders = await Order.aggregate([{$match:{status:"DONE"}},{$project:{listOrderDetail:1}} ,{$unwind:"$listOrderDetail"}, {$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}},{$unwind:"$listOrderDetail.productDetail"},{$group:{"_id":"$listOrderDetail.productDetail.product",totalQuantity:{$sum:"$listOrderDetail.quantity"}}},{$sort:{"totalQuantity":-1}},{$lookup:{from:"Product", localField:"_id",foreignField:"_id", as:"product"}},{$skip:(page-1)*limit},{$limit:limit}])
             if(orders){
                 await RedisCache.setCache(key, JSON.stringify(orders), 60*5);
                 return {status: 200,message: "found Order success !", data: orders}
@@ -334,7 +334,7 @@ export class OrderService {
                     query.push({$sort:{_id:-1}})
                 }
             }
-            if(typeOrderStatus === "HANDLING"||typeOrderStatus === "DELIVERING"||typeOrderStatus === "DONE"||typeOrderStatus === "CANCELED"){
+            if(typeOrderStatus === "HANDLING"||typeOrderStatus === "WAITING_RECEIVE_ORDER"||typeOrderStatus === "DELIVERING"||typeOrderStatus === "DONE"||typeOrderStatus === "CANCELED"){
                 query.push({$match:{status:typeOrderStatus}})
             }
             query.push({$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}})
@@ -379,40 +379,40 @@ export class OrderService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
-    static async nextStatusOrder(orderId: String){
-        try {
-            const canCancelOrderCache = await RedisCache.getCache(`CancelOrder_${orderId.toString()}`);
-            if(canCancelOrderCache){
-                return {status: 400, message: "Đơn hàng có thể sẽ bị hủy bởi khách hàng, hãy chờ 30 phút từ khi đơn hàng này được tạo !"}
-            }
-            let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
-            if(order){
-                if(order.status === "HANDLING"){
-                    const timezone = "Asia/Ho_Chi_Minh";
-                    let date = zonedTimeToUtc(new Date(), timezone);
+    // static async nextStatusOrder(orderId: String){
+    //     try {
+    //         const canCancelOrderCache = await RedisCache.getCache(`CancelOrder_${orderId.toString()}`);
+    //         if(canCancelOrderCache){
+    //             return {status: 400, message: "Đơn hàng có thể sẽ bị hủy bởi khách hàng, hãy chờ 30 phút từ khi đơn hàng này được tạo !"}
+    //         }
+    //         let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
+    //         if(order){
+    //             if(order.status === "HANDLING"){
+    //                 const timezone = "Asia/Ho_Chi_Minh";
+    //                 let date = zonedTimeToUtc(new Date(), timezone);
 
-                    let start = new Date();
-                    start.setHours(start.getHours()+7);
-                    await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DELIVERING", deliveryDay: start}})
-                }
-                if(order.status === "DELIVERING"){
-                    const timezone = "Asia/Ho_Chi_Minh";
-                    let date = zonedTimeToUtc(new Date(), timezone);
+    //                 let start = new Date();
+    //                 start.setHours(start.getHours()+7);
+    //                 await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DELIVERING", deliveryDay: start}})
+    //             }
+    //             if(order.status === "DELIVERING"){
+    //                 const timezone = "Asia/Ho_Chi_Minh";
+    //                 let date = zonedTimeToUtc(new Date(), timezone);
 
-                    let start = new Date();
-                    start.setHours(start.getHours()+7);
-                    await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE", receiveDay: start}})
-                }
-                // await RedisCache.clearCache();
-                delKeyRedisWhenChangeOrder();
-                return {status: 204,message: "change status Order success !"};
-            }
-            else
-                return {status: 404, message: "Not found Order !"}
-        } catch (error) {
-            return {status: 500, message: "Something went wrong !", error: error};
-        }
-    }
+    //                 let start = new Date();
+    //                 start.setHours(start.getHours()+7);
+    //                 await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE", receiveDay: start}})
+    //             }
+    //             // await RedisCache.clearCache();
+    //             delKeyRedisWhenChangeOrder();
+    //             return {status: 204,message: "change status Order success !"};
+    //         }
+    //         else
+    //             return {status: 404, message: "Not found Order !"}
+    //     } catch (error) {
+    //         return {status: 500, message: "Something went wrong !", error: error};
+    //     }
+    // }
     static async cancelOrder(orderId: String){
         try {
             let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
@@ -437,7 +437,7 @@ export class OrderService {
             let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
             if(!order.shipper){
                 const shipper = await Account.findOne({_id:new ObjectId(`${shipperId}`)})
-                await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{shipper:new ObjectId(`${shipperId}`), shipperName:shipper.nameDisplay}})
+                await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{shipper:new ObjectId(`${shipperId}`), shipperName:shipper.nameDisplay, status:"WAITING"}})
                 const keysOrder = await RedisCache.getKeys(`OrderService*`);
                 await RedisCache.delKeys(keysOrder);
                 return {status: 204,message: "cancel Order success !"};

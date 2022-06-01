@@ -36,7 +36,7 @@ const OrderSchema = new Schema({
     },
     status:{
         type: String,
-        enum : ['HANDLING','DELIVERING','DONE','CANCELED'],
+        enum : ['HANDLING','WAITING','DELIVERING','DONE','CANCELED'],
         default: 'HANDLING'
     },
     subTotal: {

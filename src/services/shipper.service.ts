@@ -6,7 +6,7 @@ import { v4 as uuid } from "uuid";
 export class ShipperService {
     static async receiveOrder(accountId: String, orderId: String){
         try {
-            const order = await Order.findOne({_id:new ObjectId(`${orderId}`), shipper: new ObjectId(`${accountId}`), status:"HANDLING"});
+            const order = await Order.findOne({_id:new ObjectId(`${orderId}`), shipper: new ObjectId(`${accountId}`), status:"WAITING"});
             if(!order){
                 return {status: 404, message:"Không tìm thấy đơn hàng cần nhận"};
             }
