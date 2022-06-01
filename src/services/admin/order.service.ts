@@ -436,7 +436,8 @@ export class OrderService {
         try {
             let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
             if(!order.shipper){
-                await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{shipper:new ObjectId(`${shipperId}`)}})
+                const shipper = await Account.findOne({_id:new ObjectId(`${shipperId}`)})
+                await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{shipper:new ObjectId(`${shipperId}`), shipperName:shipper.nameDisplay}})
                 const keysOrder = await RedisCache.getKeys(`OrderService*`);
                 await RedisCache.delKeys(keysOrder);
                 return {status: 204,message: "cancel Order success !"};
