@@ -91,6 +91,10 @@ const OrderSchema = new Schema({
     receiveDay:{
         type: Date,
         required:false
+    },
+    confirmOrderImage:{
+        type:String,
+        default:""
     }
 },{timestamps: true, collection:"Order"});
 

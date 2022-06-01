@@ -140,6 +140,19 @@ export class OrderController {
             });
         }
     }
+
+    static async addShipperToOrder(req: Request, res: Response): Promise<any> {
+        try {
+            const {orderId, shipperId} = req.params;
+            const data = await OrderService.addShipperToOrder(orderId, shipperId);
+            return res.status(data.status).json(data);
+         
+        } catch (error: any) {
+            return res.status(500).send({
+              msg: error.message,
+            });
+        }
+    }
     
     static async getDataOrderForChart(req: Request, res: Response): Promise<any> {
         try {

@@ -431,6 +431,23 @@ export class OrderService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
+
+    static async addShipperToOrder(orderId: String, shipperId: String){
+        try {
+            let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
+            if(!order.shipper){
+                await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{shipper:new ObjectId(`${shipperId}`)}})
+                const keysOrder = await RedisCache.getKeys(`OrderService*`);
+                await RedisCache.delKeys(keysOrder);
+                return {status: 204,message: "cancel Order success !"};
+            }
+            else
+                return {status: 404, message: "Đơn hàng đã có shipper !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
     static async getDataOrderForChart(){
         try {
             const key = `OrderService_getDataOrderForChart`;
