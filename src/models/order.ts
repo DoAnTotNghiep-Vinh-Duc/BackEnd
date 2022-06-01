@@ -90,11 +90,11 @@ const OrderSchema = new Schema({
     },
     deliveryDay:{
         type: Date,
-        required:false
+        default:null
     },
     receiveDay:{
         type: Date,
-        required:false
+        default:null
     },
     confirmOrderImage:{
         type:Array,
