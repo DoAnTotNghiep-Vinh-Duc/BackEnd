@@ -11,6 +11,10 @@ const OrderSchema = new Schema({
         ref:'Account',
         default:null
     },
+    shipperName:{
+        type:String,
+        default:""
+    },
     listOrderDetail: {
         type:[
             {
