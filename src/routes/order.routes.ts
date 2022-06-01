@@ -163,7 +163,7 @@ orderRoutes.get("/success",async (req, res)=>{
         }
     });
 })
-orderRoutes.post("/",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone, OrderController.createOrder);
+orderRoutes.post("/payment-cash",AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive,CheckPhoneMiddleware.checkVerifyPhone, OrderController.createOrder);
 orderRoutes.get("/get-order-by-account", AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive, OrderController.getOrderByAccountId)
 orderRoutes.get("/get-order-by-shipper", AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive, OrderController.getOrderByAccountShipperId)
 orderRoutes.get("/get-order-by-orderId/:orderId", AuthMiddleware.verifyAccessToken,AuthMiddleware.checkAccountIsActive, OrderController.getOrderByOrderId)
