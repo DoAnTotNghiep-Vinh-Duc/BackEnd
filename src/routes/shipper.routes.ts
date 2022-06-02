@@ -13,4 +13,4 @@ let storage = multer.memoryStorage({
 });//Configure the place you will upload your file
 let upload = multer({ storage: storage });
 shipperRoutes.post("/receive-order",AuthMiddleware.verifyAccessToken, AuthMiddleware.checkAccountIsActive, ShipperController.receiveOrder);
-shipperRoutes.post("/finish-order",AuthMiddleware.verifyAccessToken, AuthMiddleware.checkAccountIsActive,upload.any(), ShipperController.finishOrder);
+shipperRoutes.post("/finish-order",AuthMiddleware.verifyAccessToken, AuthMiddleware.checkAccountIsActive, ShipperController.finishOrder);
