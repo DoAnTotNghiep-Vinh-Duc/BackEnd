@@ -74,10 +74,6 @@ export class OrderService {
                 query.push({$match:{status:statusOrder}})
             }
             query.push({$project:{account:1,listOrderDetail:1,status:1,subTotal:1,feeShip:1,total:1,typePayment:1,name:1,city:1,district:1,ward:1,street:1,phone:1,createdAt:1,updatedAt:1, deliveryDay:1, receiveDay: 1,quantity:{$sum:"$listOrderDetail.quantity"}}})
-            query.push({$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}});
-            query.push({$unwind:"$account"});
-            query.push({$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}});
-            query.push({$unwind:"$account.information"});
             query.push({$unwind:"$listOrderDetail"});
             query.push({$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}});
             query.push({$unwind:"$listOrderDetail.productDetail"});
@@ -89,8 +85,9 @@ export class OrderService {
             query.push({ "$group": { "_id": "$_id",account:{$first:"$account"},status:{$first:"$status"},subTotal:{$first:"$subTotal"},feeShip:{$first:"$feeShip"},total:{$first:"$total"},typePayment:{$first:"$typePayment"},name:{$first:"$name"},city:{$first:"$city"},district:{$first:"$district"},ward:{$first:"$ward"},street:{$first:"$street"},phone:{$first:"$phone"},createdAt:{$first:"$createdAt"},updatedAt:{$first:"$updatedAt"},deliveryDay:{$first:"$deliveryDay"},receiveDay:{$first:"$receiveDay"}, "listOrderDetail": { "$push": "$listOrderDetail" } }});
             const order = await Order.aggregate(query)
             if(order){
-                await RedisCache.setCache(key, JSON.stringify(order), 60*5);
-                return {status: 200,message: "found Order success !", data: order}
+                const account = await Account.aggregate([{$match:{_id: new ObjectId(`${accountId}`)}}, { "$lookup": { "from": "Information", "localField": "information", "foreignField": "_id", "as": "information" }},{$unwind:"$information"}])
+                await RedisCache.setCache(key, JSON.stringify({order, account:account[0]}), 60*5);
+                return {status: 200,message: "found Order success !", data: {order, account:account[0]}}
             }
             else
                 return {status: 404, message: "Not found Order !"}
