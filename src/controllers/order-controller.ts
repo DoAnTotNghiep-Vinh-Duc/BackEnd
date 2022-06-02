@@ -5,7 +5,7 @@ export class OrderController {
     static async getOrderByOrderId(req: Request, res: Response): Promise<any> {
         try {
             const {orderId} = req.params;
-            const data = await OrderService.getOrderByOrderId(req.payload.userId,orderId);
+            const data = await OrderService.getOrderByOrderId(orderId);
             return res.status(data.status).json(data);
          
         } catch (error: any) {

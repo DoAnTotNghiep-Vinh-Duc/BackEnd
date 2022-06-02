@@ -334,7 +334,9 @@ export class OrderService {
                     query.push({$sort:{_id:-1}})
                 }
             }
-            if(typeOrderStatus === "HANDLING"||typeOrderStatus === "WAITING_RECEIVE_ORDER"||typeOrderStatus === "DELIVERING"||typeOrderStatus === "DONE"||typeOrderStatus === "CANCELED"){
+            if(typeOrderStatus === "HANDLING"||typeOrderStatus === "WAITING"||typeOrderStatus === "DELIVERING"||typeOrderStatus === "DONE"||typeOrderStatus === "CANCELED"){
+                console.log(typeOrderStatus);
+                
                 query.push({$match:{status:typeOrderStatus}})
             }
             query.push({$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}})
