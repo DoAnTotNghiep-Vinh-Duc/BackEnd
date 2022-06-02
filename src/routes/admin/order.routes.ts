@@ -10,7 +10,8 @@ orderRoutes.get("/all-order-with-user",AuthMiddleware.verifyAccessToken,CheckAdm
 orderRoutes.post("/by-date",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin,  OrderController.getOrdersByDate);
 orderRoutes.get("/all-top-customer",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopCustomer);
 orderRoutes.get("/all-top-sell-product",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopSellProduct);
-orderRoutes.get("/get-user-order", OrderController.getUserOrderAdmin);
+orderRoutes.get("/get-user-order",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getUserOrderAdmin);
+orderRoutes.get("/get-shipper-order",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getShipperOrderAdmin);
 orderRoutes.get("/top-customer/:page/:limit",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopCustomerLimitPage);
 orderRoutes.get("/top-sell-product/:page/:limit",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getTopSellProductLimitPage);
 orderRoutes.get("/get-order-by-id/:orderId",AuthMiddleware.verifyAccessToken,CheckAdminMiddleware.isAdmin, OrderController.getOrderByOrderIdAdmin);

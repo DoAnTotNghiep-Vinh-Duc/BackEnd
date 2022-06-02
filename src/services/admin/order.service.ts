@@ -97,7 +97,42 @@ export class OrderService {
             return {status: 500, message: "Something went wrong !", error: error};
         }
     }
-
+    static async getShipperOrderAdmin(accountId: any, statusOrder:any){
+        try {
+            const key = `OrderService_getShipperOrderAdmin(accountId:${accountId},statusOrder:${statusOrder})`;
+            const dataCache = await RedisCache.getCache(key);
+            if(dataCache){
+                return {status: 200,message: "found Order success !", data: JSON.parse(dataCache)};
+            }
+            let query: Array<any> = [];
+            query.push({$match:{shipper:new ObjectId(`${accountId}`)}});
+            if(statusOrder==='HANDLING'||statusOrder==='WAITING'||statusOrder==='DELIVERING'||statusOrder==='DONE'||statusOrder==='CANCELED'){
+                query.push({$match:{status:statusOrder}})
+            }
+            query.push({$project:{account:1,listOrderDetail:1,status:1,subTotal:1,feeShip:1,total:1,typePayment:1,name:1,city:1,district:1,ward:1,street:1,phone:1,createdAt:1,updatedAt:1, deliveryDay:1, receiveDay: 1,quantity:{$sum:"$listOrderDetail.quantity"}}})
+            query.push({$unwind:"$listOrderDetail"});
+            query.push({$lookup:{from:"ProductDetail", localField:"listOrderDetail.productDetail",foreignField:"_id", as:"listOrderDetail.productDetail"}});
+            query.push({$unwind:"$listOrderDetail.productDetail"});
+            query.push({ "$lookup": { "from": "Product", "localField": "listOrderDetail.productDetail.product", "foreignField": "_id", "as": "listOrderDetail.productDetail.product" }});
+            query.push({$unwind:"$listOrderDetail.productDetail.product"});
+            query.push({ "$lookup": { "from": "Color", "localField": "listOrderDetail.productDetail.color", "foreignField": "_id", "as": "listOrderDetail.productDetail.color" }});
+            query.push({$unwind:"$listOrderDetail.productDetail.color"});
+            query.push({$project:{"listOrderDetail.productDetail.product.listProductDetail":0}});
+            query.push({ "$group": { "_id": "$_id",account:{$first:"$account"},status:{$first:"$status"},subTotal:{$first:"$subTotal"},feeShip:{$first:"$feeShip"},total:{$first:"$total"},typePayment:{$first:"$typePayment"},name:{$first:"$name"},city:{$first:"$city"},district:{$first:"$district"},ward:{$first:"$ward"},street:{$first:"$street"},phone:{$first:"$phone"},createdAt:{$first:"$createdAt"},updatedAt:{$first:"$updatedAt"},deliveryDay:{$first:"$deliveryDay"},receiveDay:{$first:"$receiveDay"}, "listOrderDetail": { "$push": "$listOrderDetail" } }});
+            const order = await Order.aggregate(query)
+            if(order){
+                const account = await Account.aggregate([{$match:{_id: new ObjectId(`${accountId}`)}}, { "$lookup": { "from": "Information", "localField": "information", "foreignField": "_id", "as": "information" }},{$unwind:"$information"}])
+                await RedisCache.setCache(key, JSON.stringify({order, account:account[0]}), 60*5);
+                return {status: 200,message: "found Order success !", data: {order, account:account[0]}}
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            console.log(error);
+            
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
     static async getOrdersByDate(typeRequest: String, beginDate?: Date, endDate?: Date){
         try {
             const key = `OrderService_getOrdersByDate(typeRequest:${typeRequest}, beginDate?:${beginDate}, endDate?:${endDate})`;
