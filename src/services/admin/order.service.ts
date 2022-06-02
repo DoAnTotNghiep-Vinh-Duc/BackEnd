@@ -74,6 +74,8 @@ export class OrderService {
                 query.push({$match:{status:statusOrder}})
             }
             query.push({$project:{account:1,listOrderDetail:1,status:1,subTotal:1,feeShip:1,total:1,typePayment:1,name:1,city:1,district:1,ward:1,street:1,phone:1,createdAt:1,updatedAt:1, deliveryDay:1, receiveDay: 1,quantity:{$sum:"$listOrderDetail.quantity"}}})
+            query.push({$lookup:{from:"Account", localField:"account",foreignField:"_id", as:"account"}});
+            query.push({$unwind:"$account"});
             query.push({$lookup:{from:"Information", localField:"account.information",foreignField:"_id", as:"account.information"}});
             query.push({$unwind:"$account.information"});
             query.push({$unwind:"$listOrderDetail"});
