@@ -19,8 +19,9 @@ export class ShipperController {
         try {
             const accountId = req.payload.userId
             const {orderId} = req.body;
-            const uploadFile = req.files;
-            const data = await ShipperService.finishOrder(accountId,JSON.parse(orderId), uploadFile);
+            // const uploadFile = req.files;
+            const data = await ShipperService.finishOrder(accountId,JSON.parse(orderId));
+            // const data = await ShipperService.finishOrder(accountId,JSON.parse(orderId), uploadFile);
             return res.status(data.status).json(data);
         
         } catch (error: any) {

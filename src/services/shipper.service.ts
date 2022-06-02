@@ -22,50 +22,53 @@ export class ShipperService {
         }
     }
 
-    static async finishOrder(accountId: String, orderId: String, uploadFile: any){
+    static async finishOrder(accountId: String, orderId: String){
         try {
-            if(uploadFile.length>0){
-                const order = await Order.findOne({_id:new ObjectId(`${orderId}`), shipper: new ObjectId(`${accountId}`), status:"DELIVERING"});
-                if(!order){
-                    return {status: 404, message:"Không tìm thấy đơn hàng cần hoàn tất"};
-                }
-                const s3 = new AWS.S3({
-                    accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
-                    secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
-                    region:"us-east-1"
-                });
-                let listImageUrl = [];
-                for(let i = 0; i< uploadFile.length; i++){
-                    let ul = uploadFile[i].originalname.split(".");
-                    let filesTypes = ul[ul.length - 1];
-                    let filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
-                    console.log("filePath", filePath);
+            // if(uploadFile.length>0){
+            //     const order = await Order.findOne({_id:new ObjectId(`${orderId}`), shipper: new ObjectId(`${accountId}`), status:"DELIVERING"});
+            //     if(!order){
+            //         return {status: 404, message:"Không tìm thấy đơn hàng cần hoàn tất"};
+            //     }
+            //     const s3 = new AWS.S3({
+            //         accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+            //         secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+            //         region:"us-east-1"
+            //     });
+            //     let listImageUrl = [];
+            //     for(let i = 0; i< uploadFile.length; i++){
+            //         let ul = uploadFile[i].originalname.split(".");
+            //         let filesTypes = ul[ul.length - 1];
+            //         let filePath = `${uuid() + Date.now().toString()}.${filesTypes}`;
+            //         console.log("filePath", filePath);
                     
-                    let params: any = {
-                        Body: uploadFile[i].buffer,
-                        Bucket: `${process.env.AWS_BUCKET_NAME}`,
-                        Key: `${filePath}`,
-                        ACL: "public-read",
-                        ContentType: uploadFile[i].mimetype,
-                    };
-                    let s3Response = await s3.upload(params).promise();
-                    console.log("s3Response",s3Response);
+            //         let params: any = {
+            //             Body: uploadFile[i].buffer,
+            //             Bucket: `${process.env.AWS_BUCKET_NAME}`,
+            //             Key: `${filePath}`,
+            //             ACL: "public-read",
+            //             ContentType: uploadFile[i].mimetype,
+            //         };
+            //         let s3Response = await s3.upload(params).promise();
+            //         console.log("s3Response",s3Response);
                     
-                    listImageUrl.push(s3Response.Location)
-                }
-                console.log("listImageUrl",listImageUrl);
+            //         listImageUrl.push(s3Response.Location)
+            //     }
+            //     console.log("listImageUrl",listImageUrl);
 
-                const timezone = "Asia/Ho_Chi_Minh";
-                let start = new Date();
-                start.setHours(start.getHours()+7);
-                await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE", receiveDay: start, confirmOrderImage:listImageUrl}})
-                const keysOrder = await RedisCache.getKeys(`OrderService*`);
-                await RedisCache.delKeys(keysOrder);
-                return {status: 200, message:"Hoàn tất đơn hàng !"}
-            }
-            else{
-                return {status:400, message:"Bạn cần phải có hình ảnh xác thực !"};
-            }
+                
+            // }
+            // else{
+            //     return {status:400, message:"Bạn cần phải có hình ảnh xác thực !"};
+            // }
+            const timezone = "Asia/Ho_Chi_Minh";
+            let start = new Date();
+            start.setHours(start.getHours()+7);
+            await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE", receiveDay: start}})
+
+            // await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE", receiveDay: start, confirmOrderImage:listImageUrl}})
+            const keysOrder = await RedisCache.getKeys(`OrderService*`);
+            await RedisCache.delKeys(keysOrder);
+            return {status: 200, message:"Hoàn tất đơn hàng !"}
         } catch (error) {
             return{status: 500,message: "Something went wrong !", error: error};
         }
