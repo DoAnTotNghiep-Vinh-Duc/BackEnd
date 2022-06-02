@@ -63,7 +63,7 @@ export class ShipperService {
             const timezone = "Asia/Ho_Chi_Minh";
             let start = new Date();
             start.setHours(start.getHours()+7);
-            await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE", receiveDay: start}})
+            await Order.updateOne({_id:new ObjectId(`${orderId}`), shipper:new ObjectId(`${accountId}`)},{$set:{status:"DONE", receiveDay: start}})
 
             // await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"DONE", receiveDay: start, confirmOrderImage:listImageUrl}})
             const keysOrder = await RedisCache.getKeys(`OrderService*`);
