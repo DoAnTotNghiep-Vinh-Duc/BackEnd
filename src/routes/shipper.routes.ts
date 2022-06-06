@@ -14,3 +14,4 @@ let storage = multer.memoryStorage({
 let upload = multer({ storage: storage });
 shipperRoutes.post("/receive-order",AuthMiddleware.verifyAccessToken, AuthMiddleware.checkAccountIsActive, ShipperController.receiveOrder);
 shipperRoutes.post("/finish-order",AuthMiddleware.verifyAccessToken, AuthMiddleware.checkAccountIsActive, ShipperController.finishOrder);
+shipperRoutes.post("/cancel-order",AuthMiddleware.verifyAccessToken, AuthMiddleware.checkAccountIsActive, ShipperController.cancelOrder);

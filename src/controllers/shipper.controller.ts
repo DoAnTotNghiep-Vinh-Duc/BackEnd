@@ -30,5 +30,18 @@ export class ShipperController {
             });
         }
     }
+
+    static async cancelOrder (req: Request, res: Response): Promise<any> {
+        try {
+            const {orderId} = req.body;
+            const data = await ShipperService.cancelOrder(orderId);
+            return res.status(data.status).json(data);
+        
+        } catch (error: any) {
+            return res.status(500).send({
+            msg: error.message,
+            });
+        }
+    }
 }
 

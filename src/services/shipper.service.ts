@@ -3,6 +3,7 @@ import { Order } from "../models/order";
 import { RedisCache } from "../config/redis-cache";
 import AWS from "aws-sdk";
 import { v4 as uuid } from "uuid";
+import { ProductDetail } from "../models/product-detail";
 export class ShipperService {
     static async receiveOrder(accountId: String, orderId: String){
         try {
@@ -73,4 +74,33 @@ export class ShipperService {
             return{status: 500,message: "Something went wrong !", error: error};
         }
     }
+
+    static async cancelOrder(orderId: String){
+        try {
+            let order = await Order.findOne({_id:new ObjectId(`${orderId}`)});
+            if(order){
+                await Order.updateOne({_id:new ObjectId(`${orderId}`)},{$set:{status:"CANCELED"}})
+                for (let index = 0; index < order.listOrderDetail.length; index++) {
+                    const element = order.listOrderDetail[index];
+                    await ProductDetail.findOneAndUpdate({_id:order.listOrderDetail[index].productDetail},{$inc:{quantity:order.listOrderDetail[index].quantity}})
+                }
+                delKeyRedisWhenChangeOrder();
+                return {status: 204,message: "cancel Order success !"};
+            }
+            else
+                return {status: 404, message: "Not found Order !"}
+        } catch (error) {
+            return {status: 500, message: "Something went wrong !", error: error};
+        }
+    }
+
+}
+
+async function delKeyRedisWhenChangeOrder() {
+    const keysOrder = await RedisCache.getKeys(`OrderService*`);
+    await RedisCache.delKeys(keysOrder);
+    const keysCart = await RedisCache.getKeys(`CartService*`);
+    await RedisCache.delKeys(keysCart);
+    const keysProduct = await RedisCache.getKeys(`ProductService*`);
+    await RedisCache.delKeys(keysProduct);
 }
