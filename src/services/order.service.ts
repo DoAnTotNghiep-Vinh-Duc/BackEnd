@@ -33,7 +33,7 @@ export class OrderService {
         }
     }
 
-    static async createOrder(order: any){
+    static async createOrder(order: any, typePayment?: String, ){
         const session = await mongoose.startSession();
         session.startTransaction();
         const opts = {session,returnOriginal: false}

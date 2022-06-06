@@ -266,7 +266,7 @@ export class AuthService{
       // account : email, password
       const email = account.email;
       const foundAccount = await Account.findOne({ email });
-      if (!foundAccount||foundAccount.typeAccount!=="Shipper") {
+      if (!foundAccount||foundAccount.roleAccount!=="Shipper") {
         return {status: 403, message: "Tài khoản chưa được đăng ký." }
         
       }
