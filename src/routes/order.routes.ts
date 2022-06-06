@@ -66,8 +66,8 @@ orderRoutes.post("/payment-paypal",AuthMiddleware.verifyAccessToken,AuthMiddlewa
                 "payment_method": "paypal"
             },
             "redirect_urls": {
-                "return_url": `http://localhost:${process.env.PORT}/order/success`,
-                "cancel_url": `http://localhost:${process.env.PORT}/order/cancel`
+                "return_url": `http://${process.env.BACKEND_HOST}:${process.env.PORT}/order/success`,
+                "cancel_url": `http://${process.env.BACKEND_HOST}:${process.env.PORT}/order/cancel`
             },
             "transactions": [{
                 "item_list": {
@@ -157,9 +157,9 @@ orderRoutes.get("/success",async (req, res)=>{
             
         return res.send('error');
         } else {
-            const data = await OrderService.createOrder(parseCacheOrder);
+            const data = await OrderService.createOrder(parseCacheOrder, "PAYPAL", payerId,paymentId);
             delKeyRedisWhenChangeOrder();
-            return res.redirect("http://localhost:3000");
+            return res.redirect(`${process.env.DOMAIN_FRONTEND}/cart/information/payment/notification`);
         }
     });
 })

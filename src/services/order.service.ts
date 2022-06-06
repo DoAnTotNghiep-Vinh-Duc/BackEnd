@@ -33,7 +33,7 @@ export class OrderService {
         }
     }
 
-    static async createOrder(order: any, typePayment?: String, ){
+    static async createOrder(order: any, typePayment?: String, payerId?:any, paymentId?:any){
         const session = await mongoose.startSession();
         session.startTransaction();
         const opts = {session,returnOriginal: false}
@@ -98,12 +98,20 @@ export class OrderService {
                     street: order.street,
                     phone: order.phone
                 })
+                if(typePayment==="PAYPAL"){
+                    newOrder.typePayment = "PAYPAL";
+                    newOrder.payerId = payerId;
+                    newOrder.paymentId = paymentId;
+                }
                 await newOrder.save(opts);
 
                 await session.commitTransaction();
                 session.endSession();
                 delKeyRedisWhenChangeOrder();
                 await RedisCache.setCache(`CancelOrder_${newOrder._id.toString()}`,JSON.stringify(newOrder),Number.parseInt(`${process.env.TTL_CANCELORDER}`));
+                if(typePayment==="PAYPAL"){
+                    await RedisCache.delCache(`CancelOrder_${newOrder._id.toString()}`);
+                }
                 return {status: 201, message: "create Order success !", data:newOrder}
             }
             else{
