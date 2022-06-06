@@ -108,6 +108,32 @@ export class AuthController{
       }    
     };
 
+    static async signInWithShipper  (req: Request, res: Response, next: NextFunction) : Promise<any> {
+      try {
+        const { email, password } = req.body;
+        const data = await AuthService.signInWithShipper({ email, password })
+        const status = data.status
+          if(status === 200){
+            const account = data.message.account
+            const accessToken = data.message.accessToken
+            const refreshToken = data.message.refreshToken
+            res.setHeader("authorization", accessToken);
+            res.setHeader("refreshToken", refreshToken);
+  
+            return res
+              .status(status)
+              .send({ success: true, accessToken, refreshToken, account });
+          }
+          else{
+            return res
+              .status(status)
+              .send({ error: data.message }); 
+          }
+      } catch (error) {
+        next(error);
+      }    
+    };
+
     static async verifyAccountWeb(req: Request, res: Response, next: NextFunction) : Promise<any> {
       try {
         const {verifyCode} = req.body;

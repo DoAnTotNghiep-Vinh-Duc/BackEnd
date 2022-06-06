@@ -261,6 +261,31 @@ export class AuthService{
         return{status: 200, message:{account: {_id:foundAccount._id,email:foundAccount.email,nameDisplay:foundAccount.nameDisplay, role: foundAccount.roleAccount, avatar:information.avatar}, accessToken, refreshToken}}
       }
     }
+
+    static async signInWithShipper(account: any): Promise<any>{
+      // account : email, password
+      const email = account.email;
+      const foundAccount = await Account.findOne({ email });
+      if (!foundAccount||foundAccount.typeAccount!=="Shipper") {
+        return {status: 403, message: "Tài khoản chưa được đăng ký." }
+        
+      }
+      const isValid = await foundAccount.isValidPassword(account.password);
+      if (!isValid) {
+        return {status:403,message:"Sai mật khẩu !"}
+      }
+      if(foundAccount.status==="CLOSED"){
+        return {status:403, message:"Tài khoản đã bị khóa. "}
+      }
+      
+      else{
+        const accessToken = await AuthService.signAccessToken(foundAccount._id);
+        const refreshToken = await AuthService.signRefreshToken(foundAccount._id);
+        const information = await Information.findOne({_id:foundAccount.information})
+        return{status: 200, message:{account: {_id:foundAccount._id,email:foundAccount.email,nameDisplay:foundAccount.nameDisplay, role: foundAccount.roleAccount, avatar:information.avatar}, accessToken, refreshToken}}
+      }
+    }
+
     static async changePassword(userId: any, password: String, newPassword: any, reEnterPassword:any): Promise<any>{
       try {
         const foundAccount = await Account.findOne({ _id: new ObjectId(`${userId}`) });
